@@ -1,0 +1,40 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Universal brand blue controls. Change these RGB triplets to tune the whole site. */
+    --color-brand-light: 238 245 255; /* #EEF5FF */
+    --color-brand: 24 83 164; /* #1853A4 */
+    --color-brand-dark: 18 63 126; /* #123F7E */
+    --color-brand-deep: 11 43 89; /* #0B2B59 */
+  }
+
+  html {
+    scroll-behavior: auto;
+  }
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-text-size-adjust: 100%;
+  }
+  input, textarea, select {
+    font-size: 16px;
+  }
+}
+
+@layer components {
+  .container-custom {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  .no-scrollbar {
+    scrollbar-width: none;
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+}
