@@ -46,6 +46,24 @@ export default function Register() {
       ? rawRedirect
       : "/";
 
+  const handleClose = () => {
+    const isProtected = (path) => {
+      return ['/checkout', '/orders', '/profile', '/wishlist'].some(p => path.startsWith(p));
+    };
+    const fromPath = location.state?.from?.pathname || searchParams.get("redirect") || "/";
+    if (fromPath !== '/' && !isProtected(fromPath)) {
+      navigate(fromPath);
+    } else if (fromPath.startsWith('/checkout')) {
+      navigate('/cart');
+    } else {
+      if (window.history.length > 1 && location.key !== 'default') {
+        navigate(-1);
+      } else {
+        navigate('/');
+      }
+    }
+  };
+
   const handleChange = (e) => {
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
@@ -137,23 +155,20 @@ export default function Register() {
 
         <section className="relative flex min-h-0 items-start justify-center px-4 py-4 pt-10 sm:px-6 lg:min-h-screen lg:items-center lg:px-8 lg:pt-4">
           <div className="relative w-full max-w-full lg:max-w-[44rem]">
-            <div className="pointer-events-none absolute left-1 top-1 z-0 overflow-hidden opacity-15 lg:hidden">
-              <img
-                src={logo}
-                alt="Caps and Pills"
-                className="block h-auto w-[120px] max-w-[55vw] object-contain sm:w-[140px]"
-              />
-            </div>
-
-            <div className="relative z-10 max-w-full overflow-hidden rounded-[28px] border border-slate-200 bg-white p-7 shadow-[0_24px_80px_rgba(15,23,42,0.10)] sm:p-9">
+            <div className="relative z-10 max-w-full overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-[0_24px_80px_rgba(15,23,42,0.10)]">
               <button
-                onClick={() => navigate('/')}
+                onClick={handleClose}
                 className="absolute right-4 top-4 inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 shadow-sm transition-colors hover:text-pills-pink"
                 aria-label="Close"
               >
                 <X className="h-4 w-4" />
               </button>
-              <div className="mb-5">
+              <div className="border-b border-slate-100 bg-slate-50/70 px-7 py-5 sm:px-9">
+                <img
+                  src={logo}
+                  alt="Caps and Pills"
+                  className="h-12 w-auto object-contain lg:hidden"
+                />
                 <p className="text-sm font-semibold text-pills-pink">
                   Create account
                 </p>
@@ -164,6 +179,8 @@ export default function Register() {
                   Save your details for faster medicine orders and checkout.
                 </p>
               </div>
+
+              <div className="p-7 sm:p-9">
 
               {error && (
                 <div className="mb-5 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-600">
@@ -334,11 +351,13 @@ export default function Register() {
                 Already have an account?{" "}
                 <Link
                   to={`/login?redirect=${encodeURIComponent(redirect)}`}
+                  state={location.state}
                   className="font-bold text-pills-pink hover:text-pills-pink-dark"
                 >
                   Sign in
                 </Link>
               </p>
+              </div>
             </div>
           </div>
         </section>

@@ -3,6 +3,7 @@ import { Download, Edit2, Eye, FileText, Loader2, Plus, Search, Trash2, Pill, Se
 import { adminAPI, prescriptionAPI } from '../../api/index.js';
 import { Badge, Button, ConfirmDialog, EmptyState, Modal, Select, SkeletonRow, Textarea } from '../components/AdminUI.jsx';
 import { exportToExcel } from '../../utils/excelExport.js';
+import { useInfiniteScroll } from '../hooks/useInfiniteScroll.js';
 
 const statusOptions = [
   { value: '', label: 'All Statuses' },
@@ -90,7 +91,7 @@ const PrescriptionsModule = () => {
         p.uploadedAt ? new Date(p.uploadedAt).toLocaleString() : ''
       ];
 
-      exportToExcel(allPrescriptions, headers, mapper, 'prescriptions_export', 'Prescriptions');
+      await exportToExcel(allPrescriptions, headers, mapper, 'prescriptions_export', 'Prescriptions');
     } catch (err) {
       console.error('Failed to export prescriptions:', err);
       setMessage('Failed to export Excel file');
@@ -100,17 +101,19 @@ const PrescriptionsModule = () => {
     }
   };
 
-  const loadPrescriptions = useCallback(async () => {
+  const loadPrescriptions = useCallback(async (pageNum = 1, append = false) => {
     try {
       setLoading(true);
-      const params = { page, limit: 20 };
+      const params = { page: pageNum, limit: 20 };
       if (statusFilter) params.status = statusFilter;
       if (search) params.search = search;
       const [listRes, statsRes] = await Promise.all([
         prescriptionAPI.getAllPrescriptions(params),
         prescriptionAPI.getPrescriptionStats(),
       ]);
-      setPrescriptions(listRes.data.prescriptions || []);
+      const nextPrescriptions = listRes.data.prescriptions || [];
+      setPrescriptions((prev) => (append ? [...prev, ...nextPrescriptions] : nextPrescriptions));
+      setPage(pageNum);
       setTotalPages(listRes.data.pagination?.pages || 1);
       setStats(statsRes.data.stats || null);
     } catch (err) {
@@ -118,11 +121,23 @@ const PrescriptionsModule = () => {
     } finally {
       setLoading(false);
     }
-  }, [page, statusFilter, search]);
+  }, [statusFilter, search]);
 
   useEffect(() => {
-    loadPrescriptions();
+    loadPrescriptions(1, false);
   }, [loadPrescriptions]);
+
+  const hasMore = page < totalPages;
+  const loadMore = useCallback(() => {
+    if (!hasMore || loading) return;
+    loadPrescriptions(page + 1, true);
+  }, [hasMore, loading, loadPrescriptions, page]);
+
+  const loadMoreRef = useInfiniteScroll({
+    enabled: hasMore,
+    loading,
+    onLoadMore: loadMore,
+  });
 
   const showMessage = (text) => {
     setMessage(text);
@@ -201,7 +216,7 @@ const PrescriptionsModule = () => {
       setQuoteRows([]);
       setQuoteNotes('');
       showMessage(data.message || 'Quote sent');
-      await loadPrescriptions();
+      await loadPrescriptions(1, false);
     } catch (err) {
       showMessage(err.response?.data?.message || 'Failed to send quote');
     } finally {
@@ -216,7 +231,7 @@ const PrescriptionsModule = () => {
       const { data } = await prescriptionAPI.reviewPrescription(reviewItem._id, { status: reviewStatus, adminNotes });
       setReviewItem(null);
       showMessage(data.message || `Prescription ${reviewStatus}`);
-      await loadPrescriptions();
+      await loadPrescriptions(1, false);
     } catch (err) {
       showMessage(err.response?.data?.message || 'Failed to review prescription');
     } finally {
@@ -231,7 +246,7 @@ const PrescriptionsModule = () => {
       await prescriptionAPI.deletePrescription(deleteId);
       setDeleteId(null);
       showMessage('Prescription deleted successfully');
-      await loadPrescriptions();
+      await loadPrescriptions(1, false);
     } catch (err) {
       showMessage(err.response?.data?.message || 'Failed to delete prescription');
     } finally {
@@ -425,11 +440,16 @@ const PrescriptionsModule = () => {
             </tbody>
           </table>
         </div>
-        {totalPages > 1 && (
-          <div className="flex items-center justify-center gap-3 border-t border-gray-100 p-4">
-            <Button variant="secondary" size="sm" onClick={() => setPage(Math.max(1, page - 1))} disabled={page === 1}>Previous</Button>
-            <span className="text-sm text-gray-600">Page {page} of {totalPages}</span>
-            <Button variant="secondary" size="sm" onClick={() => setPage(Math.min(totalPages, page + 1))} disabled={page === totalPages}>Next</Button>
+        {(hasMore || loading) && (
+          <div ref={loadMoreRef} className="flex min-h-14 items-center justify-center gap-2 border-t border-gray-100 p-4 text-sm text-gray-500">
+            {loading ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Loading more...
+              </>
+            ) : (
+              'Scroll to load more'
+            )}
           </div>
         )}
       </div>

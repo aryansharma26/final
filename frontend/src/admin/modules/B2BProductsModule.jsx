@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { Search, Plus, Edit2, Trash2, Upload, Loader2, Package, X } from 'lucide-react';
 import { b2bProductAPI } from '../../api/index.js';
 import { Badge, Button, Input, Textarea, Modal, ConfirmDialog, EmptyState, SkeletonRow } from '../components/AdminUI.jsx';
+import { useInfiniteScroll } from '../hooks/useInfiniteScroll.js';
 
 const getProductImage = (product) => {
   const image = product?.images?.[0];
@@ -70,12 +71,18 @@ const B2BProductsModule = () => {
     }
   }, [search, statusFilter]);
 
-  const loadMore = async () => {
+  const loadMore = useCallback(async () => {
     if (!hasMore || loading) return;
     const nextPage = page + 1;
     setPage(nextPage);
     await loadProducts(nextPage, true);
-  };
+  }, [hasMore, loading, page, loadProducts]);
+
+  const loadMoreRef = useInfiniteScroll({
+    enabled: hasMore,
+    loading,
+    onLoadMore: loadMore,
+  });
 
   useEffect(() => {
     setPage(1);
@@ -275,13 +282,27 @@ const B2BProductsModule = () => {
                 <tr><td colSpan={5}><EmptyState icon={Package} title="No B2B products found" subtitle="Add B2B products with bulk pricing tiers" /></td></tr>
               ) : (
                 products.map((p) => (
-                  <tr key={p._id} className="border-b border-gray-50 hover:bg-gray-50/50">
+                  <tr
+                    key={p._id}
+                    onClick={() => openEdit(p)}
+                    className="border-b border-gray-50 hover:bg-gray-50/50 cursor-pointer transition-colors"
+                  >
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-3">
                         <img src={getProductImage(p) || 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=100&h=100&fit=crop'} alt="" className="w-10 h-10 rounded-lg object-cover bg-gray-100" />
                         <div>
                           <p className="font-medium text-gray-900">{p.name}</p>
-                          <p className="text-xs text-gray-500">{p.brand}</p>
+                          <div className="mt-1 flex flex-wrap items-center gap-1.5 text-[10px] font-semibold text-gray-500">
+                            <span>{p.brand || 'No brand'}</span>
+                            <span className="text-gray-300">|</span>
+                            <span>SKU: {p.sku || 'N/A'}</span>
+                            <span className="text-gray-300">|</span>
+                            <span>ID: {p._id}</span>
+                          </div>
+                          <div className="mt-1 flex flex-wrap gap-1">
+                            {p.featured && <Badge color="yellow">Featured</Badge>}
+                            {p.taxRate !== undefined && <Badge color="gray">Tax {p.taxRate}%</Badge>}
+                          </div>
                         </div>
                       </div>
                     </td>
@@ -292,7 +313,7 @@ const B2BProductsModule = () => {
                     <td className="px-4 py-3">
                       <span className="text-xs text-gray-600">{(p.bulkPricing || []).length} tiers</span>
                     </td>
-                    <td className="px-4 py-3 text-right">
+                    <td className="px-4 py-3 text-right" onClick={(e) => e.stopPropagation()}>
                       <div className="flex items-center justify-end gap-1">
                         <button onClick={() => openEdit(p)} className="p-1.5 hover:bg-blue-50 rounded-lg text-gray-400 hover:text-blue-600 transition-colors"><Edit2 className="w-4 h-4" /></button>
                         <button onClick={() => setDeleteId(p._id)} className="p-1.5 hover:bg-red-50 rounded-lg text-gray-400 hover:text-red-600 transition-colors"><Trash2 className="w-4 h-4" /></button>
@@ -304,11 +325,16 @@ const B2BProductsModule = () => {
             </tbody>
           </table>
         </div>
-        {hasMore && (
-          <div className="flex items-center justify-center gap-2 p-4 border-t border-gray-100">
-            <Button variant="secondary" size="sm" onClick={loadMore} disabled={loading}>
-              {loading ? 'Loading...' : 'Load More'}
-            </Button>
+        {(hasMore || loading) && (
+          <div ref={loadMoreRef} className="flex min-h-14 items-center justify-center gap-2 border-t border-gray-100 p-4 text-sm text-gray-500">
+            {loading ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Loading more...
+              </>
+            ) : (
+              'Scroll to load more'
+            )}
           </div>
         )}
       </div>

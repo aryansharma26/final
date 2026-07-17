@@ -1,8 +1,9 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { Search, Plus, Edit2, Trash2, ChevronLeft, ChevronRight, Upload, Loader2, Star, Shield, Video, Siren, Stethoscope, MapPin, Building2, Activity, X, ChevronDown, Download } from 'lucide-react';
+import { Search, Plus, Edit2, Trash2, Upload, Loader2, Star, Shield, Video, Siren, Stethoscope, MapPin, Building2, Activity, X, ChevronDown, Download } from 'lucide-react';
 import { doctorAPI } from '../../api/index.js';
 import { Badge, Button, Input, Select, Textarea, Modal, ConfirmDialog, EmptyState, SkeletonRow } from '../components/AdminUI.jsx';
 import { exportToExcel } from '../../utils/excelExport.js';
+import { useInfiniteScroll } from '../hooks/useInfiniteScroll.js';
 
 // ─── Searchable Select Component (for large lists: cities, provinces) ───
 const SearchableSelect = ({ label, value, onChange, options, placeholder = 'Search...', disabled }) => {
@@ -170,7 +171,7 @@ const DoctorsModule = () => {
         d.createdAt ? new Date(d.createdAt).toLocaleDateString() : ''
       ];
 
-      exportToExcel(allDoctors, headers, mapper, 'doctors_export', 'Doctors');
+      await exportToExcel(allDoctors, headers, mapper, 'doctors_export', 'Doctors');
     } catch (err) {
       console.error('Failed to export doctors:', err);
       setMessage('Failed to export Excel file');
@@ -183,20 +184,22 @@ const DoctorsModule = () => {
   const [stats, setStats] = useState({ doctors: 0, regions: 0, provinces: 0, cities: 0, specialties: 0 });
   const [showStats, setShowStats] = useState(true);
 
-  const loadDoctors = useCallback(async () => {
+  const loadDoctors = useCallback(async (pageNum = 1, append = false) => {
     try {
       setLoading(true);
-      const params = { page, limit: 12 };
+      const params = { page: pageNum, limit: 12 };
       if (search) params.search = search;
       const { data } = await doctorAPI.getAllDoctorsAdmin(params);
-      setDoctors(data.doctors || []);
+      const nextDoctors = data.doctors || [];
+      setDoctors((prev) => (append ? [...prev, ...nextDoctors] : nextDoctors));
+      setPage(pageNum);
       setTotalPages(data.pagination?.pages || 1);
     } catch (err) {
       console.error('Failed to load doctors:', err);
     } finally {
       setLoading(false);
     }
-  }, [page, search]);
+  }, [search]);
 
   const loadFilters = useCallback(async () => {
     try {
@@ -248,7 +251,19 @@ const DoctorsModule = () => {
     } catch { setCities([]); }
   };
 
-  useEffect(() => { loadDoctors(); loadFilters(); loadStats(); }, [loadDoctors, loadFilters, loadStats]);
+  useEffect(() => { loadDoctors(1, false); loadFilters(); loadStats(); }, [loadDoctors, loadFilters, loadStats]);
+
+  const hasMore = page < totalPages;
+  const loadMore = useCallback(() => {
+    if (!hasMore || loading) return;
+    loadDoctors(page + 1, true);
+  }, [hasMore, loading, loadDoctors, page]);
+
+  const loadMoreRef = useInfiniteScroll({
+    enabled: hasMore,
+    loading,
+    onLoadMore: loadMore,
+  });
 
   useEffect(() => {
     if (formData.region && !editingDoctor) { loadProvinces(formData.region); setFormData((p) => ({ ...p, province: '', city: '' })); }
@@ -328,7 +343,7 @@ const DoctorsModule = () => {
         await doctorAPI.createDoctor(payload);
         setMessage('Doctor created successfully');
       }
-      setTimeout(() => { closeModal(); loadDoctors(); loadStats(); }, 800);
+      setTimeout(() => { closeModal(); loadDoctors(1, false); loadStats(); }, 800);
     } catch (err) {
       setMessage(err.response?.data?.message || 'Operation failed');
     } finally {
@@ -342,7 +357,7 @@ const DoctorsModule = () => {
       setDeleteLoading(true);
       await doctorAPI.deleteDoctor(deleteId);
       setDeleteId(null);
-      loadDoctors();
+      loadDoctors(1, false);
       loadStats();
     } catch (err) {
       alert(err.response?.data?.message || 'Delete failed');
@@ -528,15 +543,16 @@ const DoctorsModule = () => {
               ))}
             </tbody>
           </table>
-          {totalPages > 1 && (
-            <div className="flex items-center justify-center gap-2 px-4 py-3 border-t border-gray-100">
-              <button onClick={() => setPage(page - 1)} disabled={page <= 1} className="p-1.5 rounded-lg hover:bg-gray-100 disabled:opacity-40">
-                <ChevronLeft className="w-4 h-4" />
-              </button>
-              <span className="text-sm text-gray-600">Page {page} of {totalPages}</span>
-              <button onClick={() => setPage(page + 1)} disabled={page >= totalPages} className="p-1.5 rounded-lg hover:bg-gray-100 disabled:opacity-40">
-                <ChevronRight className="w-4 h-4" />
-              </button>
+          {(hasMore || loading) && (
+            <div ref={loadMoreRef} className="flex min-h-14 items-center justify-center gap-2 border-t border-gray-100 px-4 py-3 text-sm text-gray-500">
+              {loading ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Loading more...
+                </>
+              ) : (
+                'Scroll to load more'
+              )}
             </div>
           )}
         </div>

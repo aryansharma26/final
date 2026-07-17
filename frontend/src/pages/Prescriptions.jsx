@@ -198,7 +198,7 @@ const Prescriptions = () => {
   const triggerPicker = (source) => {
     setMessage('');
     if (!isAuthenticated) {
-      navigate('/login', { state: { from: location }, replace: true });
+      navigate('/login', { state: { from: location } });
       return;
     }
     if (source === 'camera') {
@@ -460,7 +460,7 @@ const Prescriptions = () => {
                 <p className="mt-1 text-sm text-gray-500">Upload and manage your prescriptions after signing in.</p>
                 <button
                   type="button"
-                  onClick={() => navigate('/login', { state: { from: location }, replace: true })}
+                  onClick={() => navigate('/login', { state: { from: location } })}
                   className="mt-4 inline-flex items-center justify-center gap-2 rounded-xl bg-brand px-5 py-2.5 text-sm font-semibold text-white hover:bg-brand-dark transition-colors"
                 >
                   Sign In

@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import B2BProduct from '../models/B2BProduct.js';
 import { body, validationResult } from 'express-validator';
 import cloudinary, { isCloudinaryConfigured } from '../config/cloudinary.js';
@@ -101,6 +102,9 @@ export const createB2BProduct = async (req, res, next) => {
 
 export const updateB2BProduct = async (req, res, next) => {
   try {
+    if (!mongoose.isValidObjectId(req.params.id)) {
+      return res.status(400).json({ success: false, message: 'Invalid B2B product ID' });
+    }
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({ success: false, errors: errors.array() });
@@ -154,6 +158,9 @@ export const updateB2BProduct = async (req, res, next) => {
 
 export const deleteB2BProduct = async (req, res, next) => {
   try {
+    if (!mongoose.isValidObjectId(req.params.id)) {
+      return res.status(400).json({ success: false, message: 'Invalid B2B product ID' });
+    }
     const product = await B2BProduct.findById(req.params.id);
     if (!product) {
       return res.status(404).json({ success: false, message: 'B2B Product not found' });

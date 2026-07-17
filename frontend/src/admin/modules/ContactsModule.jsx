@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { Search, MessageSquare, Eye, CheckCircle, Trash2 } from 'lucide-react';
 import { adminAPI } from '../../api/index.js';
 import { Badge, Select, Modal, EmptyState, SkeletonRow, ConfirmDialog } from '../components/AdminUI.jsx';
+import { useInfiniteScroll } from '../hooks/useInfiniteScroll.js';
 
 const ContactsModule = () => {
   const [contacts, setContacts] = useState([]);
@@ -15,22 +16,36 @@ const ContactsModule = () => {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
-  const loadContacts = useCallback(async () => {
+  const loadContacts = useCallback(async (pageNum = 1, append = false) => {
     try {
       setLoading(true);
-      const params = { page, limit: 20 };
+      const params = { page: pageNum, limit: 20 };
       if (statusFilter) params.isRead = statusFilter;
       const { data } = await adminAPI.getContacts(params);
-      setContacts(data.contacts || []);
+      const nextContacts = data.contacts || [];
+      setContacts((prev) => (append ? [...prev, ...nextContacts] : nextContacts));
+      setPage(pageNum);
       setTotalPages(data.pagination?.pages || 1);
     } catch (err) {
       console.error('Failed to load contacts:', err);
     } finally {
       setLoading(false);
     }
-  }, [page, statusFilter]);
+  }, [statusFilter]);
 
-  useEffect(() => { loadContacts(); }, [loadContacts]);
+  useEffect(() => { loadContacts(1, false); }, [loadContacts]);
+
+  const hasMore = page < totalPages;
+  const loadMore = useCallback(() => {
+    if (!hasMore || loading) return;
+    loadContacts(page + 1, true);
+  }, [hasMore, loading, loadContacts, page]);
+
+  const loadMoreRef = useInfiniteScroll({
+    enabled: hasMore,
+    loading,
+    onLoadMore: loadMore,
+  });
 
   const filteredContacts = search
     ? contacts.filter((c) =>
@@ -44,7 +59,7 @@ const ContactsModule = () => {
   const handleToggleRead = async (contact) => {
     try {
       await adminAPI.toggleContactRead(contact._id);
-      loadContacts();
+      loadContacts(1, false);
       setMessage('Contact status updated');
       setTimeout(() => setMessage(''), 3000);
     } catch (err) {
@@ -58,12 +73,7 @@ const ContactsModule = () => {
       setDeleteLoading(true);
       await adminAPI.deleteContact(deleteId);
       setDeleteId(null);
-      // If on last page and only item, go back one page
-      if (contacts.length === 1 && page > 1) {
-        setPage(page - 1);
-      } else {
-        loadContacts();
-      }
+      loadContacts(1, false);
       setMessage('Contact deleted');
       setTimeout(() => setMessage(''), 3000);
     } catch (err) {
@@ -132,11 +142,9 @@ const ContactsModule = () => {
             </tbody>
           </table>
         </div>
-        {totalPages > 1 && (
-          <div className="flex items-center justify-center gap-2 p-4 border-t border-gray-100">
-            <button onClick={() => setPage(Math.max(1, page - 1))} disabled={page === 1} className="px-3 py-1.5 border border-gray-200 rounded-lg text-sm disabled:opacity-50 hover:bg-gray-50">Previous</button>
-            <span className="text-sm text-gray-600">Page {page} of {totalPages}</span>
-            <button onClick={() => setPage(Math.min(totalPages, page + 1))} disabled={page === totalPages} className="px-3 py-1.5 border border-gray-200 rounded-lg text-sm disabled:opacity-50 hover:bg-gray-50">Next</button>
+        {(hasMore || loading) && (
+          <div ref={loadMoreRef} className="flex min-h-14 items-center justify-center gap-2 border-t border-gray-100 p-4 text-sm text-gray-500">
+            {loading ? 'Loading more...' : 'Scroll to load more'}
           </div>
         )}
       </div>

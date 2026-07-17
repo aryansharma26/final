@@ -3,6 +3,7 @@ import { Search, Building2, Eye, CheckCircle, Trash2, Download, Loader2 } from '
 import { adminAPI } from '../../api/index.js';
 import { Badge, Select, Modal, EmptyState, SkeletonRow, ConfirmDialog } from '../components/AdminUI.jsx';
 import { exportToExcel } from '../../utils/excelExport.js';
+import { useInfiniteScroll } from '../hooks/useInfiniteScroll.js';
 
 const B2BModule = () => {
   const [enquiries, setEnquiries] = useState([]);
@@ -54,7 +55,7 @@ const B2BModule = () => {
         c.createdAt ? new Date(c.createdAt).toLocaleString() : ''
       ];
 
-      exportToExcel(b2bList, headers, mapper, 'b2b_enquiries_export', 'B2B Enquiries');
+      await exportToExcel(b2bList, headers, mapper, 'b2b_enquiries_export', 'B2B Enquiries');
     } catch (err) {
       console.error('Failed to export B2B enquiries:', err);
       setMessage('Failed to export Excel file');
@@ -69,26 +70,39 @@ const B2BModule = () => {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
-  const loadEnquiries = useCallback(async () => {
+  const loadEnquiries = useCallback(async (pageNum = 1, append = false) => {
     try {
       setLoading(true);
-      const params = { page, limit: 20 };
+      const params = { page: pageNum, limit: 20 };
       if (statusFilter) params.isRead = statusFilter;
       const { data } = await adminAPI.getContacts(params);
       // Filter only B2B enquiries (subject starts with "B2B Enquiry")
       const b2bList = (data.contacts || []).filter((c) =>
         c.subject?.startsWith('B2B Enquiry')
       );
-      setEnquiries(b2bList);
+      setEnquiries((prev) => (append ? [...prev, ...b2bList] : b2bList));
+      setPage(pageNum);
       setTotalPages(data.pagination?.pages || 1);
     } catch (err) {
       console.error('Failed to load B2B enquiries:', err);
     } finally {
       setLoading(false);
     }
-  }, [page, statusFilter]);
+  }, [statusFilter]);
 
-  useEffect(() => { loadEnquiries(); }, [loadEnquiries]);
+  useEffect(() => { loadEnquiries(1, false); }, [loadEnquiries]);
+
+  const hasMore = page < totalPages;
+  const loadMore = useCallback(() => {
+    if (!hasMore || loading) return;
+    loadEnquiries(page + 1, true);
+  }, [hasMore, loading, loadEnquiries, page]);
+
+  const loadMoreRef = useInfiniteScroll({
+    enabled: hasMore,
+    loading,
+    onLoadMore: loadMore,
+  });
 
   const filteredEnquiries = search
     ? enquiries.filter((e) =>
@@ -102,7 +116,7 @@ const B2BModule = () => {
   const handleToggleRead = async (enquiry) => {
     try {
       await adminAPI.toggleContactRead(enquiry._id);
-      loadEnquiries();
+      loadEnquiries(1, false);
       setMessage('Status updated');
       setTimeout(() => setMessage(''), 3000);
     } catch (err) {
@@ -116,11 +130,7 @@ const B2BModule = () => {
       setDeleteLoading(true);
       await adminAPI.deleteContact(deleteId);
       setDeleteId(null);
-      if (enquiries.length === 1 && page > 1) {
-        setPage(page - 1);
-      } else {
-        loadEnquiries();
-      }
+      loadEnquiries(1, false);
       setMessage('Enquiry deleted');
       setTimeout(() => setMessage(''), 3000);
     } catch (err) {
@@ -217,11 +227,16 @@ const B2BModule = () => {
             </tbody>
           </table>
         </div>
-        {totalPages > 1 && (
-          <div className="flex items-center justify-center gap-2 p-4 border-t border-gray-100">
-            <button onClick={() => setPage(Math.max(1, page - 1))} disabled={page === 1} className="px-3 py-1.5 border border-gray-200 rounded-lg text-sm disabled:opacity-50 hover:bg-gray-50">Previous</button>
-            <span className="text-sm text-gray-600">Page {page} of {totalPages}</span>
-            <button onClick={() => setPage(Math.min(totalPages, page + 1))} disabled={page === totalPages} className="px-3 py-1.5 border border-gray-200 rounded-lg text-sm disabled:opacity-50 hover:bg-gray-50">Next</button>
+        {(hasMore || loading) && (
+          <div ref={loadMoreRef} className="flex min-h-14 items-center justify-center gap-2 border-t border-gray-100 p-4 text-sm text-gray-500">
+            {loading ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Loading more...
+              </>
+            ) : (
+              'Scroll to load more'
+            )}
           </div>
         )}
       </div>

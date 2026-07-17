@@ -9,7 +9,8 @@ import {
   TrendingDown,
   Clock,
   ArrowRight,
-  ShoppingBag
+  ShoppingBag,
+  Building2
 } from 'lucide-react';
 import { Badge } from '../components/AdminUI.jsx';
 
@@ -70,6 +71,92 @@ const getOrderSummary = (order) => {
 
 const getImage = (image) => (typeof image === 'string' ? image : image?.url || '');
 
+const getOrderCode = (order, prefix) => `${prefix} #${String(order?._id || '').slice(-6).toUpperCase()}`;
+
+const BusinessCard = ({ title, subtitle, prefix, data = {}, orders = [], icon: Icon, tone, onView }) => {
+  const toneClass = tone === 'b2b'
+    ? 'bg-blue-50 text-blue-700 border-blue-100'
+    : 'bg-green-50 text-green-700 border-green-100';
+  const buttonClass = tone === 'b2b'
+    ? 'text-blue-700 bg-blue-50 hover:bg-blue-100'
+    : 'text-green-700 bg-green-50 hover:bg-green-100';
+
+  return (
+    <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-xs">
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <div className={`flex h-11 w-11 items-center justify-center rounded-xl border ${toneClass}`}>
+            <Icon className="h-5 w-5" />
+          </div>
+          <div>
+            <h2 className="text-base font-bold text-gray-950">{title}</h2>
+            <p className="text-xs text-gray-500">{subtitle}</p>
+          </div>
+        </div>
+        <button onClick={onView} className={`rounded-lg px-3 py-1.5 text-xs font-bold transition-colors ${buttonClass}`}>
+          View orders
+        </button>
+      </div>
+
+      <div className="mt-5 grid grid-cols-2 gap-3 lg:grid-cols-4">
+        {[
+          ['Revenue', formatMoney(data.paidRevenue)],
+          ['Orders', data.totalOrders || 0],
+          ['Paid Orders', data.paidOrders || 0],
+          ['AOV', formatMoney(data.averageOrderValue)],
+        ].map(([label, value]) => (
+          <div key={label} className="rounded-xl bg-gray-50 p-3">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400">{label}</p>
+            <p className="mt-1 text-lg font-extrabold text-gray-950">{value}</p>
+          </div>
+        ))}
+      </div>
+
+      <div className="mt-4 flex flex-wrap gap-2">
+        {[
+          ['Pending', data.pending, 'yellow'],
+          ['Packed', data.packed, 'blue'],
+          ['Shipped', data.shipped, 'purple'],
+          ['Delivered', data.delivered, 'green'],
+          ['Cancelled', data.cancelled, 'red'],
+        ].map(([label, value, color]) => (
+          <Badge key={label} color={color}>{label}: {value || 0}</Badge>
+        ))}
+      </div>
+
+      <div className="mt-5 border-t border-gray-100 pt-4">
+        <div className="mb-2 flex items-center justify-between">
+          <p className="text-xs font-bold uppercase tracking-wider text-gray-400">Recent {prefix} Orders</p>
+          <span className="text-[10px] font-semibold text-gray-400">Codes stay scoped by type</span>
+        </div>
+        <div className="space-y-2">
+          {orders.length > 0 ? orders.slice(0, 3).map((order) => (
+            <div key={order._id} className="flex items-center justify-between gap-3 rounded-xl bg-gray-50 px-3 py-2">
+              <div className="min-w-0">
+                <p className="truncate text-xs font-bold text-gray-900">{getOrderSummary(order)}</p>
+                <p className="mt-0.5 font-mono text-[10px] text-gray-500" title={order._id}>{getOrderCode(order, prefix)} | {order.user?.name || 'Unknown'}</p>
+              </div>
+              <div className="shrink-0 text-right">
+                <p className="text-xs font-bold text-gray-950">{formatMoney(order.totalPrice)}</p>
+                <Badge color={order.status === 'delivered' ? 'green' : order.status === 'cancelled' ? 'red' : 'yellow'}>{order.status}</Badge>
+              </div>
+            </div>
+          )) : (
+            <p className="rounded-xl bg-gray-50 px-3 py-3 text-xs text-gray-500">No {prefix} orders yet</p>
+          )}
+        </div>
+        <button
+          onClick={onView}
+          className={`mt-3 flex w-full items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold transition-colors ${buttonClass}`}
+        >
+          Go to {prefix} orders
+          <ArrowRight className="h-4 w-4" />
+        </button>
+      </div>
+    </div>
+  );
+};
+
 const DashboardModule = ({ stats, loading, setActiveTab }) => {
   const revenueChart = stats?.monthlyRevenue || [];
   const points = getLastSixMonths(revenueChart);
@@ -77,6 +164,8 @@ const DashboardModule = ({ stats, loading, setActiveTab }) => {
   const axisTicks = [1, 0.75, 0.5, 0.25, 0];
   const hasRevenueData = points.some((item) => item.total > 0);
   const averageOrderValue = stats?.totalOrders > 0 ? (stats.totalRevenue / stats.totalOrders) : 0;
+  const b2cStats = stats?.businessBreakdown?.b2c || {};
+  const b2bStats = stats?.businessBreakdown?.b2b || {};
 
   // SVG Chart Calculations
   const width = 600;
@@ -140,6 +229,29 @@ const DashboardModule = ({ stats, loading, setActiveTab }) => {
                 <p className="text-xs text-gray-400 mt-0.5 relative z-10">{s.desc}</p>
               </div>
             ))}
+          </div>
+
+          <div className="grid gap-6 xl:grid-cols-2">
+            <BusinessCard
+              title="B2C Retail Business"
+              subtitle="Customer website orders only"
+              prefix="B2C"
+              data={b2cStats}
+              orders={stats.recentB2COrders || []}
+              icon={ShoppingCart}
+              tone="b2c"
+              onView={() => setActiveTab?.('orders')}
+            />
+            <BusinessCard
+              title="B2B Wholesale Business"
+              subtitle="Wholesale/B2B order flow only"
+              prefix="B2B"
+              data={b2bStats}
+              orders={stats.recentB2BOrders || []}
+              icon={Building2}
+              tone="b2b"
+              onView={() => setActiveTab?.('b2b-orders')}
+            />
           </div>
 
           {/* Revenue Chart & Low Stock */}

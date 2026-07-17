@@ -269,7 +269,7 @@ const Navbar = () => {
     setIsMobileSearchOpen(false);
     setActiveDropdown(null);
     setUserMenuOpen(false);
-    closeSearchSuggestions();
+    resetSearch();
   }, [location]);
 
   useEffect(() => {
@@ -596,7 +596,7 @@ const Navbar = () => {
       </div>
 
       <div
-        className={`border-t border-gray-100 bg-white shadow-sm lg:hidden transition-all duration-200 overflow-hidden ${isMobileSearchOpen ? 'px-3 py-3 opacity-100 max-h-40' : 'px-3 py-0 opacity-0 max-h-0 pointer-events-none'}`}
+        className={`border-t border-gray-100 bg-white shadow-sm lg:hidden transition-all duration-200 ${isMobileSearchOpen ? 'px-3 py-3 opacity-100 max-h-[1000px] overflow-visible' : 'px-3 py-0 opacity-0 max-h-0 overflow-hidden pointer-events-none'}`}
       >
         <form onSubmit={handleSearch} className="relative" data-search-root="true">
           <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />

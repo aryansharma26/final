@@ -23,10 +23,10 @@ router.post('/verify-payment', protect, verifyPayment);
 router.post('/upload-senior-doc', protect, uploadPrescription, uploadSeniorDoc);
 router.get('/stats', adminProtect, getOrderStats);
 router.get('/b2b-purchase-report', adminProtect, getB2BPurchaseReport);
-router.get('/:id', protect, getOrderById);
 router.get('/admin/:id', adminProtect, getOrderById);
 router.put('/admin/:id/verify-senior', adminProtect, verifySeniorCitizenDoc);
 router.get('/', adminProtect, getAllOrders);
+router.get('/:id', protect, getOrderById);
 router.put('/:id/status', adminProtect, [
   body('status').isIn(['pending', 'confirmed', 'packed', 'shipped', 'delivered', 'cancelled']).withMessage('Invalid status value'),
 ], validate, updateOrderStatus);

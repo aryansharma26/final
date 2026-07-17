@@ -23,12 +23,12 @@ const hasAcceptedPrescriptionForProduct = async (userId, productId, session) => 
 };
 
 const VALID_STATUS_TRANSITIONS = {
-  pending: ['confirmed', 'cancelled'],
-  confirmed: ['packed', 'cancelled'],
-  packed: ['shipped', 'cancelled'],
-  shipped: ['delivered'],
-  delivered: [],
-  cancelled: [],
+  pending: ['confirmed', 'packed', 'shipped', 'delivered', 'cancelled'],
+  confirmed: ['pending', 'packed', 'shipped', 'delivered', 'cancelled'],
+  packed: ['pending', 'confirmed', 'shipped', 'delivered', 'cancelled'],
+  shipped: ['pending', 'confirmed', 'packed', 'delivered', 'cancelled'],
+  delivered: ['pending', 'confirmed', 'packed', 'shipped', 'cancelled'],
+  cancelled: ['pending', 'confirmed', 'packed', 'shipped', 'delivered'],
 };
 
 export const createOrder = async (req, res, next) => {

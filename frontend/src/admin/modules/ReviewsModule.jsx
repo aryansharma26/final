@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { Search, Star, CheckCircle, XCircle, Trash2 } from 'lucide-react';
 import { adminAPI } from '../../api/index.js';
 import { Badge, EmptyState, SkeletonRow, ConfirmDialog } from '../components/AdminUI.jsx';
+import { useInfiniteScroll } from '../hooks/useInfiniteScroll.js';
 
 const ReviewsModule = () => {
   const [reviews, setReviews] = useState([]);
@@ -13,20 +14,34 @@ const ReviewsModule = () => {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
-  const loadReviews = useCallback(async () => {
+  const loadReviews = useCallback(async (pageNum = 1, append = false) => {
     try {
       setLoading(true);
-      const { data } = await adminAPI.getAllReviews({ page, limit: 20 });
-      setReviews(data.reviews || []);
+      const { data } = await adminAPI.getAllReviews({ page: pageNum, limit: 20 });
+      const nextReviews = data.reviews || [];
+      setReviews((prev) => (append ? [...prev, ...nextReviews] : nextReviews));
+      setPage(pageNum);
       setTotalPages(data.pagination?.pages || 1);
     } catch (err) {
       console.error('Failed to load reviews:', err);
     } finally {
       setLoading(false);
     }
-  }, [page]);
+  }, []);
 
-  useEffect(() => { loadReviews(); }, [loadReviews]);
+  useEffect(() => { loadReviews(1, false); }, [loadReviews]);
+
+  const hasMore = page < totalPages;
+  const loadMore = useCallback(() => {
+    if (!hasMore || loading) return;
+    loadReviews(page + 1, true);
+  }, [hasMore, loading, loadReviews, page]);
+
+  const loadMoreRef = useInfiniteScroll({
+    enabled: hasMore,
+    loading,
+    onLoadMore: loadMore,
+  });
 
   const filteredReviews = search
     ? reviews.filter((r) =>
@@ -39,7 +54,7 @@ const ReviewsModule = () => {
   const handleToggleApproval = async (review) => {
     try {
       await adminAPI.toggleReviewApproval(review._id);
-      loadReviews();
+      loadReviews(1, false);
       setMessage('Review approval updated');
       setTimeout(() => setMessage(''), 3000);
     } catch (err) {
@@ -53,12 +68,7 @@ const ReviewsModule = () => {
       setDeleteLoading(true);
       await adminAPI.deleteReview(deleteId);
       setDeleteId(null);
-      // If on last page and only item, go back one page
-      if (reviews.length === 1 && page > 1) {
-        setPage(page - 1);
-      } else {
-        loadReviews();
-      }
+      loadReviews(1, false);
       setMessage('Review deleted');
       setTimeout(() => setMessage(''), 3000);
     } catch (err) {
@@ -132,11 +142,9 @@ const ReviewsModule = () => {
             </tbody>
           </table>
         </div>
-        {totalPages > 1 && (
-          <div className="flex items-center justify-center gap-2 p-4 border-t border-gray-100">
-            <button onClick={() => setPage(Math.max(1, page - 1))} disabled={page === 1} className="px-3 py-1.5 border border-gray-200 rounded-lg text-sm disabled:opacity-50 hover:bg-gray-50">Previous</button>
-            <span className="text-sm text-gray-600">Page {page} of {totalPages}</span>
-            <button onClick={() => setPage(Math.min(totalPages, page + 1))} disabled={page === totalPages} className="px-3 py-1.5 border border-gray-200 rounded-lg text-sm disabled:opacity-50 hover:bg-gray-50">Next</button>
+        {(hasMore || loading) && (
+          <div ref={loadMoreRef} className="flex min-h-14 items-center justify-center gap-2 border-t border-gray-100 p-4 text-sm text-gray-500">
+            {loading ? 'Loading more...' : 'Scroll to load more'}
           </div>
         )}
       </div>

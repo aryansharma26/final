@@ -1,5 +1,3 @@
-import * as XLSX from 'xlsx';
-
 /**
  * Exports data array to a proper Excel (.xlsx) file
  * @param {Array<any>} data - Raw data array of items
@@ -8,7 +6,8 @@ import * as XLSX from 'xlsx';
  * @param {string} fileName - Base name of the exported file
  * @param {string} [sheetName='Sheet1'] - Name of the worksheet tab
  */
-export const exportToExcel = (data, headers, rowMapper, fileName, sheetName = 'Sheet1') => {
+export const exportToExcel = async (data, headers, rowMapper, fileName, sheetName = 'Sheet1') => {
+  const XLSX = await import('xlsx');
   const rows = data.map(item => rowMapper(item));
   const worksheetData = [headers, ...rows];
   const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);

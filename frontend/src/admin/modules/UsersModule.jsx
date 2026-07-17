@@ -22,6 +22,7 @@ import {
 import { adminAPI, prescriptionAPI, categoryAPI } from '../../api/index.js';
 import { Badge, Button, EmptyState, Modal, SkeletonRow, Textarea, ConfirmDialog } from '../components/AdminUI.jsx';
 import { exportToExcel } from '../../utils/excelExport.js';
+import { useInfiniteScroll } from '../hooks/useInfiniteScroll.js';
 
 const statusColor = {
   pending: 'yellow',
@@ -191,14 +192,16 @@ const UsersModule = () => {
     if (previewUrl) URL.revokeObjectURL(previewUrl);
   }, [previewUrl]);
 
-  const loadUsers = useCallback(async () => {
+  const loadUsers = useCallback(async (pageNum = 1, append = false) => {
     try {
       setLoading(true);
-      const params = { page, limit: 20 };
+      const params = { page: pageNum, limit: 20 };
       const categoryId = selectedSubCategory || selectedParentCategory;
       if (categoryId) params.category = categoryId;
       const { data } = await adminAPI.getAllUsers(params);
-      setUsers(data.users || []);
+      const nextUsers = data.users || [];
+      setUsers((prev) => (append ? [...prev, ...nextUsers] : nextUsers));
+      setPage(pageNum);
       setTotalPages(data.pagination?.pages || 1);
       setStats(data.stats || null);
     } catch (err) {
@@ -206,9 +209,21 @@ const UsersModule = () => {
     } finally {
       setLoading(false);
     }
-  }, [page, selectedParentCategory, selectedSubCategory]);
+  }, [selectedParentCategory, selectedSubCategory]);
 
-  useEffect(() => { loadUsers(); }, [loadUsers]);
+  useEffect(() => { loadUsers(1, false); }, [loadUsers]);
+
+  const hasMore = page < totalPages;
+  const loadMore = useCallback(() => {
+    if (!hasMore || loading) return;
+    loadUsers(page + 1, true);
+  }, [hasMore, loading, loadUsers, page]);
+
+  const loadMoreRef = useInfiniteScroll({
+    enabled: hasMore,
+    loading,
+    onLoadMore: loadMore,
+  });
 
   const filteredUsers = search
     ? users.filter((u) => u.name?.toLowerCase().includes(search.toLowerCase()) || u.email?.toLowerCase().includes(search.toLowerCase()) || u.phone?.includes(search))
@@ -285,7 +300,7 @@ const UsersModule = () => {
         u.purchasedMedicines || 'No purchases'
       ];
 
-      exportToExcel(exportUsers, headers, mapper, 'users_export', 'Users');
+      await exportToExcel(exportUsers, headers, mapper, 'users_export', 'Users');
     } catch (err) {
       console.error('Failed to export users to excel:', err);
       setMessage('Failed to export Excel file');
@@ -516,11 +531,16 @@ const UsersModule = () => {
             </tbody>
           </table>
         </div>
-        {totalPages > 1 && (
-          <div className="flex items-center justify-center gap-2 border-t border-gray-100 p-4">
-            <button onClick={() => setPage(Math.max(1, page - 1))} disabled={page === 1} className="rounded-lg border border-gray-200 px-3 py-1.5 text-sm hover:bg-gray-50 disabled:opacity-50">Previous</button>
-            <span className="text-sm text-gray-600">Page {page} of {totalPages}</span>
-            <button onClick={() => setPage(Math.min(totalPages, page + 1))} disabled={page === totalPages} className="rounded-lg border border-gray-200 px-3 py-1.5 text-sm hover:bg-gray-50 disabled:opacity-50">Next</button>
+        {(hasMore || loading) && (
+          <div ref={loadMoreRef} className="flex min-h-14 items-center justify-center gap-2 border-t border-gray-100 p-4 text-sm text-gray-500">
+            {loading ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Loading more...
+              </>
+            ) : (
+              'Scroll to load more'
+            )}
           </div>
         )}
       </div>

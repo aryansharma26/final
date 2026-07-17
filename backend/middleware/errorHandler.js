@@ -15,7 +15,16 @@ export const errorHandler = (err, req, res, next) => {
   }
   if (err.code === 11000) {
     statusCode = 400;
-    message = 'Duplicate field value entered';
+    const duplicateField = Object.keys(err.keyPattern || err.keyValue || {})[0];
+    if (duplicateField === 'sku') {
+      message = 'SKU already exists. Please use a unique SKU.';
+    } else if (duplicateField === 'email') {
+      message = 'Email already exists. Please use a different email.';
+    } else if (duplicateField === 'slug') {
+      message = 'Slug already exists. Please use a unique name or slug.';
+    } else {
+      message = 'Duplicate field value entered';
+    }
   }
   if (err.name === 'JsonWebTokenError') {
     statusCode = 401;

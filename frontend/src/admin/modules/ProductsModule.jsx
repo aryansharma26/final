@@ -3,6 +3,7 @@ import { Search, Plus, Edit2, Trash2, Upload, Loader2, Package, X, Star, Downloa
 import { adminAPI, categoryAPI } from '../../api/index.js';
 import { Badge, Button, Input, Select, Textarea, Modal, ConfirmDialog, EmptyState, SkeletonRow } from '../components/AdminUI.jsx';
 import { exportToExcel } from '../../utils/excelExport.js';
+import { useInfiniteScroll } from '../hooks/useInfiniteScroll.js';
 
 const defaultProductForm = {
   name: '',
@@ -152,7 +153,7 @@ const ProductsModule = () => {
         ];
       };
 
-      exportToExcel(allProducts, headers, mapper, 'products_export', 'Products');
+      await exportToExcel(allProducts, headers, mapper, 'products_export', 'Products');
     } catch (err) {
       console.error('Failed to export products:', err);
       setMessage('Failed to export Excel file');
@@ -210,12 +211,18 @@ const ProductsModule = () => {
     }
   }, [search, statusFilter, filterParentCategory, filterSubCategory]);
 
-  const loadMore = async () => {
+  const loadMore = useCallback(async () => {
     if (!hasMore || loading) return;
     const nextPage = page + 1;
     setPage(nextPage);
     await loadProducts(nextPage, true);
-  };
+  }, [hasMore, loading, page, loadProducts]);
+
+  const loadMoreRef = useInfiniteScroll({
+    enabled: hasMore,
+    loading,
+    onLoadMore: loadMore,
+  });
 
   const loadCategories = useCallback(async () => {
     try {
@@ -525,7 +532,11 @@ const ProductsModule = () => {
                 <tr><td colSpan={6}><EmptyState icon={Package} title="No products found" subtitle="Try adjusting your search or filters" /></td></tr>
               ) : (
                 products.map((p) => (
-                  <tr key={p._id} className="border-b border-gray-50 hover:bg-gray-50/50">
+                  <tr
+                    key={p._id}
+                    onClick={() => openEdit(p)}
+                    className="border-b border-gray-50 hover:bg-gray-50/50 cursor-pointer transition-colors"
+                  >
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-3">
                         <img src={p.images?.[0] || 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=100&h=100&fit=crop'} alt="" className="w-10 h-10 rounded-lg object-cover bg-gray-100" />
@@ -536,7 +547,19 @@ const ProductsModule = () => {
                               <Star className="w-3.5 h-3.5 fill-yellow-400 text-yellow-500 shrink-0" title="Featured product" />
                             )}
                           </div>
-                          <p className="text-xs text-gray-500 mt-0.5">{p.brand}</p>
+                          <div className="mt-1 flex flex-wrap items-center gap-1.5 text-[10px] font-semibold text-gray-500">
+                            <span>{p.brand || 'No brand'}</span>
+                            <span className="text-gray-300">|</span>
+                            <span>SKU: {p.sku || 'N/A'}</span>
+                            <span className="text-gray-300">|</span>
+                            <span>ID: {p._id}</span>
+                          </div>
+                          <div className="mt-1 flex flex-wrap gap-1">
+                            {p.isPrescriptionRequired && <Badge color="yellow">Rx</Badge>}
+                            {p.showInOffers && <Badge color="blue">Offer</Badge>}
+                            {p.isPopular && <Badge color="green">Popular</Badge>}
+                            {p.priority > 0 && <Badge color="gray">Priority {p.priority}</Badge>}
+                          </div>
                         </div>
                       </div>
                     </td>
@@ -578,7 +601,7 @@ const ProductsModule = () => {
                         <span className="text-xs text-gray-400 italic">Uncategorized</span>
                       )}
                     </td>
-                    <td className="px-4 py-3 text-right">
+                    <td className="px-4 py-3 text-right" onClick={(e) => e.stopPropagation()}>
                       <div className="flex items-center justify-end gap-1">
                         <button onClick={() => openEdit(p)} className="p-1.5 hover:bg-blue-50 rounded-lg text-gray-400 hover:text-blue-600 transition-colors"><Edit2 className="w-4 h-4" /></button>
                         <button onClick={() => setDeleteId(p._id)} className="p-1.5 hover:bg-red-50 rounded-lg text-gray-400 hover:text-red-600 transition-colors"><Trash2 className="w-4 h-4" /></button>
@@ -590,16 +613,16 @@ const ProductsModule = () => {
             </tbody>
           </table>
         </div>
-        {hasMore && (
-          <div className="flex items-center justify-center gap-2 p-4 border-t border-gray-100">
-            <Button 
-              variant="secondary" 
-              size="sm" 
-              onClick={loadMore} 
-              disabled={loading}
-            >
-              {loading ? 'Loading...' : 'Load More'}
-            </Button>
+        {(hasMore || loading) && (
+          <div ref={loadMoreRef} className="flex min-h-14 items-center justify-center gap-2 border-t border-gray-100 p-4 text-sm text-gray-500">
+            {loading ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Loading more...
+              </>
+            ) : (
+              'Scroll to load more'
+            )}
           </div>
         )}
       </div>

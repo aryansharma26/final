@@ -24,7 +24,7 @@ const CategoriesModule = () => {
   const [message, setMessage] = useState('');
   const [exportLoading, setExportLoading] = useState(false);
 
-  const handleExportExcel = () => {
+  const handleExportExcel = async () => {
     try {
       setExportLoading(true);
       
@@ -59,7 +59,7 @@ const CategoriesModule = () => {
         c.description
       ];
 
-      exportToExcel(exportData, headers, mapper, 'categories_export', 'Categories');
+      await exportToExcel(exportData, headers, mapper, 'categories_export', 'Categories');
     } catch (err) {
       console.error('Failed to export categories:', err);
       setMessage('Failed to export Excel file');

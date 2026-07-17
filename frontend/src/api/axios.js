@@ -42,7 +42,9 @@ API.interceptors.response.use(
         if (refreshError.response?.status === 401 || refreshError.response?.status === 403) {
           const currentPath = window.location.pathname;
           const isAuthPage = ['/login', '/register', '/forgot-password', '/reset-password'].some((p) => currentPath.startsWith(p));
-          if (!isAuthPage) {
+          const isAdminPath = currentPath.startsWith('/admin');
+          const isProtectedRoute = ['/profile', '/orders', '/checkout', '/wishlist'].some((p) => currentPath.startsWith(p));
+          if (isProtectedRoute && !isAuthPage && !isAdminPath) {
             window.location.href = '/login';
           }
         }

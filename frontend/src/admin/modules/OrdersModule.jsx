@@ -3,8 +3,6 @@ import {
   Search,
   Edit2,
   Eye,
-  ChevronLeft,
-  ChevronRight,
   Loader2,
   ShoppingCart,
   Printer,
@@ -22,6 +20,7 @@ import {
 import { adminAPI, orderAPI } from '../../api/index.js';
 import { Badge, Button, Select, Modal, EmptyState, SkeletonRow, Textarea } from '../components/AdminUI.jsx';
 import { exportToExcel } from '../../utils/excelExport.js';
+import { useInfiniteScroll } from '../hooks/useInfiniteScroll.js';
 
 const formatMoney = (value = 0) => `₱${Number(value || 0).toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 const formatDate = (value) => (value ? new Date(value).toLocaleString() : 'N/A');
@@ -35,6 +34,52 @@ const getOrderSummary = (order) => {
 };
 
 const getImage = (image) => (typeof image === 'string' ? image : image?.url || '');
+
+const orderStatusTheme = {
+  pending: {
+    badge: 'yellow',
+    row: 'bg-yellow-50/45 hover:bg-yellow-50',
+    border: 'border-l-yellow-400',
+    dot: 'bg-yellow-500',
+  },
+  confirmed: {
+    badge: 'blue',
+    row: 'bg-blue-50/40 hover:bg-blue-50',
+    border: 'border-l-blue-400',
+    dot: 'bg-blue-500',
+  },
+  packed: {
+    badge: 'purple',
+    row: 'bg-purple-50/40 hover:bg-purple-50',
+    border: 'border-l-purple-400',
+    dot: 'bg-purple-500',
+  },
+  shipped: {
+    badge: 'orange',
+    row: 'bg-orange-50/45 hover:bg-orange-50',
+    border: 'border-l-orange-400',
+    dot: 'bg-orange-500',
+  },
+  delivered: {
+    badge: 'green',
+    row: 'bg-green-50/55 hover:bg-green-50',
+    border: 'border-l-green-500',
+    dot: 'bg-green-600',
+  },
+  cancelled: {
+    badge: 'red',
+    row: 'bg-red-50/50 hover:bg-red-50',
+    border: 'border-l-red-500',
+    dot: 'bg-red-500',
+  },
+};
+
+const getOrderStatusTheme = (status) => orderStatusTheme[status] || {
+  badge: 'gray',
+  row: 'bg-white hover:bg-gray-50/50',
+  border: 'border-l-gray-200',
+  dot: 'bg-gray-400',
+};
 
 const OrdersModule = ({ defaultTypeFilter = 'all', hideTypeFilter = false }) => {
   const [orders, setOrders] = useState([]);
@@ -56,24 +101,38 @@ const OrdersModule = ({ defaultTypeFilter = 'all', hideTypeFilter = false }) => 
     setPage(1);
   }, [defaultTypeFilter]);
 
-  const loadOrders = useCallback(async () => {
+  const loadOrders = useCallback(async (pageNum = 1, append = false) => {
     try {
       setLoading(true);
-      const params = { page, limit: 20 };
+      const params = { page: pageNum, limit: 20 };
       if (statusFilter) params.status = statusFilter;
       if (orderTypeFilter === 'b2b') params.isB2B = 'true';
       if (orderTypeFilter === 'b2c') params.isB2B = 'false';
       const { data } = await adminAPI.getAllOrders(params);
-      setOrders(data.orders || []);
+      const nextOrders = data.orders || [];
+      setOrders((prev) => (append ? [...prev, ...nextOrders] : nextOrders));
+      setPage(pageNum);
       setTotalPages(data.pagination?.pages || 1);
     } catch (err) {
       console.error('Failed to load orders:', err);
     } finally {
       setLoading(false);
     }
-  }, [page, statusFilter, orderTypeFilter]);
+  }, [statusFilter, orderTypeFilter]);
 
-  useEffect(() => { loadOrders(); }, [loadOrders]);
+  useEffect(() => { loadOrders(1, false); }, [loadOrders]);
+
+  const hasMore = page < totalPages;
+  const loadMore = useCallback(() => {
+    if (!hasMore || loading) return;
+    loadOrders(page + 1, true);
+  }, [hasMore, loading, loadOrders, page]);
+
+  const loadMoreRef = useInfiniteScroll({
+    enabled: hasMore,
+    loading,
+    onLoadMore: loadMore,
+  });
 
   const filteredOrders = search
     ? orders.filter((o) =>
@@ -91,7 +150,7 @@ const OrdersModule = ({ defaultTypeFilter = 'all', hideTypeFilter = false }) => 
       setUpdateLoading(true);
       await adminAPI.updateOrderStatus(updateId, { status: newStatus });
       setUpdateId(null);
-      loadOrders();
+      loadOrders(1, false);
       setMessage('Order status updated');
       setTimeout(() => setMessage(''), 3000);
     } catch (err) {
@@ -125,6 +184,7 @@ const OrdersModule = ({ defaultTypeFilter = 'all', hideTypeFilter = false }) => 
 
       const headers = [
         'Order ID',
+        'Order Code',
         'Customer Name',
         'Email',
         'Phone',
@@ -139,6 +199,7 @@ const OrdersModule = ({ defaultTypeFilter = 'all', hideTypeFilter = false }) => 
 
       const mapper = (o) => [
         o._id,
+        shortId(o._id),
         o.user?.name || 'Guest',
         o.user?.email || '',
         o.shippingAddress?.phone || '',
@@ -151,7 +212,7 @@ const OrdersModule = ({ defaultTypeFilter = 'all', hideTypeFilter = false }) => 
         o.createdAt ? new Date(o.createdAt).toLocaleString() : ''
       ];
 
-      exportToExcel(matchingOrders, headers, mapper, 'orders_export', 'Orders');
+      await exportToExcel(matchingOrders, headers, mapper, 'orders_export', 'Orders');
     } catch (err) {
       console.error('Failed to export orders to excel:', err);
       setMessage('Failed to export Excel file');
@@ -252,12 +313,14 @@ const OrdersModule = ({ defaultTypeFilter = 'all', hideTypeFilter = false }) => 
               ) : filteredOrders.length === 0 ? (
                 <tr><td colSpan={7}><EmptyState icon={ShoppingCart} title="No orders found" subtitle="Try adjusting your search or filters" /></td></tr>
               ) : (
-                filteredOrders.map((o) => (
-                  <tr key={o._id} onClick={() => setViewOrder(o)} className="border-b border-gray-50 hover:bg-gray-50/50 cursor-pointer transition-all animate-fadeIn">
+                filteredOrders.map((o) => {
+                  const theme = getOrderStatusTheme(o.status);
+                  return (
+                  <tr key={o._id} onClick={() => setViewOrder(o)} className={`border-b border-l-4 border-gray-50 ${theme.border} ${theme.row} cursor-pointer transition-all animate-fadeIn`}>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
-                        <span className="font-mono text-xs font-semibold text-gray-500 bg-gray-50 px-2 py-0.5 rounded border border-gray-100">
-                          {shortId(o._id)}
+                        <span className="font-mono text-xs font-semibold text-gray-500 bg-gray-50 px-2 py-0.5 rounded border border-gray-100" title={`Order Code: ${shortId(o._id)} | Full Order ID: ${o._id}`}>
+                          Order Code {shortId(o._id)}
                         </span>
                         {o.isB2B && (
                           <span className="inline-flex items-center rounded-full bg-blue-50 px-2 py-0.5 text-[10px] font-semibold text-blue-700 border border-blue-100">
@@ -300,9 +363,10 @@ const OrdersModule = ({ defaultTypeFilter = 'all', hideTypeFilter = false }) => 
                     </td>
                     <td className="px-4 py-3 font-bold text-gray-950">{formatMoney(o.totalPrice)}</td>
                     <td className="px-4 py-3">
-                      <Badge color={o.status === 'delivered' ? 'green' : o.status === 'cancelled' ? 'red' : o.status === 'shipped' ? 'orange' : o.status === 'packed' ? 'purple' : o.status === 'confirmed' ? 'blue' : 'yellow'}>
-                        {o.status}
-                      </Badge>
+                      <div className="flex items-center gap-2">
+                        <span className={`h-2.5 w-2.5 rounded-full ${theme.dot}`} />
+                        <Badge color={theme.badge}>{o.status}</Badge>
+                      </div>
                     </td>
                     <td className="px-4 py-3">
                       <Badge color={o.isPaid ? 'green' : 'red'}>
@@ -320,26 +384,34 @@ const OrdersModule = ({ defaultTypeFilter = 'all', hideTypeFilter = false }) => 
                       </div>
                     </td>
                   </tr>
-                ))
+                  );
+                })
               )}
             </tbody>
           </table>
         </div>
-        {totalPages > 1 && (
-          <div className="flex items-center justify-center gap-2 p-4 border-t border-gray-100">
-            <Button variant="secondary" size="sm" onClick={() => setPage(Math.max(1, page - 1))} disabled={page === 1}><ChevronLeft className="w-4 h-4" /></Button>
-            <span className="text-sm text-gray-600">Page {page} of {totalPages}</span>
-            <Button variant="secondary" size="sm" onClick={() => setPage(Math.min(totalPages, page + 1))} disabled={page === totalPages}><ChevronRight className="w-4 h-4" /></Button>
+        {(hasMore || loading) && (
+          <div ref={loadMoreRef} className="flex min-h-14 items-center justify-center gap-2 border-t border-gray-100 p-4 text-sm text-gray-500">
+            {loading ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Loading more...
+              </>
+            ) : (
+              'Scroll to load more'
+            )}
           </div>
         )}
       </div>
 
-      <Modal open={!!viewOrder} onClose={() => setViewOrder(null)} title={`Invoice Receipt: ${viewOrder ? shortId(viewOrder._id) : ''}`} maxWidth="max-w-4xl">
+      <Modal open={!!viewOrder} onClose={() => setViewOrder(null)} title={`Invoice Receipt: ${viewOrder ? `Order Code ${shortId(viewOrder._id)}` : ''}`} maxWidth="max-w-4xl">
         {viewOrder && (
           <div className="space-y-6">
             {/* Invoice Header */}
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-gray-100 pb-5">
               <div>
+                <p className="text-xs text-gray-400 uppercase tracking-wider">Full Order ID</p>
+                <p className="mb-3 font-mono text-xs font-semibold text-gray-600 break-all">{viewOrder._id}</p>
                 <p className="text-xs text-gray-400 uppercase tracking-wider">Order Placement Date</p>
                 <div className="flex items-center gap-2 mt-1 text-sm font-semibold text-gray-900">
                   <Calendar className="h-4 w-4 text-gray-400" />
@@ -350,7 +422,7 @@ const OrdersModule = ({ defaultTypeFilter = 'all', hideTypeFilter = false }) => 
                 <Badge color={viewOrder.isPaid ? 'green' : 'red'}>
                   {viewOrder.isPaid ? 'Paid' : 'Unpaid'}
                 </Badge>
-                <Badge color={viewOrder.status === 'delivered' ? 'green' : viewOrder.status === 'cancelled' ? 'red' : 'yellow'}>
+                <Badge color={getOrderStatusTheme(viewOrder.status).badge}>
                   {viewOrder.status}
                 </Badge>
                 {viewOrder.isB2B && (
@@ -367,11 +439,12 @@ const OrdersModule = ({ defaultTypeFilter = 'all', hideTypeFilter = false }) => 
               const steps = [
                 { key: 'pending', label: 'Placed' },
                 { key: 'confirmed', label: 'Confirmed' },
+                { key: 'packed', label: 'Packed' },
                 { key: 'shipped', label: 'Shipped' },
                 { key: 'delivered', label: 'Delivered' }
               ];
               const isCancelled = viewOrder.status === 'cancelled';
-              const statusKeys = ['pending', 'confirmed', 'shipped', 'delivered'];
+              const statusKeys = ['pending', 'confirmed', 'packed', 'shipped', 'delivered'];
               const currentIndex = statusKeys.indexOf(viewOrder.status);
               return isCancelled ? (
                 <div className="p-4 bg-red-50 border border-red-100 rounded-2xl flex items-center gap-3">

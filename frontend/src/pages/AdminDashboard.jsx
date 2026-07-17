@@ -1,24 +1,31 @@
-import { useState, useEffect } from 'react';
+import { lazy, Suspense, useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, Package, ShoppingCart, Users, MessageSquare, Star, LogOut, Menu, Stethoscope, FolderTree, FileText, Building2, Percent
 } from 'lucide-react';
 import { adminAPI } from '../api/index.js';
-import DashboardModule from '../admin/modules/DashboardModule.jsx';
-import ProductsModule from '../admin/modules/ProductsModule.jsx';
-import OrdersModule from '../admin/modules/OrdersModule.jsx';
-import UsersModule from '../admin/modules/UsersModule.jsx';
-import ReviewsModule from '../admin/modules/ReviewsModule.jsx';
-import ContactsModule from '../admin/modules/ContactsModule.jsx';
-import DoctorsModule from '../admin/modules/DoctorsModule.jsx';
-import CategoriesModule from '../admin/modules/CategoriesModule.jsx';
-import PrescriptionsModule from '../admin/modules/PrescriptionsModule.jsx';
-import B2BModule from '../admin/modules/B2BModule.jsx';
-import B2BProductsModule from '../admin/modules/B2BProductsModule.jsx';
-import SettingsModule from '../admin/modules/SettingsModule.jsx';
-import CategoryPurchaseReportModule from '../admin/modules/CategoryPurchaseReportModule.jsx';
-import B2BPurchaseReportModule from '../admin/modules/B2BPurchaseReportModule.jsx';
 import logo from '../assets/logo.png';
+
+const DashboardModule = lazy(() => import('../admin/modules/DashboardModule.jsx'));
+const ProductsModule = lazy(() => import('../admin/modules/ProductsModule.jsx'));
+const OrdersModule = lazy(() => import('../admin/modules/OrdersModule.jsx'));
+const UsersModule = lazy(() => import('../admin/modules/UsersModule.jsx'));
+const ReviewsModule = lazy(() => import('../admin/modules/ReviewsModule.jsx'));
+const ContactsModule = lazy(() => import('../admin/modules/ContactsModule.jsx'));
+const DoctorsModule = lazy(() => import('../admin/modules/DoctorsModule.jsx'));
+const CategoriesModule = lazy(() => import('../admin/modules/CategoriesModule.jsx'));
+const PrescriptionsModule = lazy(() => import('../admin/modules/PrescriptionsModule.jsx'));
+const B2BModule = lazy(() => import('../admin/modules/B2BModule.jsx'));
+const B2BProductsModule = lazy(() => import('../admin/modules/B2BProductsModule.jsx'));
+const SettingsModule = lazy(() => import('../admin/modules/SettingsModule.jsx'));
+const CategoryPurchaseReportModule = lazy(() => import('../admin/modules/CategoryPurchaseReportModule.jsx'));
+const B2BPurchaseReportModule = lazy(() => import('../admin/modules/B2BPurchaseReportModule.jsx'));
+
+const ModuleLoader = () => (
+  <div className="min-h-[320px] flex items-center justify-center">
+    <div className="w-8 h-8 border-2 border-brand/30 border-t-brand rounded-full animate-spin" />
+  </div>
+);
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -148,7 +155,9 @@ const AdminDashboard = () => {
       </aside>
 
       <main className={`flex-1 h-full overflow-y-auto p-8 min-w-0 transition-all ${sidebarOpen ? 'lg:ml-64' : 'lg:ml-64'}`}>
-        {renderTab()}
+        <Suspense fallback={<ModuleLoader />}>
+          {renderTab()}
+        </Suspense>
       </main>
     </div>
   );

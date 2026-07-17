@@ -488,8 +488,14 @@ export const getUserById = async (req, res, next) => {
 
 export const updateUserStatus = async (req, res, next) => {
   try {
+    if (!mongoose.isValidObjectId(req.params.id)) {
+      return res.status(400).json({ success: false, message: 'Invalid user ID' });
+    }
     const { isActive } = req.body;
     const user = await User.findByIdAndUpdate(req.params.id, { isActive }, { new: true }).select('-password -refreshToken');
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
     res.json({ success: true, message: 'User status updated', user });
   } catch (error) {
     next(error);
@@ -498,6 +504,9 @@ export const updateUserStatus = async (req, res, next) => {
 
 export const updateUserAdminNotes = async (req, res, next) => {
   try {
+    if (!mongoose.isValidObjectId(req.params.id)) {
+      return res.status(400).json({ success: false, message: 'Invalid user ID' });
+    }
     const { adminNotes } = req.body;
     const user = await User.findByIdAndUpdate(
       req.params.id,

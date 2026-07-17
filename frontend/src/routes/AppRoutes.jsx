@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import MainLayout from '../layouts/MainLayout';
 import Home from '../pages/Home';
@@ -12,8 +13,6 @@ import ProductDetail from '../pages/ProductDetail';
 import Cart from '../pages/Cart';
 import Checkout from '../pages/Checkout';
 import OrderDetail from '../pages/OrderDetail';
-import AdminLogin from '../pages/AdminLogin';
-import AdminDashboard from '../pages/AdminDashboard';
 import Wishlist from '../pages/Wishlist';
 import Orders from '../pages/Orders';
 import Prescriptions from '../pages/Prescriptions';
@@ -25,7 +24,16 @@ import DoctorDetail from '../pages/DoctorDetail';
 import ComingSoon from '../pages/ComingSoon';
 import FAQ from '../pages/FAQ';
 import ProtectedRoute from '../components/ProtectedRoute';
-import AdminProtectedRoute from '../components/AdminProtectedRoute';
+
+const AdminLogin = lazy(() => import('../pages/AdminLogin'));
+const AdminDashboard = lazy(() => import('../pages/AdminDashboard'));
+const AdminProtectedRoute = lazy(() => import('../components/AdminProtectedRoute'));
+
+const RouteLoader = () => (
+  <div className="min-h-screen flex items-center justify-center bg-gray-50">
+    <div className="w-8 h-8 border-2 border-brand/30 border-t-brand rounded-full animate-spin" />
+  </div>
+);
 
 const RedirectWithQuery = () => {
   const location = useLocation();
@@ -83,11 +91,17 @@ const AppRoutes = () => {
       <Route path="/register" element={<Register />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
-      <Route path="/admin/login" element={<AdminLogin />} />
+      <Route path="/admin/login" element={
+        <Suspense fallback={<RouteLoader />}>
+          <AdminLogin />
+        </Suspense>
+      } />
       <Route path="/admin" element={
-        <AdminProtectedRoute>
-          <AdminDashboard />
-        </AdminProtectedRoute>
+        <Suspense fallback={<RouteLoader />}>
+          <AdminProtectedRoute>
+            <AdminDashboard />
+          </AdminProtectedRoute>
+        </Suspense>
       } />
       <Route path="*" element={<NotFound />} />
     </Routes>

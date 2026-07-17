@@ -106,7 +106,7 @@ const CategoryPurchaseReportModule = () => {
         row.lastOrderedAt ? new Date(row.lastOrderedAt).toLocaleDateString() : '',
       ];
 
-      exportToExcel(exportRows, headers, mapper, 'retail_category_purchase_report', 'Retail Category Purchases');
+      await exportToExcel(exportRows, headers, mapper, 'retail_category_purchase_report', 'Retail Category Purchases');
     } catch (err) {
       setMessage(err.response?.data?.message || 'Failed to export retail category report');
       setTimeout(() => setMessage(''), 3000);

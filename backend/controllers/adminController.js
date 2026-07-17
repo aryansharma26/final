@@ -51,7 +51,22 @@ export const adminLogout = async (req, res, next) => {
 
 export const getDashboardStats = async (req, res, next) => {
   try {
-    const [totalUsers, lowStock, outOfStock, totalProducts, totalOrders, totalRevenue, pendingOrders, recentOrders, recentUsers, orderStatusCounts, monthlyRevenue] = await Promise.all([
+    const [
+      totalUsers,
+      lowStock,
+      outOfStock,
+      totalProducts,
+      totalOrders,
+      totalRevenue,
+      pendingOrders,
+      recentOrders,
+      recentB2COrders,
+      recentB2BOrders,
+      recentUsers,
+      orderStatusCounts,
+      monthlyRevenue,
+      businessStats,
+    ] = await Promise.all([
       User.countDocuments(),
       Product.find({ stock: { $lt: 10, $gt: 0 } }).sort({ stock: 1 }).limit(5).select('name stock sku'),
       Product.countDocuments({ stock: 0 }),
@@ -64,6 +79,16 @@ export const getDashboardStats = async (req, res, next) => {
         .populate('orderItems.product', 'name images slug')
         .sort({ createdAt: -1 })
         .limit(5),
+      Order.find({ isB2B: false })
+        .populate('user', 'name email')
+        .populate('orderItems.product', 'name images slug')
+        .sort({ createdAt: -1 })
+        .limit(4),
+      Order.find({ isB2B: true })
+        .populate('user', 'name email')
+        .populate('orderItems.product', 'name images slug')
+        .sort({ createdAt: -1 })
+        .limit(4),
       User.find().select('name email createdAt').sort({ createdAt: -1 }).limit(5),
       Order.aggregate([{ $group: { _id: '$status', count: { $sum: 1 } } }]),
       Order.aggregate([
@@ -72,7 +97,48 @@ export const getDashboardStats = async (req, res, next) => {
         { $sort: { '_id.year': -1, '_id.month': -1 } },
         { $limit: 6 },
       ]),
+      Order.aggregate([
+        {
+          $group: {
+            _id: '$isB2B',
+            totalOrders: { $sum: 1 },
+            paidOrders: { $sum: { $cond: ['$isPaid', 1, 0] } },
+            unpaidOrders: { $sum: { $cond: ['$isPaid', 0, 1] } },
+            paidRevenue: { $sum: { $cond: ['$isPaid', '$totalPrice', 0] } },
+            totalOrderValue: { $sum: '$totalPrice' },
+            pending: { $sum: { $cond: [{ $eq: ['$status', 'pending'] }, 1, 0] } },
+            confirmed: { $sum: { $cond: [{ $eq: ['$status', 'confirmed'] }, 1, 0] } },
+            packed: { $sum: { $cond: [{ $eq: ['$status', 'packed'] }, 1, 0] } },
+            shipped: { $sum: { $cond: [{ $eq: ['$status', 'shipped'] }, 1, 0] } },
+            delivered: { $sum: { $cond: [{ $eq: ['$status', 'delivered'] }, 1, 0] } },
+            cancelled: { $sum: { $cond: [{ $eq: ['$status', 'cancelled'] }, 1, 0] } },
+          },
+        },
+      ]),
     ]);
+
+    const defaultBusinessStats = {
+      totalOrders: 0,
+      paidOrders: 0,
+      unpaidOrders: 0,
+      paidRevenue: 0,
+      totalOrderValue: 0,
+      pending: 0,
+      confirmed: 0,
+      packed: 0,
+      shipped: 0,
+      delivered: 0,
+      cancelled: 0,
+      averageOrderValue: 0,
+    };
+    const normalizeBusinessStats = (isB2B) => {
+      const row = businessStats.find((item) => item._id === isB2B) || {};
+      const stats = { ...defaultBusinessStats, ...row };
+      stats.averageOrderValue = stats.totalOrders > 0 ? stats.totalOrderValue / stats.totalOrders : 0;
+      delete stats._id;
+      return stats;
+    };
+
     res.json({
       success: true,
       stats: {
@@ -85,8 +151,14 @@ export const getDashboardStats = async (req, res, next) => {
         lowStock,
         orderStatusCounts: orderStatusCounts.reduce((acc, curr) => ({ ...acc, [curr._id]: curr.count }), {}),
         recentOrders,
+        recentB2COrders,
+        recentB2BOrders,
         recentUsers,
         monthlyRevenue,
+        businessBreakdown: {
+          b2c: normalizeBusinessStats(false),
+          b2b: normalizeBusinessStats(true),
+        },
       },
     });
   } catch (error) {

@@ -101,7 +101,7 @@ const B2BPurchaseReportModule = () => {
         row.lastOrderedAt ? new Date(row.lastOrderedAt).toLocaleDateString() : '',
       ];
 
-      exportToExcel(exportRows, headers, mapper, 'b2b_purchase_report', 'B2B Purchases');
+      await exportToExcel(exportRows, headers, mapper, 'b2b_purchase_report', 'B2B Purchases');
     } catch (err) {
       setMessage(err.response?.data?.message || 'Failed to export B2B purchase report');
       setTimeout(() => setMessage(''), 3000);
