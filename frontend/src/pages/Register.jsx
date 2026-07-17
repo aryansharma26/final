@@ -51,6 +51,17 @@ export default function Register() {
       return ['/checkout', '/orders', '/profile', '/wishlist'].some(p => path.startsWith(p));
     };
     const fromPath = location.state?.from?.pathname || searchParams.get("redirect") || "/";
+    const isBuyNow = location.state?.from?.state?.fromBuyNow;
+
+    if (isBuyNow) {
+      if (window.history.length > 1) {
+        navigate(-1);
+      } else {
+        navigate('/', { replace: true });
+      }
+      return;
+    }
+
     if (fromPath !== '/' && !isProtected(fromPath)) {
       navigate(fromPath);
     } else if (fromPath.startsWith('/checkout')) {
@@ -92,7 +103,7 @@ export default function Register() {
         password: formData.password,
       });
       if (result.success) {
-        navigate(redirect, { replace: true });
+        navigate(redirect, { replace: true, state: location.state?.from?.state });
       } else {
         setError(result.error || "Registration failed");
       }

@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { Star, ShoppingCart, Heart, Trash2 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext.jsx';
 
 /**
@@ -45,6 +45,7 @@ const ProductCard = ({
 }) => {
   const hasDiscount = product.discountPrice > 0;
   const navigate = useNavigate();
+  const location = useLocation();
   const { isAuthenticated } = useAuth();
 
   const handleCardClick = () => {
@@ -54,7 +55,10 @@ const ProductCard = ({
   const handleCartClick = (e) => {
     e.stopPropagation();
     if (product.isPrescriptionRequired) {
-      navigate(isAuthenticated ? `/product/${product.slug}` : `/login?redirect=${encodeURIComponent(`/product/${product.slug}`)}`);
+      navigate(
+        isAuthenticated ? `/product/${product.slug}` : `/login?redirect=${encodeURIComponent(`/product/${product.slug}`)}`,
+        isAuthenticated ? undefined : { state: { from: location } }
+      );
       return;
     }
     onCartClick?.(product);

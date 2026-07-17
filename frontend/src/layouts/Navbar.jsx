@@ -233,7 +233,9 @@ const Navbar = () => {
 
   const handleProductSuggestion = (product) => {
     if (!product?.slug) return;
-    navigate(`/product/${product.slug}`);
+    navigate(`/product/${product.slug}`, {
+      state: { from: { pathname: location.pathname, search: location.search } },
+    });
     resetSearch();
     setIsOpen(false);
     setIsMobileSearchOpen(false);

@@ -9,7 +9,6 @@ const router = express.Router();
 
 router.get('/profile', protect, getProfile);
 router.put('/profile', protect, [
-  body('name').optional().trim().notEmpty().withMessage('Name cannot be empty'),
   body('phone').optional().trim(),
 ], validate, updateProfile);
 router.put('/avatar', protect, upload.single('avatar'), updateAvatar);

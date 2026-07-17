@@ -30,7 +30,7 @@ API.interceptors.response.use(
       if (isAdminRoute) {
         const onAdminLogin = window.location.pathname.startsWith('/admin/login');
         if (!onAdminLogin) {
-          window.location.href = '/admin/login';
+          window.location.replace('/admin/login');
         }
         return Promise.reject(error);
       }
@@ -45,7 +45,7 @@ API.interceptors.response.use(
           const isAdminPath = currentPath.startsWith('/admin');
           const isProtectedRoute = ['/profile', '/orders', '/checkout', '/wishlist'].some((p) => currentPath.startsWith(p));
           if (isProtectedRoute && !isAuthPage && !isAdminPath) {
-            window.location.href = '/login';
+            window.location.replace('/login');
           }
         }
       }

@@ -38,3 +38,7 @@
     display: none;
   }
 }
+
+body.js-scroll-restoring footer {
+  display: none !important;
+}

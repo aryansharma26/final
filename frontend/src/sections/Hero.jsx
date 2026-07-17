@@ -12,7 +12,7 @@ import {
   Tag,
   Upload,
 } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { productAPI } from "../api/index.js";
 
 const FAQ_LINKS = [
@@ -35,6 +35,7 @@ const formatPrice = (product) => {
 
 const Hero = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchQuery, setSearchQuery] = useState("");
   const [suggestionsOpen, setSuggestionsOpen] = useState(false);
   const [suggestionsLoading, setSuggestionsLoading] = useState(false);
@@ -120,7 +121,9 @@ const Hero = () => {
 
   const openProduct = (product) => {
     if (!product?.slug) return;
-    navigate(`/product/${product.slug}`);
+    navigate(`/product/${product.slug}`, {
+      state: { from: { pathname: location.pathname, search: location.search } },
+    });
     resetSearch();
   };
 

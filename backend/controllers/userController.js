@@ -19,7 +19,7 @@ export const getProfile = async (req, res, next) => {
 
 export const updateProfile = async (req, res, next) => {
   try {
-    const { name, phone, email } = req.body;
+    const { phone, email } = req.body;
     if (email) {
       const existing = await User.findOne({ email, _id: { $ne: req.user._id } });
       if (existing) {
@@ -28,7 +28,7 @@ export const updateProfile = async (req, res, next) => {
     }
     const user = await User.findByIdAndUpdate(
       req.user._id,
-      { name, phone, email },
+      { phone, email },
       { new: true, runValidators: true }
     ).select('-password -refreshToken');
     res.json({ success: true, message: 'Profile updated', user });

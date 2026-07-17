@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Heart, ShoppingCart, ArrowRight, ArrowLeft } from 'lucide-react';
 import { wishlistAPI } from '../api/index.js';
 import { useCart } from '../contexts/CartContext.jsx';
@@ -10,6 +10,7 @@ const Wishlist = () => {
   const [loading, setLoading] = useState(true);
   const { addToCart } = useCart();
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     loadWishlist();
@@ -99,7 +100,9 @@ const Wishlist = () => {
             key={product._id}
             product={product}
             index={index}
-            onCardClick={() => navigate(`/product/${product.slug}`)}
+            onCardClick={() => navigate(`/product/${product.slug}`, {
+              state: { from: { pathname: location.pathname, search: location.search } },
+            })}
             onActionClick={() => moveToCart(product)}
             actionLabel="Move to Cart"
             actionIcon={<ShoppingCart className="w-4 h-4" />}

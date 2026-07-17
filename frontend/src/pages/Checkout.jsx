@@ -4,7 +4,7 @@ import { CreditCard, Truck, MapPin, CheckCircle, ArrowLeft, Plus, Pencil, Trash2
 import { useCart } from '../contexts/CartContext.jsx';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import { useSettings } from '../contexts/SettingsContext.jsx';
-import { userAPI, orderAPI, b2bCouponAPI } from '../api/index.js';
+import { userAPI, orderAPI, b2bCouponAPI, couponAPI } from '../api/index.js';
 
 const emptyAddress = {
   name: '',
@@ -42,6 +42,14 @@ const Checkout = () => {
       return null;
     }
   });
+  const [buyNowItem] = useState(() => {
+    if (location.state?.buyNowItem) return location.state.buyNowItem;
+    try {
+      return JSON.parse(sessionStorage.getItem('pendingBuyNowCheckout') || 'null');
+    } catch {
+      return null;
+    }
+  });
   const [addresses, setAddresses] = useState([]);
   const [selectedAddress, setSelectedAddress] = useState(null);
   const [paymentMethod, setPaymentMethod] = useState('cod');
@@ -57,6 +65,11 @@ const Checkout = () => {
   const [b2bCouponDiscount, setB2BCouponDiscount] = useState(0);
   const [b2bCouponMessage, setB2BCouponMessage] = useState('');
   const [b2bCouponLoading, setB2BCouponLoading] = useState(false);
+  const [couponCode, setCouponCode] = useState('');
+  const [appliedCoupon, setAppliedCoupon] = useState(null);
+  const [couponDiscount, setCouponDiscount] = useState(0);
+  const [couponMessage, setCouponMessage] = useState('');
+  const [couponLoading, setCouponLoading] = useState(false);
 
   const handleSeniorCheckboxChange = (e) => {
     const checked = e.target.checked;
@@ -204,28 +217,53 @@ const Checkout = () => {
   };
 
   const { checkoutDiscount } = useSettings();
-  const checkoutSubtotal = b2bItem ? b2bItem.totalPrice : subtotal;
-  const shipping = b2bItem ? (checkoutSubtotal >= 2000 ? 0 : 50) : (subtotal >= 2000 ? 0 : 50);
-  const itemTaxRate = (b2bItem && b2bItem.taxRate !== undefined) ? b2bItem.taxRate : 12;
+  const isBuyNow = Boolean(buyNowItem);
+  const checkoutSubtotal = b2bItem 
+    ? b2bItem.totalPrice 
+    : isBuyNow 
+      ? buyNowItem.price * buyNowItem.quantity 
+      : subtotal;
+
+  const shipping = (b2bItem || isBuyNow) 
+    ? (checkoutSubtotal >= 2000 ? 0 : 50) 
+    : (subtotal >= 2000 ? 0 : 50);
+
+  const itemTaxRate = (b2bItem && b2bItem.taxRate !== undefined) 
+    ? b2bItem.taxRate 
+    : (isBuyNow && buyNowItem.taxRate !== undefined) 
+      ? buyNowItem.taxRate 
+      : 12;
+
   const seniorDiscountActive = !b2bItem && isSenior && seniorDocUrl;
   const getSeniorPrice = (price) => seniorDiscountActive ? Number((Number(price || 0) * 0.80).toFixed(2)) : Number(price || 0);
+
   const tax = b2bItem
     ? Number((checkoutSubtotal * (itemTaxRate / (100 + itemTaxRate))).toFixed(2))
-    : Number(
-        (cart.items || []).reduce((sum, item) => {
-          const rate = item.product?.taxRate !== undefined ? item.product.taxRate : 12;
-          return sum + (getSeniorPrice(item.price) * item.quantity) * (rate / (100 + rate));
-        }, 0).toFixed(2)
-      );
-  const discount = b2bItem ? b2bCouponDiscount : (cart.couponDiscount || 0);
-  const seniorDiscount = seniorDiscountActive ? Number((subtotal * 0.20).toFixed(2)) : 0;
+    : isBuyNow
+      ? Number((getSeniorPrice(buyNowItem.price) * buyNowItem.quantity * (itemTaxRate / (100 + itemTaxRate))).toFixed(2))
+      : Number(
+          (cart.items || []).reduce((sum, item) => {
+            const rate = item.product?.taxRate !== undefined ? item.product.taxRate : 12;
+            return sum + (getSeniorPrice(item.price) * item.quantity) * (rate / (100 + rate));
+          }, 0).toFixed(2)
+        );
+
+  const discount = b2bItem 
+    ? b2bCouponDiscount 
+    : isBuyNow 
+      ? couponDiscount 
+      : (cart.couponDiscount || 0);
+
+  const seniorDiscount = seniorDiscountActive ? Number((checkoutSubtotal * 0.20).toFixed(2)) : 0;
 
   let checkoutOfferDiscount = 0;
-  if (!b2bItem && checkoutDiscount?.enabled && subtotal >= checkoutDiscount.minOrderAmount) {
-    checkoutOfferDiscount = Number((subtotal * (checkoutDiscount.discountPercentage / 100)).toFixed(2));
+  if (!b2bItem && checkoutDiscount?.enabled && checkoutSubtotal >= checkoutDiscount.minOrderAmount) {
+    checkoutOfferDiscount = Number((checkoutSubtotal * (checkoutDiscount.discountPercentage / 100)).toFixed(2));
   }
 
-  const total = b2bItem ? Math.max(0, checkoutSubtotal + shipping - discount) : (subtotal + shipping - discount - seniorDiscount - checkoutOfferDiscount);
+  const total = b2bItem 
+    ? Math.max(0, checkoutSubtotal + shipping - discount) 
+    : Math.max(0, checkoutSubtotal + shipping - discount - seniorDiscount - checkoutOfferDiscount);
 
   const handleApplyB2BCoupon = async () => {
     if (!b2bItem || !b2bCouponCode.trim()) return;
@@ -242,6 +280,24 @@ const Checkout = () => {
       setB2BCouponMessage(err.response?.data?.message || 'Invalid coupon');
     } finally {
       setB2BCouponLoading(false);
+    }
+  };
+
+  const handleApplyB2CCoupon = async () => {
+    if (!couponCode.trim()) return;
+    try {
+      setCouponLoading(true);
+      setCouponMessage('');
+      const { data } = await couponAPI.validateCoupon({ code: couponCode, orderAmount: checkoutSubtotal });
+      setAppliedCoupon(data.coupon);
+      setCouponDiscount(Number(data.discount || 0));
+      setCouponMessage('Coupon applied');
+    } catch (err) {
+      setAppliedCoupon(null);
+      setCouponDiscount(0);
+      setCouponMessage(err.response?.data?.message || 'Invalid coupon');
+    } finally {
+      setCouponLoading(false);
     }
   };
 
@@ -283,18 +339,33 @@ const Checkout = () => {
             },
             b2bCouponCode: b2bCoupon?.code,
           }
-        : {
-            shippingAddress: address,
-            paymentMethod,
-            couponCode: cart.coupon?.code || undefined,
-            isSeniorCitizen: isSenior,
-            seniorCitizenIdDoc: seniorDocUrl || undefined,
-          };
+        : isBuyNow
+          ? {
+              shippingAddress: address,
+              paymentMethod,
+              isBuyNow: true,
+              buyNowItem: {
+                productId: buyNowItem.productId,
+                quantity: buyNowItem.quantity,
+              },
+              couponCode: appliedCoupon?.code || undefined,
+              isSeniorCitizen: isSenior,
+              seniorCitizenIdDoc: seniorDocUrl || undefined,
+            }
+          : {
+              shippingAddress: address,
+              paymentMethod,
+              couponCode: cart.coupon?.code || undefined,
+              isSeniorCitizen: isSenior,
+              seniorCitizenIdDoc: seniorDocUrl || undefined,
+            };
       const { data: res } = await orderAPI.createOrder(orderData);
-      if (!b2bItem) {
-        await clearCart();
-      } else {
+      if (b2bItem) {
         sessionStorage.removeItem('pendingB2BCheckout');
+      } else if (isBuyNow) {
+        sessionStorage.removeItem('pendingBuyNowCheckout');
+      } else {
+        await clearCart();
       }
       navigate(`/orders/${res.order._id}?success=true`, { replace: true });
     } catch (err) {
@@ -309,8 +380,8 @@ const Checkout = () => {
 
   return (
     <div className="container-custom py-4 lg:py-8">
-      <button onClick={() => (b2bItem ? navigate(-1) : navigate('/cart'))} className="inline-flex items-center gap-2 text-gray-600 hover:text-brand mb-6 transition-colors">
-        <ArrowLeft className="w-4 h-4" /> {b2bItem ? 'Back' : 'Back to Cart'}
+      <button onClick={() => (b2bItem || isBuyNow ? navigate(-1) : navigate('/cart', { replace: true }))} className="inline-flex items-center gap-2 text-gray-600 hover:text-brand mb-6 transition-colors">
+        <ArrowLeft className="w-4 h-4" /> {b2bItem || isBuyNow ? 'Back' : 'Back to Cart'}
       </button>
 
       <h1 className="mb-4 text-2xl font-bold text-gray-900 lg:mb-6">Checkout</h1>
@@ -614,13 +685,13 @@ const Checkout = () => {
           <div className="rounded-2xl border border-gray-100 bg-white p-4 sm:p-6 lg:sticky lg:top-32">
             <h2 className="text-lg font-bold text-gray-900 mb-4">Order Summary</h2>
             <div className="space-y-2 text-sm mb-4">
-              {(b2bItem ? [b2bItem] : cart.items || []).map((item) => {
+              {(b2bItem ? [b2bItem] : isBuyNow ? [buyNowItem] : cart.items || []).map((item) => {
                 const quantity = Number(item.quantity || 0);
                 const originalLineTotal = Number(item.price || 0) * quantity;
                 const discountedLineTotal = (b2bItem ? Number(item.price || 0) : getSeniorPrice(item.price)) * quantity;
                 return (
-                  <div key={item.product?._id || item.productId} className="flex justify-between gap-3 text-gray-600">
-                    <span className="line-clamp-1">{b2bItem ? `${item.name} (${item.tierLabel})` : item.product?.name} x{item.quantity}</span>
+                  <div key={item.product?._id || item.productId || 'buynow-item'} className="flex justify-between gap-3 text-gray-600">
+                    <span className="line-clamp-1">{b2bItem ? `${item.name} (${item.tierLabel})` : isBuyNow ? item.name : item.product?.name} x{item.quantity}</span>
                     <div className="text-right">
                       {seniorDiscountActive && originalLineTotal !== discountedLineTotal && (
                         <span className="block text-[10px] text-gray-400 line-through">₱{originalLineTotal.toFixed(0)}</span>
@@ -681,6 +752,55 @@ const Checkout = () => {
                 )}
                 {b2bCouponMessage && (
                   <p className={`mt-2 text-xs font-semibold ${b2bCoupon ? 'text-green-700' : 'text-red-600'}`}>{b2bCouponMessage}</p>
+                )}
+              </div>
+            )}
+            {isBuyNow && (
+              <div className="mb-4 rounded-2xl border border-blue-100 bg-blue-50/50 p-3">
+                <div className="mb-2 flex items-center gap-2 text-sm font-bold text-blue-950">
+                  <Tag className="h-4 w-4" />
+                  Coupon
+                </div>
+                {appliedCoupon ? (
+                  <div className="flex items-center justify-between gap-2 rounded-xl bg-white px-3 py-2">
+                    <div>
+                      <p className="text-sm font-bold text-blue-800">{appliedCoupon.code}</p>
+                      <p className="text-xs text-blue-600">Discount: -₱{couponDiscount.toFixed(0)}</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setAppliedCoupon(null);
+                        setCouponDiscount(0);
+                        setCouponCode('');
+                        setCouponMessage('');
+                      }}
+                      className="text-xs font-semibold text-red-600 hover:underline"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={couponCode}
+                      onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                      placeholder="Enter coupon"
+                      className="min-w-0 flex-1 rounded-xl border border-blue-100 bg-white px-3 py-2 text-sm font-semibold outline-none focus:border-brand"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleApplyB2CCoupon}
+                      disabled={couponLoading || !couponCode.trim()}
+                      className="rounded-xl bg-brand px-3 py-2 text-xs font-bold text-white disabled:opacity-50"
+                    >
+                      {couponLoading ? 'Applying' : 'Apply'}
+                    </button>
+                  </div>
+                )}
+                {couponMessage && (
+                  <p className={`mt-2 text-xs font-semibold ${appliedCoupon ? 'text-green-700' : 'text-red-600'}`}>{couponMessage}</p>
                 )}
               </div>
             )}

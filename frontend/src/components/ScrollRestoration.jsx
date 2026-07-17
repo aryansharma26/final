@@ -1,5 +1,5 @@
-import { useEffect, useRef } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useEffect, useLayoutEffect, useRef } from 'react';
+import { useLocation, useNavigationType } from 'react-router-dom';
 
 const STORAGE_KEY = 'scroll-positions';
 
@@ -19,12 +19,12 @@ function setStored(positions) {
 
 export default function ScrollRestoration() {
   const { key, pathname } = useLocation();
+  const navigationType = useNavigationType();
   const positions = useRef(getStored());
   const prevKeyRef = useRef(null);
   const prevPathRef = useRef(null);
   const scrollYRef = useRef(0);
-  const timerRef = useRef(null);
-  const lastRestoreYRef = useRef(-1);
+  const isTransitioningRef = useRef(false);
 
   // Disable native scroll restoration
   useEffect(() => {
@@ -33,9 +33,10 @@ export default function ScrollRestoration() {
     }
   }, []);
 
-  // Save position on scroll (never cancels the restore timer)
+  // Save position on scroll (ignore restoration-induced scroll events)
   useEffect(() => {
     const handleScroll = () => {
+      if (isTransitioningRef.current) return;
       const y = window.scrollY;
       scrollYRef.current = y;
       positions.current[key] = y;
@@ -45,20 +46,28 @@ export default function ScrollRestoration() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, [key]);
 
-  // Restore scroll position on route change
-  useEffect(() => {
+  // Synchronously flag route change and apply target minHeight during render to prevent scroll collapse
+  if (prevKeyRef.current !== key) {
+    isTransitioningRef.current = true;
+    const targetY = positions.current[key] ?? positions.current[pathname];
+    if (targetY !== undefined && targetY > 0 && navigationType === 'POP') {
+      document.body.style.minHeight = `${targetY + window.innerHeight}px`;
+      document.body.classList.add('js-scroll-restoring');
+    }
+  }
+
+  // Restore scroll position on route change before painting
+  useLayoutEffect(() => {
     if (prevKeyRef.current === null) {
       prevKeyRef.current = key;
       prevPathRef.current = pathname;
+      isTransitioningRef.current = false;
       return;
     }
 
-    if (prevKeyRef.current === key) return;
-
-    // Cancel any previous timer
-    if (timerRef.current) {
-      clearTimeout(timerRef.current);
-      timerRef.current = null;
+    if (prevKeyRef.current === key) {
+      isTransitioningRef.current = false;
+      return;
     }
 
     // Save the position of the page we're LEAVING (by pathname)
@@ -68,56 +77,43 @@ export default function ScrollRestoration() {
     prevKeyRef.current = key;
     prevPathRef.current = pathname;
 
-    // Product pages always open at top
-    if (pathname.startsWith('/product/')) {
+    // For new navigations (PUSH or REPLACE), we always open at the top of the page
+    if (navigationType === 'PUSH' || navigationType === 'REPLACE') {
+      document.body.style.minHeight = '';
+      document.body.classList.remove('js-scroll-restoring');
       window.scrollTo(0, 0);
+      isTransitioningRef.current = false;
       return;
     }
 
     const saved = positions.current[key] ?? positions.current[pathname];
 
     if (saved === undefined || saved <= 0) {
+      document.body.style.minHeight = '';
+      document.body.classList.remove('js-scroll-restoring');
       window.scrollTo(0, 0);
+      isTransitioningRef.current = false;
       return;
     }
 
-    // Restore with retry for dynamic content.
-    // Stop when: (1) page is tall enough AND we're at target, OR (2) user manually scrolled.
+    // Apply temporary min-height to prevent scroll collapse and layout jumps
     const targetY = saved;
-    lastRestoreYRef.current = -1;
+    document.body.style.minHeight = `${targetY + window.innerHeight}px`;
+    window.scrollTo(0, targetY);
 
-    const tryRestore = () => {
-      const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
-      const currentY = window.scrollY;
-
-      // Success: page is tall enough AND we're at the target
-      if (maxScroll >= targetY && Math.abs(currentY - targetY) <= 5) {
-        timerRef.current = null;
-        return;
-      }
-
-      // User manually scrolled away from our restored position — stop
-      if (lastRestoreYRef.current !== -1 && Math.abs(currentY - lastRestoreYRef.current) > 10) {
-        timerRef.current = null;
-        return;
-      }
-
-      // Scroll to where we can (clamped to current page height)
-      const clampedTarget = Math.min(targetY, Math.max(maxScroll, 0));
-      lastRestoreYRef.current = clampedTarget;
-      window.scrollTo(0, clampedTarget);
-
-      // Retry again
-      timerRef.current = setTimeout(tryRestore, 100);
-    };
-
-    tryRestore();
-  }, [key, pathname]);
+    // Clear the min-height in the next frame after browser has painted and restored scroll
+    requestAnimationFrame(() => {
+      document.body.style.minHeight = '';
+      document.body.classList.remove('js-scroll-restoring');
+      isTransitioningRef.current = false;
+    });
+  }, [key, pathname, navigationType]);
 
   // Cleanup on unmount
   useEffect(() => {
     return () => {
-      if (timerRef.current) clearTimeout(timerRef.current);
+      document.body.style.minHeight = '';
+      document.body.classList.remove('js-scroll-restoring');
     };
   }, []);
 

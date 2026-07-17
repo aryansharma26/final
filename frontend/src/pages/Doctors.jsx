@@ -1,22 +1,27 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { Link, useSearchParams, useNavigate } from 'react-router-dom';
+import { Link, useSearchParams, useNavigate, useLocation } from 'react-router-dom';
 import { Search, MapPin, Star, Phone, Stethoscope, Filter, X, ChevronLeft, User, Clock, Shield, Video, Siren, Mail, ArrowLeft, Loader2 } from 'lucide-react';
 import { doctorAPI } from '../api/index.js';
+import { getPageState, setPageState } from '../utils/pageCache.js';
 
 const DOCTORS_PAGE_SIZE = 12;
 
 const Doctors = () => {
   const [searchParams, setSearchParams] = useSearchParams();
-
   const navigate = useNavigate();
+  const location = useLocation();
 
-  const [doctors, setDoctors] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const cacheKey = location.pathname + location.search;
+  const cachedState = getPageState(cacheKey);
+
+  const [doctors, setDoctors] = useState(() => cachedState?.doctors || []);
+  const [loading, setLoading] = useState(() => (cachedState ? false : true));
   const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState('');
-  const [pagination, setPagination] = useState({ page: 1, limit: DOCTORS_PAGE_SIZE, total: 0, pages: 1 });
+  const [pagination, setPagination] = useState(() => cachedState?.pagination || { page: 1, limit: DOCTORS_PAGE_SIZE, total: 0, pages: 1 });
   const loadMoreRef = useRef(null);
   const loadRequestRef = useRef(0);
+  const isFirstRender = useRef(true);
 
   const [specialties, setSpecialties] = useState([]);
   const [regions, setRegions] = useState([]);
@@ -115,7 +120,23 @@ const Doctors = () => {
       .catch(() => setCities([]));
   }, [provinceFilter]);
 
-  useEffect(() => { loadDoctors(1, false); }, [loadDoctors]);
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      if (cachedState) {
+        return;
+      }
+    }
+    loadDoctors(1, false);
+  }, [loadDoctors, cachedState]);
+
+  // Keep page cache in sync
+  useEffect(() => {
+    if (!loading) {
+      setPageState(cacheKey, { doctors, pagination });
+    }
+  }, [doctors, pagination, cacheKey, loading]);
+
   useEffect(() => { loadFilters(); }, [loadFilters]);
 
   const hasMoreDoctors = pagination.page < pagination.pages && doctors.length < pagination.total;

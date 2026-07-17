@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect, useRef } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { getPageState, setPageState } from '../utils/pageCache.js';
 import { ArrowLeft, BadgeCheck, Building2, Send, CheckCircle, Handshake, Loader2, Package, Percent, Phone, Mail, ShoppingCart, ChevronRight, Search, Warehouse, X } from 'lucide-react';
 import { contactAPI, b2bProductAPI } from '../api/index.js';
 import B2BCoupons from '../sections/B2BCoupons.jsx';
@@ -11,10 +12,18 @@ const getB2BImage = (product) => {
 
 const B2BEnquiry = () => {
   const navigate = useNavigate();
-  const [products, setProducts] = useState([]);
-  const [productsLoading, setProductsLoading] = useState(true);
+  const location = useLocation();
+
+  const cacheKey = location.pathname + location.search;
+  const cachedStateRef = useRef(getPageState(cacheKey));
+  const cachedState = cachedStateRef.current;
+
+  const [products, setProducts] = useState(() => cachedState?.products || []);
+  const [productsLoading, setProductsLoading] = useState(() => (cachedState ? false : true));
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
+  const isFirstRender = useRef(true);
+
   const [form, setForm] = useState({
     name: '',
     email: '',
@@ -37,8 +46,21 @@ const B2BEnquiry = () => {
   }, [searchTerm]);
 
   useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      if (cachedState) {
+        return;
+      }
+    }
     loadProducts(debouncedSearch);
   }, [debouncedSearch]);
+
+  // Keep page cache in sync
+  useEffect(() => {
+    if (!productsLoading) {
+      setPageState(cacheKey, { products });
+    }
+  }, [products, cacheKey, productsLoading]);
 
   const loadProducts = async (searchQuery = '') => {
     try {
@@ -155,10 +177,7 @@ const B2BEnquiry = () => {
                   Browse the bulk catalog, shortlist products, and submit one clear enquiry for pricing, stock availability, and delivery coordination.
                 </p>
               </div>
-              <div className="rounded-xl border border-brand/10 bg-white/80 px-3 py-2 text-sm text-gray-600 shadow-sm">
-                <p className="font-semibold text-gray-900">Fast business support</p>
-                <p className="mt-1 text-xs text-gray-500">Bulk pricing • quick quotes • delivery coordination</p>
-              </div>
+              
             </div>
 
             <div className="mt-4 flex flex-wrap gap-2">
@@ -193,7 +212,7 @@ const B2BEnquiry = () => {
             {/* Search Input */}
             <div className="relative w-full">
               <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                {productsLoading ? (
+                {productsLoading && products.length === 0 ? (
                   <Loader2 className="w-4 h-4 text-gray-400 animate-spin" />
                 ) : (
                   <Search className="w-4 h-4 text-gray-400" />
@@ -217,7 +236,7 @@ const B2BEnquiry = () => {
             </div>
           </div>
 
-          {productsLoading ? (
+          {productsLoading && products.length === 0 ? (
             <div className="grid grid-cols-2 gap-4 lg:grid-cols-3 lg:gap-5">
               {[1, 2, 3].map((i) => (
                 <div key={i} className="rounded-2xl border border-gray-100 bg-white p-3 animate-pulse sm:p-4">
@@ -250,14 +269,17 @@ const B2BEnquiry = () => {
               {products.map((product) => (
                 <div
                   key={product._id}
-                  onClick={() => navigate(`/b2b-product/${product.slug}`)}
-                  className="group cursor-pointer overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-brand/30 hover:shadow-lg hover:shadow-brand/10"
+                  onClick={() => navigate(`/b2b-product/${product.slug}`, {
+                    state: { from: { pathname: location.pathname, search: location.search } },
+                  })}
+                  className="group cursor-pointer overflow-hidden rounded-2xl border border-gray-100 bg-white transition-shadow hover:shadow-lg"
                 >
-                  <div className="relative aspect-[4/3] bg-gradient-to-br from-brand-light to-white p-3">
+                  <div className="relative aspect-square overflow-hidden bg-gray-50">
                     <img
                       src={getB2BImage(product) || 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400&h=400&fit=crop'}
                       alt={product.name}
-                      className="h-full w-full rounded-xl object-cover shadow-sm transition-transform duration-300 group-hover:scale-[1.03]"
+                      loading="lazy"
+                      className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
                     />
                   </div>
                   <div className="p-3 sm:p-4">

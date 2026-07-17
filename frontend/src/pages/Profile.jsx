@@ -1,23 +1,18 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
-import { User, Phone, MapPin, Trash2, Edit2, LogOut, Package, FileText, Mail } from 'lucide-react';
+import { ArrowLeft, User, Phone, MapPin, Trash2, Edit2, LogOut, Package, FileText, Mail, ShieldCheck, CalendarDays } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import { userAPI } from '../api/index.js';
 
 const Profile = () => {
-  const { user, logout, updateUser, loading: authLoading } = useAuth();
+  const { user, logout, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('profile');
   const [addresses, setAddresses] = useState([]);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [editingAddressId, setEditingAddressId] = useState(null);
-  const {
-    register: registerProfile,
-    handleSubmit: handleSubmitProfile,
-    reset: resetProfile,
-  } = useForm();
   const {
     register: registerAddress,
     handleSubmit: handleSubmitAddress,
@@ -39,27 +34,11 @@ const Profile = () => {
       const profileRes = await userAPI.getProfile();
       const profileUser = profileRes.data.user;
       setAddresses(profileUser.addresses || []);
-      resetProfile({
-        name: profileUser.name || '',
-        phone: profileUser.phone || '',
-      });
     } catch (err) {
       console.error('Failed to load profile data:', err);
       setMessage(err.response?.data?.message || 'Failed to load account details');
     } finally {
       setLoading(false);
-    }
-  };
-
-  const onUpdateProfile = async ({ phone, ...data }) => {
-    try {
-      setMessage('');
-      const { data: res } = await userAPI.updateProfile(data);
-      updateUser(res.user);
-      setMessage('Profile updated successfully');
-      setTimeout(() => setMessage(''), 3000);
-    } catch (err) {
-      setMessage(err.response?.data?.message || 'Update failed');
     }
   };
 
@@ -97,6 +76,14 @@ const Profile = () => {
     navigate('/');
   };
 
+  const handleBack = () => {
+    if (window.history.length > 1) {
+      navigate(-1);
+      return;
+    }
+    navigate('/', { replace: true });
+  };
+
   const tabs = [
     { id: 'profile', label: 'Profile', icon: User },
     { id: 'addresses', label: 'Addresses', icon: MapPin },
@@ -119,10 +106,23 @@ const Profile = () => {
   }
 
   return (
-    <div className="container-custom py-4 sm:py-8">
-      <div className="mb-4 sm:mb-6">
-        <p className="text-xs font-semibold uppercase tracking-wide text-brand">Account</p>
-        <h1 className="mt-1 text-2xl font-bold text-gray-950 sm:text-3xl">My Profile</h1>
+    <div className="container-custom py-5 sm:py-8">
+      <div className="mb-6 flex items-start justify-between gap-3">
+        <div className="flex min-w-0 items-start gap-3">
+          <button
+            type="button"
+            onClick={handleBack}
+            className="mt-0.5 rounded-xl p-2 transition-colors hover:bg-gray-100"
+            aria-label="Go back"
+          >
+            <ArrowLeft className="h-5 w-5 text-gray-600" />
+          </button>
+          <div className="min-w-0">
+            <p className="text-xs font-semibold uppercase tracking-wide text-brand">Account</p>
+            <h1 className="text-2xl font-bold text-gray-950 sm:text-3xl">My Profile</h1>
+            <p className="mt-1 text-sm text-gray-500">Profile details and saved addresses</p>
+          </div>
+        </div>
       </div>
 
       <div className="grid gap-4 lg:grid-cols-4 lg:gap-8">
@@ -193,38 +193,48 @@ const Profile = () => {
                 </div>
                 <div>
                   <h2 className="text-xl font-bold text-gray-950">Profile Information</h2>
-                  <p className="text-sm text-gray-500">Keep your contact details updated for faster checkout.</p>
+                  <p className="text-sm text-gray-500">Your registered account information is shown below.</p>
                 </div>
               </div>
-              <form onSubmit={handleSubmitProfile(onUpdateProfile)} className="grid gap-4 sm:grid-cols-2">
-                <div>
-                  <label className="mb-1 block text-sm font-medium text-gray-700">Name</label>
-                  <input
-                    {...registerProfile('name')}
-                    className="w-full rounded-xl border border-gray-200 px-4 py-2.5 focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20"
-                  />
-                </div>
-                <div>
-                  <label className="mb-1 block text-sm font-medium text-gray-700">Email</label>
-                  <div className="flex items-center gap-2 rounded-xl border border-gray-200 bg-gray-55 px-4 py-2.5 text-gray-500">
-                    <Mail className="h-4 w-4 shrink-0" />
-                    <span className="truncate text-sm">{user.email}</span>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="rounded-2xl border border-gray-100 bg-gray-50 p-4">
+                  <div className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-gray-400">
+                    <User className="h-4 w-4" />
+                    Account Name
                   </div>
+                  <p className="text-base font-bold text-gray-950">{user.name || 'Customer'}</p>
                 </div>
-                <div className="sm:col-span-2">
-                  <label className="mb-1 block text-sm font-medium text-gray-700">Phone</label>
-                  <div className="relative">
-                    <Phone className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-                    <div className="w-full rounded-xl border border-gray-200 bg-gray-50 py-2.5 pl-10 pr-4 text-sm text-gray-500">
-                      {user.phone || 'No phone number added'}
-                    </div>
+                <div className="rounded-2xl border border-gray-100 bg-gray-50 p-4">
+                  <div className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-gray-400">
+                    <Mail className="h-4 w-4" />
+                    Email Address
                   </div>
-                 
+                  <p className="truncate text-base font-semibold text-gray-950">{user.email}</p>
                 </div>
-                <button type="submit" className="w-full rounded-xl bg-brand px-6 py-3 font-semibold text-white transition-colors hover:bg-brand-dark sm:w-fit">
-                  Save Changes
-                </button>
-              </form>
+                <div className="rounded-2xl border border-gray-100 bg-gray-50 p-4">
+                  <div className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-gray-400">
+                    <Phone className="h-4 w-4" />
+                    Phone
+                  </div>
+                  <p className="text-base font-semibold text-gray-950">{user.phone || 'No phone number added'}</p>
+                </div>
+                <div className="rounded-2xl border border-gray-100 bg-gray-50 p-4">
+                  <div className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-gray-400">
+                    <ShieldCheck className="h-4 w-4" />
+                    Account Status
+                  </div>
+                  <p className="text-base font-semibold text-gray-950">{user.isVerified ? 'Verified account' : 'Active account'}</p>
+                </div>
+                <div className="rounded-2xl border border-gray-100 bg-gray-50 p-4 sm:col-span-2">
+                  <div className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-gray-400">
+                    <CalendarDays className="h-4 w-4" />
+                    Profile Summary
+                  </div>
+                  <p className="text-sm leading-6 text-gray-600">
+                    Your account details are used for orders, prescriptions, and customer support verification.
+                  </p>
+                </div>
+              </div>
             </div>
             </div>
           )}

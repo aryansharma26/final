@@ -400,7 +400,7 @@ const Cart = () => {
             <button
               onClick={() => {
                 if (!isAuthenticated) {
-                  navigate('/login?redirect=/checkout', { replace: true });
+                  navigate('/login?redirect=/checkout');
                   return;
                 }
                 navigate('/checkout');

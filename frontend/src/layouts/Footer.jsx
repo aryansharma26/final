@@ -74,7 +74,7 @@ const Footer = () => {
                 <Heart className="w-5 h-5 text-brand" />
               </div>
               <div>
-                <p className="text-gray-900 font-medium text-sm">24/7 Support</p>
+                <p className="text-gray-900 font-medium text-sm">Dedicated Support</p>
                 <p className="text-xs text-gray-500">Always here to help</p>
               </div>
             </div>

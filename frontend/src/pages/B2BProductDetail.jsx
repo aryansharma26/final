@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { ArrowLeft, Building2, CheckCircle, CreditCard, Loader2, Mail, Package, Phone, Send, Tag, Truck, X } from 'lucide-react';
 import { b2bProductAPI, contactAPI, b2bCouponAPI } from '../api/index.js';
 
@@ -9,6 +9,15 @@ const getImageUrl = (image) => (typeof image === 'string' ? image : image?.url);
 const B2BProductDetail = () => {
   const { slug } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const handleGoBack = () => {
+    if (location.state?.from) {
+      navigate(-1);
+    } else {
+      navigate('/b2b-enquiry', { replace: true });
+    }
+  };
   const [product, setProduct] = useState(null);
   const [selectedImage, setSelectedImage] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -175,7 +184,7 @@ const getDisplaySku = (sku) => {
       <div className="container-custom py-16 text-center">
         <Package className="mx-auto mb-4 h-12 w-12 text-gray-300" />
         <p className="font-medium text-gray-500">{error || 'B2B product not found'}</p>
-        <button onClick={() => navigate('/b2b-enquiry', { replace: true })} className="mt-4 inline-flex items-center gap-1 text-brand font-medium hover:underline">
+        <button onClick={handleGoBack} className="mt-4 inline-flex items-center gap-1 text-brand font-medium hover:underline">
           <ArrowLeft className="h-4 w-4" /> Back to B2B products
         </button>
       </div>
@@ -184,7 +193,7 @@ const getDisplaySku = (sku) => {
 
   return (
     <div className="container-custom py-4 lg:py-6">
-      <button onClick={() => navigate('/b2b-enquiry', { replace: true })} className="mb-4 inline-flex items-center gap-1.5 text-sm font-medium text-gray-500 transition-colors hover:text-brand">
+      <button onClick={handleGoBack} className="mb-4 inline-flex items-center gap-1.5 text-sm font-medium text-gray-500 transition-colors hover:text-brand">
         <ArrowLeft className="h-4 w-4" /> Back to B2B Products
       </button>
 

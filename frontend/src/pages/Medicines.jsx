@@ -1,19 +1,25 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useLocation, useSearchParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, ChevronLeft, ChevronRight, Pill } from 'lucide-react';
 import { productAPI, categoryAPI } from '../api/index.js';
 import { useCart } from '../contexts/CartContext.jsx';
 import ProductCard from '../components/ProductCard.jsx';
+import { getPageState, setPageState } from '../utils/pageCache.js';
 
 const Medicines = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
-  const [products, setProducts] = useState([]);
+  const location = useLocation();
+
+  const cacheKey = location.pathname + location.search;
+  const cachedState = getPageState(cacheKey);
+
+  const [products, setProducts] = useState(() => cachedState?.products || []);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [initialLoading, setInitialLoading] = useState(true);
-  const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
+  const [initialLoading, setInitialLoading] = useState(() => (cachedState ? false : true));
+  const [page, setPage] = useState(() => cachedState?.page || 1);
+  const [hasMore, setHasMore] = useState(() => (cachedState ? cachedState.hasMore : true));
   const [categoryScrollState, setCategoryScrollState] = useState({
     parent: { left: false, right: false },
     child: { left: false, right: false },
@@ -26,6 +32,7 @@ const Medicines = () => {
   const subCategoryScrollRef = useRef(null);
   const loaderRef = useRef(null);
   const loadRequestRef = useRef(0);
+  const isFirstRender = useRef(true);
 
   const parentCategories = useMemo(
     () => categories.filter((category) => !category.parent),
@@ -145,12 +152,25 @@ const Medicines = () => {
 
   // Reset and load products when search or category changes
   useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      if (cachedState) {
+        return;
+      }
+    }
     setPage(1);
     setHasMore(true);
     setProducts([]);
     setInitialLoading(true);
     loadData(1, false, selectedCategory, search);
-  }, [search, selectedCategory, loadData]);
+  }, [search, selectedCategory, loadData, cachedState]);
+
+  // Keep page cache in sync
+  useEffect(() => {
+    if (!initialLoading) {
+      setPageState(cacheKey, { products, page, hasMore });
+    }
+  }, [products, page, hasMore, cacheKey, initialLoading]);
 
   // IntersectionObserver for infinite scroll
   useEffect(() => {
@@ -353,7 +373,9 @@ const Medicines = () => {
                 key={product._id}
                 product={product}
                 index={index}
-                onCardClick={() => navigate(`/product/${product.slug}`)}
+                onCardClick={() => navigate(`/product/${product.slug}`, {
+                  state: { from: { pathname: location.pathname, search: location.search } },
+                })}
                 onCartClick={() => addToCart(product, 1)}
               />
             ))}

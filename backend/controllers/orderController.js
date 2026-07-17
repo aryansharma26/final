@@ -35,7 +35,7 @@ export const createOrder = async (req, res, next) => {
   const session = await mongoose.startSession();
   session.startTransaction();
   try {
-    const { shippingAddress, paymentMethod, couponCode, isB2B, b2bItem, isSeniorCitizen, seniorCitizenIdDoc } = req.body;
+    const { shippingAddress, paymentMethod, couponCode, isB2B, b2bItem, isSeniorCitizen, seniorCitizenIdDoc, isBuyNow, buyNowItem } = req.body;
 
     if (isB2B && b2bItem?.productId) {
       const quantity = Math.max(1, Number(b2bItem.quantity || 1));
@@ -108,6 +108,148 @@ export const createOrder = async (req, res, next) => {
       );
 
       const updated = await B2BProduct.findOneAndUpdate(
+        { _id: product._id, stock: { $gte: quantity } },
+        { $inc: { stock: -quantity } },
+        { session }
+      );
+      if (!updated) {
+        await session.abortTransaction();
+        return res.status(400).json({
+          success: false,
+          message: 'Stock changed during checkout. Please try again.',
+        });
+      }
+
+      await session.commitTransaction();
+
+      try {
+        await sendEmail({
+          to: req.user.email,
+          subject: `Order Confirmed - ${order._id}`,
+          html: getOrderConfirmationTemplate(order),
+        });
+      } catch (emailError) {
+        console.error('[Order] Confirmation email failed:', emailError.message);
+      }
+
+      return res.status(201).json({ success: true, message: 'Order placed successfully', order });
+    }
+
+    if (isBuyNow && buyNowItem?.productId) {
+      const quantity = Math.max(1, Number(buyNowItem.quantity || 1));
+      const product = await Product.findById(buyNowItem.productId).session(session);
+
+      if (!product || product.status !== 'active') {
+        await session.abortTransaction();
+        return res.status(404).json({ success: false, message: 'Product not found or unavailable' });
+      }
+      if (product.stock < quantity) {
+        await session.abortTransaction();
+        return res.status(400).json({ success: false, message: `Only ${product.stock} available.` });
+      }
+
+      if (product.isPrescriptionRequired) {
+        const hasPrescription = await hasAcceptedPrescriptionForProduct(req.user._id, product._id, session);
+        if (!hasPrescription) {
+          await session.abortTransaction();
+          return res.status(400).json({
+            success: false,
+            message: 'This product requires a prescription upload before checkout.',
+            prescriptionItems: [product.name],
+          });
+        }
+      }
+
+      let price = product.discountPrice > 0 ? product.discountPrice : product.price;
+      if (product.bulkPricing && product.bulkPricing.length > 0) {
+        const sortedTiers = [...product.bulkPricing].sort((a, b) => b.minQty - a.minQty);
+        const matchingTier = sortedTiers.find(tier => quantity >= tier.minQty && (!tier.maxQty || quantity <= tier.maxQty));
+        if (matchingTier) {
+          price = matchingTier.unitPrice;
+        }
+      }
+
+      const itemsPrice = price * quantity;
+      const seniorDiscount = (isSeniorCitizen && seniorCitizenIdDoc)
+        ? Number((itemsPrice * 0.20).toFixed(2))
+        : 0;
+
+      const orderItems = [{
+        product: product._id,
+        name: product.name,
+        image: product.images[0]?.url || (typeof product.images[0] === 'string' ? product.images[0] : '') || '',
+        productSlug: product.slug,
+        price: Number(price),
+        originalPrice: Number(price),
+        quantity,
+      }];
+
+      let couponDiscount = 0;
+      let appliedCoupon = null;
+
+      if (couponCode) {
+        const coupon = await Coupon.findOne({ code: couponCode.toUpperCase(), isActive: true }).session(session);
+        if (coupon && coupon.endDate > new Date() && (!coupon.usageLimit || coupon.usageCount < coupon.usageLimit)) {
+          if (itemsPrice >= coupon.minOrderAmount) {
+            if (coupon.usedBy && coupon.usedBy.some((userId) => userId.equals(req.user._id))) {
+              await session.abortTransaction();
+              return res.status(400).json({ success: false, message: 'You have already used this coupon' });
+            }
+            if (coupon.discountType === 'percentage') {
+              couponDiscount = (itemsPrice * coupon.discountValue) / 100;
+              if (coupon.maxDiscountAmount) couponDiscount = Math.min(couponDiscount, coupon.maxDiscountAmount);
+            } else {
+              couponDiscount = coupon.discountValue;
+            }
+            await Coupon.findByIdAndUpdate(
+              coupon._id,
+              { $inc: { usageCount: 1 }, $addToSet: { usedBy: req.user._id } },
+              { session }
+            );
+            appliedCoupon = coupon._id;
+          }
+        }
+      }
+
+      const rate = product.taxRate !== undefined ? product.taxRate : 12;
+      const taxPrice = Number((itemsPrice * (rate / (100 + rate))).toFixed(2));
+      const shippingPrice = itemsPrice >= SHIPPING_THRESHOLD ? 0 : SHIPPING_COST;
+
+      let checkoutOfferDiscount = 0;
+      const settings = await Setting.findOne({ key: 'promo_banner' }).session(session);
+      if (settings && settings.value?.checkoutDiscount?.enabled) {
+        const config = settings.value.checkoutDiscount;
+        if (itemsPrice >= config.minOrderAmount) {
+          checkoutOfferDiscount = Number((itemsPrice * (config.discountPercentage / 100)).toFixed(2));
+        }
+      }
+
+      let totalPrice = itemsPrice + shippingPrice - couponDiscount - seniorDiscount - checkoutOfferDiscount;
+      if (totalPrice < 0) totalPrice = 0;
+
+      const [order] = await Order.create(
+        [{
+          user: req.user._id,
+          orderItems,
+          shippingAddress,
+          paymentMethod,
+          itemsPrice,
+          taxPrice,
+          shippingPrice,
+          couponDiscount,
+          seniorDiscount,
+          checkoutOfferDiscount,
+          isSeniorCitizen: !!isSeniorCitizen,
+          seniorCitizenIdDoc: seniorCitizenIdDoc || '',
+          seniorCitizenStatus: (isSeniorCitizen && seniorCitizenIdDoc) ? 'pending' : 'none',
+          totalPrice,
+          coupon: appliedCoupon,
+          couponModel: 'Coupon',
+        }],
+        { session }
+      );
+
+      const updated = await Product.findOneAndUpdate(
         { _id: product._id, stock: { $gte: quantity } },
         { $inc: { stock: -quantity } },
         { session }

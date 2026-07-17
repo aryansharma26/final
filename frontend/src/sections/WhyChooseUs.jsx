@@ -1,35 +1,34 @@
-import { motion } from 'framer-motion';
-import Lottie from 'lottie-react';
+import { motion } from "framer-motion";
+import Lottie from "lottie-react";
 
-import firstaidkit from '../assets/lottie/firstaidkit.json';
-import locked from '../assets/lottie/locked.json';
-import mentaltherapy from '../assets/lottie/mentaltherapy.json';
-import onlinedeliveryservice from '../assets/lottie/onlinedeliveryservice.json';
+import firstaidkit from "../assets/lottie/firstaidkit.json";
+import locked from "../assets/lottie/locked.json";
+import mentaltherapy from "../assets/lottie/mentaltherapy.json";
+import onlinedeliveryservice from "../assets/lottie/onlinedeliveryservice.json";
 
 const features = [
   {
     animation: firstaidkit,
-    title: '100% Genuine Medicines',
+    title: "100% Genuine Medicines",
     description:
-      'All products sourced directly from licensed manufacturers and distributors.',
+      "All products sourced directly from licensed manufacturers and distributors.",
   },
   {
     animation: onlinedeliveryservice,
-    title: 'Express Delivery',
-    description:
-      'Get your medicines delivered within 2-4 hours in select cities.',
+    title: "Express Delivery",
+    description: "Ensuring your medicines reach you safely and on time.",
   },
   {
     animation: locked,
-    title: 'Safe & Secure Payments',
+    title: "Safe & Secure Payments",
     description:
-      'Encrypted transactions with multiple payment options including COD.',
+      "Encrypted transactions with multiple payment options including COD.",
   },
   {
     animation: mentaltherapy,
-    title: 'Free Doctor Consultation',
+    title: "Doctor Consultation",
     description:
-      'Connect with certified doctors 24/7 for medical advice and prescriptions.',
+      "Connect with certified doctors for medical advice and prescriptions.",
   },
 ];
 
@@ -40,11 +39,11 @@ const WhyChooseUs = () => {
         {/* Section Header */}
         <div className="text-center mb-10 lg:mb-12">
           <h2 className="text-2xl lg:text-3xl font-bold mb-3">
-  <span className="text-gray-900">Why Choose </span>
-  <span className="text-[#0B3B92]">Caps & </span>
-  <span className="text-[#FF4D8D]">Pills</span>
-  <span className="text-gray-900">?</span>
-</h2>
+            <span className="text-gray-900">Why Choose </span>
+            <span className="text-[#0B3B92]">Caps & </span>
+            <span className="text-[#FF4D8D]">Pills</span>
+            <span className="text-gray-900">?</span>
+          </h2>
 
           <p className="text-gray-600 max-w-xl mx-auto">
             Quality medicines. Better care. Every day.

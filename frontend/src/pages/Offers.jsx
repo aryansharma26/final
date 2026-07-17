@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Tag, Clock } from 'lucide-react';
 import { couponAPI, productAPI } from '../api/index.js';
 import { useCart } from '../contexts/CartContext.jsx';
@@ -10,6 +10,7 @@ const Offers = () => {
   const [coupons, setCoupons] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const location = useLocation();
   const { addToCart } = useCart();
 
   useEffect(() => {
@@ -103,7 +104,9 @@ const Offers = () => {
               key={product._id}
               product={product}
               index={index}
-              onCardClick={() => navigate(`/product/${product.slug}`)}
+              onCardClick={() => navigate(`/product/${product.slug}`, {
+                state: { from: { pathname: location.pathname, search: location.search } },
+              })}
               onCartClick={() => addToCart(product, 1)}
             />
           ))}

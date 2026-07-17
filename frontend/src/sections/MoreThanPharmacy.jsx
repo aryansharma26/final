@@ -30,14 +30,14 @@ const ReadingSVG = () => (
 
 const services = [
   {
-    title: 'Consult Doctors Online',
-    description: 'Connect with 1000+ certified doctors across 30+ specializations.',
+    title: 'Genuine Medicines',
+    description: 'Quality-assured medicines from trusted manufacturers for your healthcare needs.',
     Illustration: DoctorPatientSVG,
     bg: '#FFF5F7',
   },
   {
-    title: 'Health Checkup Packages',
-    description: 'Comprehensive wellness packages tailored to your age, gender, and health needs.',
+    title: 'Compassionate Care',
+    description: 'Dedicated to supporting your health with care and compassion.',
     Illustration: CheckupSVG,
     bg: '#F0FDF4',
   },

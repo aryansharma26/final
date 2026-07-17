@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { ArrowRight } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { productAPI } from '../api/index.js';
 import { useCart } from '../contexts/CartContext.jsx';
 import ProductCard from '../components/ProductCard.jsx';
@@ -11,6 +11,7 @@ const PopularProducts = () => {
   const [error, setError] = useState(null);
   const { addToCart } = useCart();
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     loadProducts();
@@ -20,7 +21,7 @@ const PopularProducts = () => {
     try {
       setLoading(true);
       setError(null);
-      const { data } = await productAPI.getProducts({ popular: true, limit: 8 });
+      const { data } = await productAPI.getProducts({ popular: true, limit: 16 });
       const prods = data?.products || [];
       setProducts(prods);
     } catch (err) {
@@ -38,7 +39,7 @@ const PopularProducts = () => {
         <div className="container-custom">
           <div className="h-8 bg-gray-200 rounded w-1/4 mb-8 animate-pulse" />
           <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4 lg:gap-6">
-            {[1, 2, 3, 4].map((i) => (
+            {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
               <div key={i} className="bg-white border border-gray-100 rounded-2xl p-3 animate-pulse sm:p-4">
                 <div className="aspect-square bg-gray-200 rounded-xl mb-3" />
                 <div className="h-4 bg-gray-200 rounded w-3/4 mb-2" />
@@ -93,7 +94,9 @@ const PopularProducts = () => {
               key={product._id}
               product={product}
               index={index}
-              onCardClick={() => navigate(`/product/${product.slug}`)}
+              onCardClick={() => navigate(`/product/${product.slug}`, {
+                state: { from: { pathname: location.pathname, search: location.search } },
+              })}
               onCartClick={() => addToCart(product, 1)}
               showHeart={true}
               animated={false}

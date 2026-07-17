@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation, useSearchParams } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import {
   ArrowLeft,
@@ -14,6 +14,12 @@ import { authAPI } from "../api/index.js";
 import logo from "../assets/logo.png";
 
 const ForgotPassword = () => {
+  const location = useLocation();
+  const [searchParams] = useSearchParams();
+  const redirect = searchParams.get("redirect");
+  const loginTarget = redirect
+    ? `/login?redirect=${encodeURIComponent(redirect)}`
+    : "/login";
   const [sent, setSent] = useState(false);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
@@ -120,8 +126,9 @@ const ForgotPassword = () => {
         <section className="relative flex min-h-screen items-center justify-center px-4 py-8 sm:px-6 lg:px-10">
           <div className="w-full max-w-md">
             <Link
-              to="/login"
+              to={loginTarget}
               replace
+              state={location.state}
               className="mb-5 inline-flex items-center gap-2 text-sm font-semibold text-slate-500 transition-colors hover:text-pills-pink"
             >
               <ArrowLeft className="h-4 w-4" /> Back to Login
@@ -195,8 +202,9 @@ const ForgotPassword = () => {
                         Use a different email
                       </button>
                       <Link
-                        to="/login"
+                        to={loginTarget}
                         replace
+                        state={location.state}
                         className="block text-sm font-semibold text-slate-500 hover:text-slate-800"
                       >
                         Back to Login

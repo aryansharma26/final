@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { ArrowLeft, ShoppingCart, Heart, Star, Minus, Plus, Truck, Shield, CheckCircle, CreditCard, Info, ListChecks, HelpCircle, FileText, Upload, Loader2, XCircle, Tag, Camera } from 'lucide-react';
 import { productAPI, reviewAPI, wishlistAPI, prescriptionAPI } from '../api/index.js';
 import { useCart } from '../contexts/CartContext.jsx';
@@ -10,6 +10,7 @@ import { compressPrescriptionFile } from '../utils/prescriptionFiles.js';
 const ProductDetail = () => {
   const { slug } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const { addToCart } = useCart();
   const { isAuthenticated } = useAuth();
   const [product, setProduct] = useState(null);
@@ -124,7 +125,17 @@ const ProductDetail = () => {
   };
 
   const handleGoBack = () => {
-    navigate(-1);
+    if (location.state?.from) {
+      navigate(-1);
+    } else {
+      navigate('/medicines', { replace: true });
+    }
+  };
+
+  const goToLogin = () => {
+    navigate(`/login?redirect=${encodeURIComponent(`/product/${slug}`)}`, {
+      state: { from: location },
+    });
   };
 
   const handleAddToCart = async () => {
@@ -146,20 +157,37 @@ const ProductDetail = () => {
 
   const handleBuyNow = async () => {
     if (!product) return;
+    setBuyingNow(true);
+    setAddError('');
     try {
-      setBuyingNow(true);
-      setAddError('');
-      const result = await addToCart(product, quantity);
-      if (result?.success) {
-        navigate('/checkout');
-      } else {
-        setAddError(result?.message || 'Failed to proceed to checkout');
-        if (result?.requiresPrescription) {
-          setTimeout(() => setAddError(''), 5000);
-        } else {
-          setTimeout(() => setAddError(''), 3000);
+      let price = product.discountPrice > 0 ? product.discountPrice : product.price;
+      if (product.bulkPricing && product.bulkPricing.length > 0) {
+        const sortedTiers = [...product.bulkPricing].sort((a, b) => b.minQty - a.minQty);
+        const matchingTier = sortedTiers.find(tier => quantity >= tier.minQty && (!tier.maxQty || quantity <= tier.maxQty));
+        if (matchingTier) {
+          price = matchingTier.unitPrice;
         }
       }
+
+      const buyNowItem = {
+        productId: product._id,
+        name: product.name,
+        image: product.images?.[0]?.url || (typeof product.images?.[0] === 'string' ? product.images[0] : '') || '',
+        slug: product.slug,
+        quantity,
+        price,
+        taxRate: product.taxRate,
+      };
+
+      sessionStorage.setItem('pendingBuyNowCheckout', JSON.stringify(buyNowItem));
+      navigate('/checkout', {
+        state: {
+          fromBuyNow: true,
+          buyNowItem,
+        },
+      });
+    } catch (err) {
+      setAddError(err.message || 'Failed to proceed to checkout');
     } finally {
       setBuyingNow(false);
     }
@@ -167,7 +195,7 @@ const ProductDetail = () => {
 
   const handleToggleWishlist = async () => {
     if (!isAuthenticated) {
-      navigate(`/login?redirect=${encodeURIComponent(`/product/${slug}`)}`);
+      goToLogin();
       return;
     }
     if (!product) return;
@@ -190,7 +218,7 @@ const ProductDetail = () => {
   const onSubmitReview = async (e) => {
     e.preventDefault();
     if (!isAuthenticated) {
-      navigate(`/login?redirect=${encodeURIComponent(`/product/${slug}`)}`);
+      goToLogin();
       return;
     }
     if (!reviewRating) {
@@ -234,7 +262,7 @@ const ProductDetail = () => {
     }
 
     if (!isAuthenticated) {
-      navigate(`/login?redirect=${encodeURIComponent(`/product/${slug}`)}`);
+      goToLogin();
       return;
     }
 
@@ -566,7 +594,7 @@ const ProductDetail = () => {
                 {!canPurchase ? (
                   !isAuthenticated ? (
                     <button
-                      onClick={() => navigate(`/login?redirect=${encodeURIComponent(`/product/${slug}`)}`)}
+                      onClick={goToLogin}
                       disabled={rxUploading}
                       className="col-span-2 flex items-center justify-center gap-2 rounded-2xl bg-amber-500 py-3.5 text-sm font-semibold text-white shadow-lg shadow-amber-500/25 transition-all duration-200 hover:-translate-y-0.5 hover:bg-amber-600 disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:translate-y-0"
                     >
@@ -755,7 +783,9 @@ const ProductDetail = () => {
                 key={similarProduct._id}
                 product={similarProduct}
                 animated={false}
-                onCardClick={() => navigate(`/product/${similarProduct.slug}`)}
+                onCardClick={() => navigate(`/product/${similarProduct.slug}`, {
+                  state: { from: location.state?.from || { pathname: '/medicines', search: '' } },
+                })}
                 onCartClick={() => addToCart(similarProduct, 1)}
               />
             ))}

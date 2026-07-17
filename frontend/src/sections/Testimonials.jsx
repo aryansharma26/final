@@ -1,46 +1,46 @@
-import { motion } from 'framer-motion';
-import { Quote, ShieldCheck, Star } from 'lucide-react';
+import { motion } from "framer-motion";
+import { Quote, ShieldCheck, Star } from "lucide-react";
 
-import familyBackground from '../assets/testimonials/family-testimonial.png';
+import familyBackground from "../assets/testimonials/family-testimonial.png";
 
 const REVIEWS = [
   {
     id: 1,
-    name: 'Maria Santos',
-    location: 'Manila, Philippines',
-    title: 'Monthly medicines made simple',
+    name: "Maria Santos",
+    location: "Manila, Philippines",
+    title: "Monthly medicines made simple",
     rating: 5,
-    text:
-      'Capsandpills made our regular medicine orders simple. Prescriptions are checked quickly, prices are fair, and every delivery arrives sealed and on time.',
+    text: "Capsandpills made our regular medicine orders simple. Prescriptions are checked quickly, prices are fair, and every delivery arrives sealed and on time.",
   },
   {
     id: 2,
-    name: 'Jose Reyes',
-    location: 'Cebu City, Philippines',
-    title: 'Reliable for the whole family',
+    name: "Jose Reyes",
+    location: "Cebu City, Philippines",
+    title: "Reliable for the whole family",
     rating: 5,
-    text:
-      'We order for our parents and kids from one place now. The updates are clear, support is kind, and we always feel confident about what is being delivered.',
+    text: "We order for our parents and kids from one place now. The updates are clear, support is kind, and we always feel confident about what is being delivered.",
   },
   {
     id: 3,
-    name: 'Alyssa Cruz',
-    location: 'Davao City, Philippines',
-    title: 'Fast, careful, and easy',
+    name: "Alyssa Cruz",
+    location: "Davao City, Philippines",
+    title: "Fast, careful, and easy",
     rating: 5,
-    text:
-      'The experience feels personal, not confusing. We upload the prescription, track the order, and receive everything neatly packed at home.',
+    text: "The experience feels personal, not confusing. We upload the prescription, track the order, and receive everything neatly packed at home.",
   },
 ];
 
 const renderStars = (rating) => (
-  <div className="flex items-center gap-0.5" aria-label={`${rating} out of 5 stars`}>
+  <div
+    className="flex items-center gap-0.5"
+    aria-label={`${rating} out of 5 stars`}
+  >
     {Array.from({ length: 5 }).map((_, index) => (
       <Star
         key={index}
         strokeWidth={1.8}
         className={`h-4 w-4 ${
-          index < rating ? 'fill-amber-400 text-amber-400' : 'text-gray-300'
+          index < rating ? "fill-amber-400 text-amber-400" : "text-gray-300"
         }`}
       />
     ))}
@@ -56,7 +56,7 @@ const Testimonials = () => {
           alt=""
           aria-hidden="true"
           className="h-full w-full scale-105 object-cover opacity-45 saturate-110"
-          style={{ objectPosition: 'center 38%' }}
+          style={{ objectPosition: "center 38%" }}
           loading="lazy"
         />
         <div className="absolute inset-0 bg-white/38" />
@@ -81,14 +81,25 @@ const Testimonials = () => {
                 Verified family reviews
               </div>
 
-              <h2 className="mb-3 text-2xl font-bold leading-tight text-gray-900 lg:text-4xl">
-                Happy Philippines families trust Capsandpills
+              <h2 className="mb-3 text-2xl font-bold leading-tight lg:text-4xl">
+                <span className="text-gray-900">
+                  Happy Philippines families trust{" "}
+                </span>
+
+                <span className="whitespace-nowrap">
+                  <span className="text-[#0B3B92]">Caps & </span>
+                  <span className="text-[#FF4D8D]">Pills</span>
+                </span>
               </h2>
 
+              {/* <h2 className="mb-3 text-2xl font-bold leading-tight text-gray-900 lg:text-4xl">
+                Happy Philippines families trust Capsandpills
+              </h2> */}
+
               <p className="mx-auto max-w-xl text-sm leading-relaxed text-gray-600 sm:text-base">
-                A soft family moment in the background, and real customer experiences in
-                focus. Genuine medicines, careful prescription checks, and dependable
-                doorstep delivery.
+                A soft family moment in the background, and real customer
+                experiences in focus. Genuine medicines, careful prescription
+                checks, and dependable doorstep delivery.
               </p>
             </motion.div>
 
@@ -104,7 +115,9 @@ const Testimonials = () => {
                 >
                   <div className="mb-4 flex items-start justify-between gap-4">
                     <div>
-                      <h3 className="text-base font-bold text-gray-900">{review.title}</h3>
+                      <h3 className="text-base font-bold text-gray-900">
+                        {review.title}
+                      </h3>
                       <p className="mt-1 text-xs font-medium text-gray-500">
                         {review.name} - {review.location}
                       </p>

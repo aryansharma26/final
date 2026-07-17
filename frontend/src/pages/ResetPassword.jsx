@@ -38,7 +38,7 @@ const ResetPassword = () => {
   return (
     <div className="min-h-screen bg-[#f5f5f0] flex items-center justify-center py-12 px-4">
       <div className="w-full max-w-md">
-        <Link to="/login" className="inline-flex items-center gap-2 text-gray-600 hover:text-brand mb-6 transition-colors">
+        <Link to="/login" replace className="inline-flex items-center gap-2 text-gray-600 hover:text-brand mb-6 transition-colors">
           <ArrowLeft className="w-4 h-4" /> Back to Login
         </Link>
         <div className="bg-white rounded-2xl shadow-sm p-8">
