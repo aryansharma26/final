@@ -52,7 +52,7 @@ const Offers = () => {
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
           <div>
             <h1 className="text-2xl font-bold mb-1">Special Offers</h1>
-            <p className="text-white/80">Up to 50% off on essential medicines and healthcare products</p>
+            <p className="text-white/80">Exclusive deals on medicines and healthcare products</p>
           </div>
           <div className="flex items-center gap-2 bg-white/15 rounded-lg px-4 py-2">
             <Clock className="w-4 h-4" />

@@ -87,7 +87,7 @@ const Footer = () => {
         <div className="grid grid-cols-2 gap-x-6 gap-y-5 md:grid-cols-3 md:gap-8 lg:grid-cols-6">
           {/* Brand column */}
            <div className="col-span-2 md:col-span-3 lg:col-span-2">
-            <Link to="/" className="flex items-center gap-2.5 -mb-3 sm:mb-4">
+            <Link to="/" className="pressable flex items-center gap-2.5 -mb-3 sm:mb-4">
               <div className="w-52 h-auto sm:w-60">
                 <img src={logo} alt="Capsandpills" className="w-full h-full object-contain" />
               </div>
@@ -121,7 +121,7 @@ const Footer = () => {
                   <li key={link}>
                     <Link
                       to={getLinkRoute(link)}
-                      className="text-xs text-gray-600 hover:text-brand transition-colors sm:text-sm"
+                      className="pressable text-xs text-gray-600 hover:text-brand transition-colors sm:text-sm"
                     >
                       {link}
                     </Link>

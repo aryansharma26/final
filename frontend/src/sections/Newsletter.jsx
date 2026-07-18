@@ -2,8 +2,10 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Mail, ArrowRight, Check, Sparkles } from "lucide-react";
 import { contactAPI } from "../api/index.js";
+import useSessionOnce from "../hooks/useSessionOnce.js";
 
 const Newsletter = () => {
+  const shouldAnimate = useSessionOnce("homeAnimationsSeen");
   const [email, setEmail] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState("");
@@ -34,10 +36,10 @@ const Newsletter = () => {
     <section className="py-8 sm:py-12 lg:py-16 bg-gray-900">
       <div className="container-custom">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
+          initial={shouldAnimate ? { opacity: 0, y: 20 } : false}
+          whileInView={shouldAnimate ? { opacity: 1, y: 0 } : undefined}
+          viewport={shouldAnimate ? { once: true } : undefined}
+          transition={shouldAnimate ? { duration: 0.5 } : undefined}
           className="max-w-2xl mx-auto text-center"
         >
           <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/5 border border-white/10 rounded-full text-xs font-medium text-gray-300 mb-3 sm:mb-4">
@@ -70,7 +72,7 @@ const Newsletter = () => {
             <button
               type="submit"
               disabled={submitted}
-              className={`w-full sm:w-auto px-6 py-3 font-semibold rounded-xl transition-colors flex items-center justify-center gap-2 ${
+              className={`pressable w-full sm:w-auto px-6 py-3 font-semibold rounded-xl transition-colors flex items-center justify-center gap-2 ${
                 submitted
                   ? "bg-green-500 text-white"
                   : "bg-brand hover:bg-brand-dark text-white"

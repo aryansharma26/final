@@ -426,7 +426,7 @@ const SettingsModule = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className="flex items-center gap-2 px-6 py-2.5 bg-brand hover:bg-brand/90 disabled:bg-brand/50 text-white rounded-xl font-semibold transition-colors shadow-sm"
+                className="pressable flex items-center gap-2 px-6 py-2.5 bg-brand hover:bg-brand/90 disabled:bg-brand/50 text-white rounded-xl font-semibold transition-colors shadow-sm"
               >
                 <Save className="w-4 h-4" />
                 {loading ? 'Saving...' : 'Save Settings'}
@@ -465,7 +465,7 @@ const SettingsModule = () => {
               <button
                 type="submit"
                 disabled={searchLoading}
-                className="px-4 py-2 bg-gray-900 text-white rounded-xl text-xs font-semibold hover:bg-gray-800 disabled:opacity-50 transition-colors"
+                className="pressable px-4 py-2 bg-gray-900 text-white rounded-xl text-xs font-semibold hover:bg-gray-800 disabled:opacity-50 transition-colors"
               >
                 {searchLoading ? 'Searching...' : 'Search'}
               </button>

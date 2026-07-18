@@ -9,24 +9,19 @@ const couponSchema = new mongoose.Schema({
   maxDiscountAmount: { type: Number, default: null },
   startDate: { type: Date, required: true },
   endDate: { type: Date, required: true },
+  perUserLimit: { type: Number, default: null },
   usageLimit: { type: Number, default: null },
   usageCount: { type: Number, default: 0 },
   isActive: { type: Boolean, default: true },
-  usedBy: {
-    type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
-    validate: {
-      validator: function (v) {
-        const limit = this.usageLimit || 10000;
-        return v.length <= limit;
-      },
-      message: 'Coupon user array has exceeded the configured usage limit',
-    },
-  },
+  usageByUser: [{
+    user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    count: { type: Number, default: 0 },
+  }],
+  usedBy: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
 }, { timestamps: true });
 
 couponSchema.virtual('isNearCapacity').get(function () {
-  const limit = this.usageLimit || 10000;
-  return this.usedBy.length >= limit * 0.9;
+  return false;
 });
 
 couponSchema.index({ isActive: 1, endDate: 1 });

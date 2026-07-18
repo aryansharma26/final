@@ -248,7 +248,7 @@ const Doctors = () => {
               className="w-full pl-9 pr-4 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
             />
           </div>
-          <button type="submit" className="px-5 py-2.5 bg-brand hover:bg-brand-dark text-white text-sm font-medium rounded-xl transition-colors">
+          <button type="submit" className="pressable px-5 py-2.5 bg-brand hover:bg-brand-dark text-white text-sm font-medium rounded-xl transition-colors">
             Search
           </button>
         </form>
@@ -276,7 +276,7 @@ const Doctors = () => {
         </div>
 
         {hasActiveFilters && (
-          <button onClick={clearFilters} className="inline-flex items-center gap-1 px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-xl transition-colors">
+          <button onClick={clearFilters} className="pressable inline-flex items-center gap-1 px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-xl transition-colors">
             <X className="w-3.5 h-3.5" /> Clear All
           </button>
         )}
@@ -343,7 +343,7 @@ const Doctors = () => {
               onChange={(e) => setHospitalInput(e.target.value)}
               className="flex-1 px-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
             />
-            <button type="submit" className="px-4 py-2 bg-brand text-white text-sm font-medium rounded-xl">Search</button>
+            <button type="submit" className="pressable px-4 py-2 bg-brand text-white text-sm font-medium rounded-xl">Search</button>
           </form>
         </div>
 
@@ -400,7 +400,7 @@ const Doctors = () => {
           <User className="w-12 h-12 text-gray-300 mx-auto mb-4" />
           <p className="text-gray-500 font-medium mb-1">No doctors found matching your filters</p>
           <p className="text-sm text-gray-400 mb-4">Try adjusting your search or filters</p>
-          <button onClick={clearFilters} className="px-5 py-2.5 bg-brand hover:bg-brand-dark text-white text-sm font-medium rounded-xl transition-colors">
+          <button onClick={clearFilters} className="pressable px-5 py-2.5 bg-brand hover:bg-brand-dark text-white text-sm font-medium rounded-xl transition-colors">
             Clear Filters
           </button>
         </div>
@@ -411,7 +411,7 @@ const Doctors = () => {
               <div key={doctor._id} className="relative bg-white border border-gray-100 rounded-2xl p-4 hover:shadow-md transition-shadow group">
                 <Link
                   to={`/doctors/${doctor.slug}`}
-                  className="absolute inset-0 z-0 rounded-2xl"
+                  className="pressable absolute inset-0 z-0 rounded-2xl"
                   aria-label={`View ${doctor.name}`}
                 />
                 <div className="relative mb-3">
@@ -461,7 +461,7 @@ const Doctors = () => {
                 </div>
 
                 <div className="mt-3 flex gap-2 relative z-10">
-                  <Link to={`/doctors/${doctor.slug}`} className="flex-1 py-2 bg-brand hover:bg-brand-dark text-white text-xs font-medium rounded-xl text-center transition-colors">
+                  <Link to={`/doctors/${doctor.slug}`} className="pressable flex-1 py-2 bg-brand hover:bg-brand-dark text-white text-xs font-medium rounded-xl text-center transition-colors">
                     View Details
                   </Link>
                   {doctor.phone && (

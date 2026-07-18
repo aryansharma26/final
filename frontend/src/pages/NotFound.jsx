@@ -24,7 +24,7 @@ const NotFound = () => {
           </button>
           <Link
             to="/"
-            className="inline-flex items-center gap-2 px-5 py-2.5 bg-brand hover:bg-brand-dark text-white rounded-xl transition-colors font-medium"
+            className="pressable inline-flex items-center gap-2 px-5 py-2.5 bg-brand hover:bg-brand-dark text-white rounded-xl transition-colors font-medium"
           >
             <Home className="w-4 h-4" /> Home
           </Link>

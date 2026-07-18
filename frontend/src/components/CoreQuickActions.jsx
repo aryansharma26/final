@@ -42,7 +42,7 @@ const CoreQuickActions = () => {
             <Link
               key={to}
               to={to}
-              className={`flex min-w-0 flex-col items-center justify-center gap-1 rounded-xl border px-1.5 py-2 text-[10px] font-semibold transition-colors min-[390px]:text-[11px] ${
+              className={`pressable flex min-w-0 flex-col items-center justify-center gap-1 rounded-xl border px-1.5 py-2 text-[10px] font-semibold transition-colors min-[390px]:text-[11px] ${
                 active
                   ? 'text-white bg-brand border-brand'
                   : className

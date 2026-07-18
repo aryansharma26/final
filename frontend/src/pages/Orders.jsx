@@ -89,7 +89,7 @@ const Orders = () => {
         <button
           type="button"
           onClick={loadOrders}
-          className="inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-gray-200 px-3 py-2 text-xs font-semibold text-gray-600 transition-colors hover:border-brand/30 hover:text-brand"
+          className="pressable inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-gray-200 px-3 py-2 text-xs font-semibold text-gray-600 transition-colors hover:border-brand/30 hover:text-brand"
         >
           <RotateCw className="h-3.5 w-3.5" />
           Refresh
@@ -107,7 +107,7 @@ const Orders = () => {
           <Package className="mb-4 h-14 w-14 text-gray-300 sm:mb-5 sm:h-16 sm:w-16" />
           <h2 className="mb-2 text-xl font-bold text-gray-950 sm:text-2xl">No Orders Yet</h2>
           <p className="mb-5 max-w-sm text-sm text-gray-500 sm:mb-7">When you place an order, tracking and payment details will appear here.</p>
-          <Link to="/medicines" className="inline-flex items-center gap-2 rounded-xl bg-brand px-7 py-3 font-semibold text-white transition-colors hover:bg-brand-dark">
+          <Link to="/medicines" className="pressable inline-flex items-center gap-2 rounded-xl bg-brand px-7 py-3 font-semibold text-white transition-colors hover:bg-brand-dark">
             Start Shopping <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
@@ -161,12 +161,12 @@ const Orders = () => {
                 </div>
 
                 <div className="flex gap-3 sm:items-center sm:gap-4">
-                  <Link to={orderLink} className="h-20 w-20 shrink-0 overflow-hidden rounded-xl border border-gray-100 bg-gray-50 transition-opacity hover:opacity-80 sm:h-24 sm:w-24">
+                  <Link to={orderLink} className="pressable h-20 w-20 shrink-0 overflow-hidden rounded-xl border border-gray-100 bg-gray-50 transition-opacity hover:opacity-80 sm:h-24 sm:w-24">
                     <img src={productImage} alt={productName} className="h-full w-full object-cover" />
                   </Link>
 
                   <div className="min-w-0 flex-1">
-                    <Link to={orderLink} className="line-clamp-2 text-sm font-semibold text-gray-950 transition-colors hover:text-brand sm:text-base">
+                    <Link to={orderLink} className="pressable line-clamp-2 text-sm font-semibold text-gray-950 transition-colors hover:text-brand sm:text-base">
                       {productName}
                     </Link>
                     <p className="mt-1 text-xs text-gray-500">
@@ -175,7 +175,7 @@ const Orders = () => {
                     </p>
                     <Link
                       to={`/orders/${order._id}`}
-                      className="mt-3 inline-flex items-center gap-1 text-sm font-semibold text-brand hover:underline"
+                      className="pressable mt-3 inline-flex items-center gap-1 text-sm font-semibold text-brand hover:underline"
                     >
                       View Details <ChevronRight className="h-3.5 w-3.5" />
                     </Link>

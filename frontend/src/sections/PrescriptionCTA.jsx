@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Upload, ArrowRight, FileText, Shield, X, ClipboardCheck, Truck } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import useSessionOnce from '../hooks/useSessionOnce.js';
 
 const steps = [
   {
@@ -36,6 +37,7 @@ const steps = [
 
 const PrescriptionCTA = () => {
   const navigate = useNavigate();
+  const shouldAnimate = useSessionOnce("homeAnimationsSeen");
   const [showHowItWorksModal, setShowHowItWorksModal] = useState(false);
 
   useEffect(() => {
@@ -50,7 +52,7 @@ const PrescriptionCTA = () => {
   }, [showHowItWorksModal]);
 
   const handleUpload = () => {
-    navigate('/prescriptions');
+    window.setTimeout(() => navigate('/prescriptions'), 160);
   };
 
   const handleHowItWorks = () => {
@@ -61,10 +63,10 @@ const PrescriptionCTA = () => {
     <section className="py-8 sm:py-12 lg:py-16 bg-gradient-to-br from-brand/5 to-white">
       <div className="container-custom">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
+          initial={shouldAnimate ? { opacity: 0, y: 20 } : false}
+          whileInView={shouldAnimate ? { opacity: 1, y: 0 } : undefined}
+          viewport={shouldAnimate ? { once: true } : undefined}
+          transition={shouldAnimate ? { duration: 0.5 } : undefined}
           className="bg-white rounded-3xl p-5 sm:p-8 lg:p-12 shadow-sm"
         >
           <div className="grid gap-5 lg:grid-cols-2 lg:gap-8 items-center">
@@ -82,11 +84,11 @@ const PrescriptionCTA = () => {
                 Free home delivery on prescription orders.
               </p>
               <div className="flex flex-col sm:flex-row items-center gap-3">
-                <button onClick={handleUpload} className="w-full sm:w-auto px-6 py-3 bg-brand hover:bg-brand-dark text-white font-semibold rounded-xl transition-colors flex items-center justify-center gap-2">
+                <button onClick={handleUpload} className="pressable route-pressable w-full sm:w-auto px-6 py-3 bg-brand hover:bg-brand-dark text-white font-semibold rounded-xl transition-colors flex items-center justify-center gap-2">
                   <Upload className="w-5 h-5" />
                   Upload Prescription
                 </button>
-                <button onClick={handleHowItWorks} className="w-full sm:w-auto px-6 py-3 bg-white border-2 border-gray-200 hover:border-brand text-gray-700 hover:text-brand font-semibold rounded-xl transition-colors flex items-center justify-center gap-2">
+                <button onClick={handleHowItWorks} className="pressable w-full sm:w-auto px-6 py-3 bg-white border-2 border-gray-200 hover:border-brand text-gray-700 hover:text-brand font-semibold rounded-xl transition-colors flex items-center justify-center gap-2">
                   How it Works <ArrowRight className="w-4 h-4" />
                 </button>
               </div>

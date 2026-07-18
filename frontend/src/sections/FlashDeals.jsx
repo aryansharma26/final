@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Zap } from "lucide-react";
 import { useSettings } from "../contexts/SettingsContext.jsx";
 
 const FlashDeals = () => {
   const { flashDeal } = useSettings();
+  const navigate = useNavigate();
   const [timeLeft, setTimeLeft] = useState({
     hours: 0,
     minutes: 0,
@@ -49,6 +50,7 @@ const FlashDeals = () => {
   if (!flashDeal || !flashDeal.show) return null;
 
   const pad = (num) => String(num).padStart(2, "0");
+  const dealLink = flashDeal.buttonLink || "/offers";
 
   return (
     <section className="bg-gray-900 py-2.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] sm:py-4">
@@ -114,8 +116,12 @@ const FlashDeals = () => {
 
           {/* Right */}
           <Link
-            to={flashDeal.buttonLink || "/offers"}
-            className="shrink-0 rounded-full bg-pills-pink px-3 py-2 text-xs font-bold text-white transition-all duration-200 hover:-translate-y-0.5 hover:bg-pills-pink-dark sm:px-7 sm:py-2.5 sm:text-sm"
+            to={dealLink}
+            onClick={(e) => {
+              e.preventDefault();
+              window.setTimeout(() => navigate(dealLink), 160);
+            }}
+            className="pressable route-pressable shrink-0 rounded-full bg-pills-pink px-3 py-2 text-xs font-bold text-white transition-all duration-200 hover:-translate-y-0.5 hover:bg-pills-pink-dark sm:px-7 sm:py-2.5 sm:text-sm"
           >
             {flashDeal.buttonText || "Shop Now"}
           </Link>

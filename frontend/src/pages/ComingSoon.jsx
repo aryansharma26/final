@@ -13,7 +13,7 @@ const ComingSoon = () => {
       </p>
       <Link
         to="/"
-        className="inline-flex items-center gap-2 px-6 py-3 bg-brand hover:bg-brand-dark text-white font-semibold rounded-xl transition-colors"
+        className="pressable inline-flex items-center gap-2 px-6 py-3 bg-brand hover:bg-brand-dark text-white font-semibold rounded-xl transition-colors"
       >
         Back to Home
       </Link>

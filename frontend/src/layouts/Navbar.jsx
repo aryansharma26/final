@@ -438,7 +438,7 @@ const Navbar = () => {
           className="w-full text-center py-2 px-4 text-xs sm:text-sm font-semibold select-none flex items-center justify-center gap-2 hover:opacity-95 transition-opacity bg-pills-pink text-white"
         >
           {banner.link ? (
-            <Link to={banner.link} className="hover:underline flex items-center gap-1">
+            <Link to={banner.link} className="pressable hover:underline flex items-center gap-1">
               <span>{banner.text}</span>
             </Link>
           ) : (
@@ -448,7 +448,7 @@ const Navbar = () => {
       )}
       <div className="container-custom bg-white">
         <div className="flex h-[54px] items-center justify-between gap-2 pb-0.5 sm:h-16 sm:pb-0 lg:h-[72px]">
-          <Link to="/" className="flex h-full shrink-0 items-center overflow-hidden">
+          <Link to="/" className="pressable flex h-full shrink-0 items-center overflow-hidden">
             <div className="flex h-[76px] w-32 items-center justify-center overflow-hidden rounded-lg sm:h-28 sm:w-40 lg:h-40 lg:w-44">
               <img
                 src={logo}
@@ -502,8 +502,8 @@ const Navbar = () => {
           <div className="flex items-center gap-1 sm:gap-2">
             <motion.button
               type="button"
-              whileTap={{ scale: 0.88, y: 1 }}
-              transition={{ type: "spring", stiffness: 520, damping: 22 }}
+              whileTap={{ scale: 0.82, y: 2 }}
+              transition={{ type: "spring", stiffness: 320, damping: 18 }}
               onClick={() => {
                 setIsOpen(false);
                 setIsMobileSearchOpen((prev) => !prev);
@@ -519,14 +519,14 @@ const Navbar = () => {
             </motion.button>
             <Link
               to="/wishlist"
-              className="nav-pressable relative hidden rounded-full border border-gray-100 bg-white p-2 shadow-sm transition-all md:block"
+              className="pressable nav-pressable relative hidden rounded-full border border-gray-100 bg-white p-2 shadow-sm transition-all md:block"
             >
               <Heart className="w-5 h-5 text-gray-600" />
             </Link>
 
             <Link
               to="/doctors"
-              className="nav-pressable hidden items-center gap-1.5 rounded-full border border-gray-100 bg-white px-4 py-2 text-sm font-medium text-gray-600 shadow-sm transition-all md:flex"
+              className="pressable nav-pressable hidden items-center gap-1.5 rounded-full border border-gray-100 bg-white px-4 py-2 text-sm font-medium text-gray-600 shadow-sm transition-all md:flex"
               title="Find Doctor"
             >
               <Stethoscope className="w-4 h-4" />
@@ -534,7 +534,7 @@ const Navbar = () => {
             </Link>
             <Link
               to="/cart"
-              className="nav-pressable relative rounded-full border border-gray-100 bg-white p-2 shadow-sm transition-all"
+              className="pressable nav-pressable relative rounded-full border border-gray-100 bg-white p-2 shadow-sm transition-all"
             >
               <ShoppingCart className="w-5 h-5 text-gray-600" />
               <AnimatePresence>
@@ -557,7 +557,7 @@ const Navbar = () => {
               <div className="relative" ref={dropdownRef}>
                 <button
                   onClick={() => setUserMenuOpen((prev) => !prev)}
-                  className="nav-pressable flex items-center gap-2 rounded-full border border-gray-100 bg-white px-2 py-1 shadow-sm transition-all sm:px-3"
+                  className="pressable nav-pressable flex items-center gap-2 rounded-full border border-gray-100 bg-white px-2 py-1 shadow-sm transition-all sm:px-3"
                 >
                   <div className="w-8 h-8 bg-brand/10 rounded-full flex items-center justify-center">
                     <span className="text-brand font-bold text-xs">
@@ -583,21 +583,21 @@ const Navbar = () => {
                     <Link
                       to="/profile"
                       onClick={() => setUserMenuOpen(false)}
-                      className="nav-pressable block px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 hover:text-brand"
+                      className="no-press-animation block px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 hover:text-brand"
                     >
                       My Profile
                     </Link>
                     <Link
                       to="/orders"
                       onClick={() => setUserMenuOpen(false)}
-                      className="nav-pressable block px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 hover:text-brand"
+                      className="no-press-animation block px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 hover:text-brand"
                     >
                       My Orders
                     </Link>
                     <Link
                       to="/prescriptions"
                       onClick={() => setUserMenuOpen(false)}
-                      className="nav-pressable block px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 hover:text-brand"
+                      className="no-press-animation block px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 hover:text-brand"
                     >
                       My Prescriptions
                     </Link>
@@ -606,7 +606,7 @@ const Navbar = () => {
                         setUserMenuOpen(false);
                         handleLogout();
                       }}
-                      className="nav-pressable flex w-full items-center gap-2 px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50"
+                      className="no-press-animation flex w-full items-center gap-2 px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50"
                     >
                       <LogOut className="w-4 h-4" /> Logout
                     </button>
@@ -617,7 +617,7 @@ const Navbar = () => {
             ) : (
               <Link
                 to="/login"
-                className="nav-pressable rounded-full border border-gray-100 bg-white p-2 shadow-sm transition-all"
+                className="pressable nav-pressable rounded-full border border-gray-100 bg-white p-2 shadow-sm transition-all"
               >
                 <User className="w-5 h-5 text-gray-600" />
               </Link>
@@ -733,9 +733,14 @@ const Navbar = () => {
                     className="relative"
                     onMouseEnter={() => hasChildren && openDropdown(cat._id)}
                     onMouseLeave={closeDropdown}
-                  >
+                    >
                     <button
-                      className={`nav-pressable flex items-center gap-1 px-3 py-2 text-sm font-medium rounded-md transition-colors whitespace-nowrap ${
+                      type="button"
+                      onClick={() => {
+                        setActiveDropdown(null);
+                        navigate(`/medicines?category=${cat._id}`);
+                      }}
+                      className={`no-press-animation flex items-center gap-1 px-3 py-2 text-sm font-medium rounded-md transition-colors whitespace-nowrap ${
                         activeDropdown === cat._id
                           ? "text-gray-700 bg-gray-100"
                           : "text-gray-700 hover:text-brand hover:bg-gray-50"
@@ -762,7 +767,7 @@ const Navbar = () => {
                           <Link
                             key={child._id}
                             to={`/medicines?category=${child._id}`}
-                            className="nav-pressable block px-4 py-2 text-sm text-gray-700 transition-colors hover:bg-gray-50 hover:text-brand"
+                            className="no-press-animation block px-4 py-2 text-sm text-gray-700 transition-colors hover:bg-gray-50 hover:text-brand"
                             onClick={() => setActiveDropdown(null)}
                           >
                             {child.name}
@@ -848,7 +853,7 @@ const Navbar = () => {
                       { to: "/prescriptions", label: "My Prescriptions", icon: FileText },
                     ].map(({ to, label, icon: Icon }, index) => (
                       <motion.div key={to} {...mobileItemMotion} transition={{ duration: 0.18, delay: 0.05 + index * 0.02 }}>
-                        <Link to={to} className="nav-pressable flex w-full items-center gap-2 rounded-2xl bg-white px-4 py-3 text-sm font-medium text-gray-700 shadow-sm transition-colors hover:bg-gray-50">
+                        <Link to={to} className="no-press-animation flex w-full items-center gap-2 rounded-2xl bg-white px-4 py-3 text-sm font-medium text-gray-700 shadow-sm transition-colors hover:bg-gray-50">
                           <Icon className="w-4 h-4" /> {label}
                         </Link>
                       </motion.div>
@@ -857,21 +862,21 @@ const Navbar = () => {
                       {...mobileItemMotion}
                       transition={{ duration: 0.18, delay: 0.11 }}
                       onClick={handleLogout}
-                      className="nav-pressable flex w-full items-center gap-2 rounded-2xl bg-white px-4 py-3 text-sm font-medium text-red-600 shadow-sm transition-colors hover:bg-red-50"
+                      className="no-press-animation flex w-full items-center gap-2 rounded-2xl bg-white px-4 py-3 text-sm font-medium text-red-600 shadow-sm transition-colors hover:bg-red-50"
                     >
                       <LogOut className="w-4 h-4" /> Logout
                     </motion.button>
                   </>
                 ) : (
                   <motion.div {...mobileItemMotion} transition={{ duration: 0.18, delay: 0.05 }}>
-                    <Link to="/login" className="nav-pressable flex w-full items-center gap-2 rounded-2xl bg-white px-4 py-3 text-sm font-medium text-gray-700 shadow-sm transition-colors hover:bg-gray-50">
+                    <Link to="/login" className="pressable nav-pressable flex w-full items-center gap-2 rounded-2xl bg-white px-4 py-3 text-sm font-medium text-gray-700 shadow-sm transition-colors hover:bg-gray-50">
                       <User className="w-4 h-4" /> Sign In
                     </Link>
                   </motion.div>
                 )}
 
                 <motion.div {...mobileItemMotion} transition={{ duration: 0.18, delay: 0.13 }} className="pt-1">
-                  <Link to="/doctors" className="nav-pressable flex w-full items-center gap-2 rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm font-semibold text-gray-700 shadow-sm transition-colors hover:bg-gray-50">
+                  <Link to="/doctors" className="pressable nav-pressable flex w-full items-center gap-2 rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm font-semibold text-gray-700 shadow-sm transition-colors hover:bg-gray-50">
                     <Stethoscope className="w-4 h-4" /> Find Doctor
                   </Link>
                 </motion.div>
@@ -895,7 +900,7 @@ const Navbar = () => {
                               <button
                                 type="button"
                                 onClick={() => setMobileExpandedCategory(isExpanded ? null : cat._id)}
-                                className="nav-pressable flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-sm font-semibold text-gray-800 transition-colors hover:bg-gray-50"
+                                className="no-press-animation flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-sm font-semibold text-gray-800 transition-colors hover:bg-gray-50"
                               >
                                 <span>{cat.name}</span>
                                 <ChevronDown className={`h-4 w-4 text-gray-400 transition-transform ${isExpanded ? "rotate-180" : ""}`} />
@@ -903,7 +908,7 @@ const Navbar = () => {
                             ) : (
                               <CategoryLink
                                 cat={cat}
-                                className="nav-pressable block rounded-xl px-3 py-2.5 text-sm font-semibold text-gray-800 transition-colors hover:bg-gray-50"
+                                className="no-press-animation block rounded-xl px-3 py-2.5 text-sm font-semibold text-gray-800 transition-colors hover:bg-gray-50"
                               />
                             )}
 
@@ -920,7 +925,7 @@ const Navbar = () => {
                                     <CategoryLink
                                       key={child._id}
                                       cat={child}
-                                      className="nav-pressable ml-3 block rounded-xl px-3 py-2 text-sm text-gray-500 transition-colors hover:bg-gray-50 hover:text-brand"
+                                      className="no-press-animation ml-3 block rounded-xl px-3 py-2 text-sm text-gray-500 transition-colors hover:bg-gray-50 hover:text-brand"
                                     />
                                   ))}
                                 </motion.div>
@@ -952,7 +957,7 @@ const Navbar = () => {
           background: radial-gradient(circle at center, rgba(255,255,255,1) 0%, rgba(249,250,251,0.9) 38%, rgba(243,244,246,0.5) 100%);
           opacity: 0;
           transform: scale(0.58);
-          transition: opacity 170ms ease, transform 240ms ease;
+          transition: opacity 240ms ease, transform 340ms ease;
           pointer-events: none;
         }
         .nav-pressable:hover {
@@ -961,7 +966,8 @@ const Navbar = () => {
         }
         .nav-pressable:active {
           box-shadow: 0 8px 22px rgba(15, 23, 42, 0.1);
-          transform: translateY(0) scale(0.92);
+          transform: translateY(1px) scale(0.88);
+          transition-duration: 280ms;
         }
         .nav-pressable:active::after {
           opacity: 1;
@@ -983,8 +989,9 @@ const Navbar = () => {
         @media (hover: none) {
           .nav-pressable:active {
             background-color: rgb(249 250 251);
-            box-shadow: 0 8px 22px rgba(15, 23, 42, 0.12);
-            transform: scale(0.9);
+            box-shadow: 0 10px 26px rgba(15, 23, 42, 0.15);
+            transform: translateY(2px) scale(0.84);
+            transition-duration: 340ms;
           }
           .nav-pressable:active::after {
             opacity: 1;

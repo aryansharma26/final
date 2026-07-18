@@ -184,7 +184,7 @@ const getDisplaySku = (sku) => {
       <div className="container-custom py-16 text-center">
         <Package className="mx-auto mb-4 h-12 w-12 text-gray-300" />
         <p className="font-medium text-gray-500">{error || 'B2B product not found'}</p>
-        <button onClick={handleGoBack} className="mt-4 inline-flex items-center gap-1 text-brand font-medium hover:underline">
+        <button onClick={handleGoBack} className="pressable mt-4 inline-flex items-center gap-1 text-brand font-medium hover:underline">
           <ArrowLeft className="h-4 w-4" /> Back to B2B products
         </button>
       </div>
@@ -193,7 +193,7 @@ const getDisplaySku = (sku) => {
 
   return (
     <div className="container-custom py-4 lg:py-6">
-      <button onClick={handleGoBack} className="mb-4 inline-flex items-center gap-1.5 text-sm font-medium text-gray-500 transition-colors hover:text-brand">
+      <button onClick={handleGoBack} className="pressable mb-4 inline-flex items-center gap-1.5 text-sm font-medium text-gray-500 transition-colors hover:text-brand">
         <ArrowLeft className="h-4 w-4" /> Back to B2B Products
       </button>
 
@@ -206,7 +206,7 @@ const getDisplaySku = (sku) => {
             {images.length > 1 && (
               <div className="mt-3 flex gap-2 overflow-x-auto">
                 {images.map((image, index) => (
-                  <button key={index} onClick={() => setSelectedImage(index)} className={`h-16 w-16 shrink-0 overflow-hidden rounded-lg border-2 bg-white p-1 ${selectedImage === index ? 'border-brand' : 'border-gray-200'}`}>
+                  <button key={index} onClick={() => setSelectedImage(index)} className={`pressable h-16 w-16 shrink-0 overflow-hidden rounded-lg border-2 bg-white p-1 ${selectedImage === index ? 'border-brand' : 'border-gray-200'}`}>
                     <img src={getImageUrl(image) || fallbackImage} alt="" className="h-full w-full object-cover" />
                   </button>
                 ))}
@@ -376,14 +376,14 @@ const getDisplaySku = (sku) => {
 
       {showEnquiryModal && (
         <div className="fixed inset-0 z-[70] flex items-center justify-center p-4">
-          <button className="absolute inset-0 bg-black/40" onClick={closeEnquiryModal} aria-label="Close enquiry modal" />
+          <button className="pressable absolute inset-0 bg-black/40" onClick={closeEnquiryModal} aria-label="Close enquiry modal" />
           <form onSubmit={handleSubmit} className="relative max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-2xl border border-gray-100 bg-white p-5 shadow-2xl">
             <div className="flex items-start justify-between gap-4">
               <div>
                 <h2 className="text-lg font-bold text-gray-900">Send Product Enquiry</h2>
                 <p className="mt-1 text-sm text-gray-500">{product.name}</p>
               </div>
-              <button type="button" onClick={closeEnquiryModal} className="rounded-lg p-1.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-700">
+              <button type="button" onClick={closeEnquiryModal} className="pressable rounded-lg p-1.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-700">
                 <X className="h-5 w-5" />
               </button>
             </div>
@@ -402,7 +402,7 @@ const getDisplaySku = (sku) => {
             </div>
             {formError && <p className="mt-3 rounded-xl bg-red-50 px-3 py-2 text-sm text-red-600">{formError}</p>}
             {submitted && <p className="mt-3 rounded-xl bg-green-50 px-3 py-2 text-sm text-green-700">Enquiry submitted. Our team will contact you within 24 hours.</p>}
-            <button type="submit" disabled={submitting || submitted} className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-brand px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-brand/20 hover:bg-brand-dark disabled:opacity-70">
+            <button type="submit" disabled={submitting || submitted} className="pressable mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-brand px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-brand/20 hover:bg-brand-dark disabled:opacity-70">
               {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : submitted ? <CheckCircle className="h-4 w-4" /> : <Send className="h-4 w-4" />}
               {submitted ? 'Submitted' : 'Submit Enquiry'}
             </button>

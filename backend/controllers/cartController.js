@@ -10,6 +10,14 @@ const hasAcceptedPrescriptionForProduct = async (userId, productId) => {
   return ['pending', 'approved'].includes(prescription?.status);
 };
 
+const getPerUserLimit = (coupon) => coupon.perUserLimit ?? coupon.usageLimit ?? null;
+
+const getUserCouponUsage = (coupon, userId) => {
+  const usage = coupon.usageByUser?.find((entry) => entry.user?.equals(userId));
+  if (usage) return usage.count || 0;
+  return coupon.usedBy?.some((id) => id.equals(userId)) ? 1 : 0;
+};
+
 const updateCartItemPrices = async (cart) => {
   for (let item of cart.items) {
     const product = await Product.findById(item.product);
@@ -227,12 +235,9 @@ export const applyCoupon = async (req, res, next) => {
     if (coupon.startDate > new Date()) {
       return res.status(400).json({ success: false, message: 'Coupon not yet active' });
     }
-    if (coupon.usageLimit && coupon.usageCount >= coupon.usageLimit) {
-      return res.status(400).json({ success: false, message: 'Coupon usage limit reached' });
-    }
-    // Per-user limit: check if this user has already used the coupon
-    if (coupon.usedBy && coupon.usedBy.some((userId) => userId.equals(req.user._id))) {
-      return res.status(400).json({ success: false, message: 'You have already used this coupon' });
+    const perUserLimit = getPerUserLimit(coupon);
+    if (perUserLimit && getUserCouponUsage(coupon, req.user._id) >= perUserLimit) {
+      return res.status(400).json({ success: false, message: `You have reached the per-user limit for this coupon (${perUserLimit})` });
     }
     let cart = await Cart.findOne({ user: req.user._id }).populate('items.product').populate('coupon');
     if (!cart) {

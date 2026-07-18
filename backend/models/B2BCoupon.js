@@ -9,9 +9,14 @@ const b2bCouponSchema = new mongoose.Schema({
   maxDiscountAmount: { type: Number, default: null },
   startDate: { type: Date, required: true },
   endDate: { type: Date, required: true },
+  perUserLimit: { type: Number, default: null },
   usageLimit: { type: Number, default: null },
   usageCount: { type: Number, default: 0 },
   isActive: { type: Boolean, default: true },
+  usageByUser: [{
+    user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    count: { type: Number, default: 0 },
+  }],
   usedBy: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
 }, { timestamps: true });
 

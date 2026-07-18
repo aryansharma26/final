@@ -36,7 +36,7 @@ const FeaturedDoctors = () => {
             </h2>
             <p className="text-sm text-gray-500 mt-0.5">Top-rated healthcare professionals</p>
           </div>
-          <Link to="/doctors" className="hidden sm:flex items-center gap-1 text-brand font-medium text-sm hover:underline">
+          <Link to="/doctors" className="pressable hidden sm:flex items-center gap-1 text-brand font-medium text-sm hover:underline">
             View All <ChevronRight className="w-4 h-4" />
           </Link>
         </div>
@@ -57,7 +57,7 @@ const FeaturedDoctors = () => {
               <Link
                 key={doctor._id}
                 to={`/doctors/${doctor.slug}`}
-                className="bg-white rounded-2xl p-2 sm:p-4 border border-gray-100 hover:shadow-md transition-shadow group"
+                className="pressable bg-white rounded-2xl p-2 sm:p-4 border border-gray-100 hover:shadow-md transition-shadow group"
               >
                 <div className="flex flex-col items-center gap-2 text-center sm:flex-row sm:gap-3 sm:text-left">
                   <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-full overflow-hidden bg-gray-100 shrink-0">
@@ -87,7 +87,7 @@ const FeaturedDoctors = () => {
         )}
 
         <div className="sm:hidden mt-4 text-center">
-          <Link to="/doctors" className="inline-flex items-center gap-1 text-brand font-medium text-sm hover:underline">
+          <Link to="/doctors" className="pressable inline-flex items-center gap-1 text-brand font-medium text-sm hover:underline">
             View All Doctors <ChevronRight className="w-4 h-4" />
           </Link>
         </div>

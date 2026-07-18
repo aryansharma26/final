@@ -93,7 +93,7 @@ const BusinessCard = ({ title, subtitle, prefix, data = {}, orders = [], icon: I
             <p className="text-xs text-gray-500">{subtitle}</p>
           </div>
         </div>
-        <button onClick={onView} className={`rounded-lg px-3 py-1.5 text-xs font-bold transition-colors ${buttonClass}`}>
+        <button onClick={onView} className={`pressable rounded-lg px-3 py-1.5 text-xs font-bold transition-colors ${buttonClass}`}>
           View orders
         </button>
       </div>
@@ -147,7 +147,7 @@ const BusinessCard = ({ title, subtitle, prefix, data = {}, orders = [], icon: I
         </div>
         <button
           onClick={onView}
-          className={`mt-3 flex w-full items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold transition-colors ${buttonClass}`}
+          className={`pressable mt-3 flex w-full items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold transition-colors ${buttonClass}`}
         >
           Go to {prefix} orders
           <ArrowRight className="h-4 w-4" />

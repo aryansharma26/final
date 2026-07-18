@@ -14,6 +14,34 @@ const TAX_RATE = 0.05;
 const SHIPPING_THRESHOLD = 2000;
 const SHIPPING_COST = 50;
 
+const getCouponPerUserLimit = (coupon) => coupon.perUserLimit ?? coupon.usageLimit ?? null;
+
+const getUserCouponUsage = (coupon, userId) => {
+  const usage = coupon.usageByUser?.find((entry) => entry.user?.equals(userId));
+  if (usage) return usage.count || 0;
+  return coupon.usedBy?.some((id) => id.equals(userId)) ? 1 : 0;
+};
+
+const incrementUserCouponUsage = async ({ coupon, userId, session }) => {
+  const updatedExisting = await Coupon.updateOne(
+    { _id: coupon._id, 'usageByUser.user': userId },
+    { $inc: { usageCount: 1, 'usageByUser.$.count': 1 }, $addToSet: { usedBy: userId } },
+    { session }
+  );
+
+  if (updatedExisting.matchedCount === 0) {
+    await Coupon.findByIdAndUpdate(
+      coupon._id,
+      {
+        $inc: { usageCount: 1 },
+        $addToSet: { usedBy: userId },
+        $push: { usageByUser: { user: userId, count: getUserCouponUsage(coupon, userId) + 1 } },
+      },
+      { session }
+    );
+  }
+};
+
 const hasAcceptedPrescriptionForProduct = async (userId, productId, session) => {
   const prescription = await Prescription.findOne({
     user: userId,
@@ -189,23 +217,20 @@ export const createOrder = async (req, res, next) => {
 
       if (couponCode) {
         const coupon = await Coupon.findOne({ code: couponCode.toUpperCase(), isActive: true }).session(session);
-        if (coupon && coupon.endDate > new Date() && (!coupon.usageLimit || coupon.usageCount < coupon.usageLimit)) {
+        const perUserLimit = coupon ? getCouponPerUserLimit(coupon) : null;
+        if (coupon && perUserLimit && getUserCouponUsage(coupon, req.user._id) >= perUserLimit) {
+          await session.abortTransaction();
+          return res.status(400).json({ success: false, message: `You have reached the per-user limit for this coupon (${perUserLimit})` });
+        }
+        if (coupon && coupon.startDate <= new Date() && coupon.endDate > new Date() && (!perUserLimit || getUserCouponUsage(coupon, req.user._id) < perUserLimit)) {
           if (itemsPrice >= coupon.minOrderAmount) {
-            if (coupon.usedBy && coupon.usedBy.some((userId) => userId.equals(req.user._id))) {
-              await session.abortTransaction();
-              return res.status(400).json({ success: false, message: 'You have already used this coupon' });
-            }
             if (coupon.discountType === 'percentage') {
               couponDiscount = (itemsPrice * coupon.discountValue) / 100;
               if (coupon.maxDiscountAmount) couponDiscount = Math.min(couponDiscount, coupon.maxDiscountAmount);
             } else {
               couponDiscount = coupon.discountValue;
             }
-            await Coupon.findByIdAndUpdate(
-              coupon._id,
-              { $inc: { usageCount: 1 }, $addToSet: { usedBy: req.user._id } },
-              { session }
-            );
+            await incrementUserCouponUsage({ coupon, userId: req.user._id, session });
             appliedCoupon = coupon._id;
           }
         }
@@ -349,13 +374,13 @@ export const createOrder = async (req, res, next) => {
 
     if (couponCode) {
       const coupon = await Coupon.findOne({ code: couponCode.toUpperCase(), isActive: true }).session(session);
-      if (coupon && coupon.endDate > new Date() && (!coupon.usageLimit || coupon.usageCount < coupon.usageLimit)) {
+      const perUserLimit = coupon ? getCouponPerUserLimit(coupon) : null;
+      if (coupon && perUserLimit && getUserCouponUsage(coupon, req.user._id) >= perUserLimit) {
+        await session.abortTransaction();
+        return res.status(400).json({ success: false, message: `You have reached the per-user limit for this coupon (${perUserLimit})` });
+      }
+      if (coupon && coupon.startDate <= new Date() && coupon.endDate > new Date() && (!perUserLimit || getUserCouponUsage(coupon, req.user._id) < perUserLimit)) {
         if (itemsPrice >= coupon.minOrderAmount) {
-          // Verify user hasn't already used this coupon in a previous order
-          if (coupon.usedBy && coupon.usedBy.some((userId) => userId.equals(req.user._id))) {
-            await session.abortTransaction();
-            return res.status(400).json({ success: false, message: 'You have already used this coupon' });
-          }
           // Verify coupon was actually applied to the cart
           if (!cart.coupon || !cart.coupon.equals(coupon._id)) {
             await session.abortTransaction();
@@ -367,12 +392,7 @@ export const createOrder = async (req, res, next) => {
           } else {
             couponDiscount = coupon.discountValue;
           }
-          // Atomic coupon update to prevent race conditions
-          await Coupon.findByIdAndUpdate(
-            coupon._id,
-            { $inc: { usageCount: 1 }, $addToSet: { usedBy: req.user._id } },
-            { session }
-          );
+          await incrementUserCouponUsage({ coupon, userId: req.user._id, session });
           appliedCoupon = coupon._id;
         }
       }

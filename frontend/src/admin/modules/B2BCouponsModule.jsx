@@ -12,7 +12,7 @@ const emptyForm = {
   maxDiscountAmount: '',
   startDate: '',
   endDate: '',
-  usageLimit: '',
+  perUserLimit: '',
   isActive: true,
 };
 
@@ -58,7 +58,7 @@ const B2BCouponsModule = () => {
       maxDiscountAmount: coupon.maxDiscountAmount || '',
       startDate: coupon.startDate ? new Date(coupon.startDate).toISOString().slice(0, 10) : '',
       endDate: coupon.endDate ? new Date(coupon.endDate).toISOString().slice(0, 10) : '',
-      usageLimit: coupon.usageLimit || '',
+      perUserLimit: coupon.perUserLimit || coupon.usageLimit || '',
       isActive: coupon.isActive ?? true,
     });
     setModalOpen(true);
@@ -72,7 +72,7 @@ const B2BCouponsModule = () => {
         discountValue: Number(formData.discountValue),
         minOrderAmount: Number(formData.minOrderAmount) || 0,
         maxDiscountAmount: formData.maxDiscountAmount ? Number(formData.maxDiscountAmount) : null,
-        usageLimit: formData.usageLimit ? Number(formData.usageLimit) : null,
+        perUserLimit: formData.perUserLimit ? Number(formData.perUserLimit) : null,
       };
       if (editingCoupon) {
         await adminAPI.updateB2BCoupon(editingCoupon._id, payload);
@@ -108,7 +108,11 @@ const B2BCouponsModule = () => {
   };
 
   const isExpired = (coupon) => new Date(coupon.endDate) < new Date();
-  const isActive = (coupon) => coupon.isActive && !isExpired(coupon) && (!coupon.usageLimit || coupon.usageCount < coupon.usageLimit);
+  const getCouponStatus = (coupon) => {
+    if (!coupon.isActive) return { label: 'Inactive', color: 'red' };
+    if (isExpired(coupon)) return { label: 'Expired', color: 'red' };
+    return { label: 'Active', color: 'green' };
+  };
 
   return (
     <div className="space-y-4">
@@ -141,7 +145,9 @@ const B2BCouponsModule = () => {
               ) : coupons.length === 0 ? (
                 <tr><td colSpan={6}><EmptyState icon={Tag} title="No B2B coupons found" subtitle="Create your first B2B coupon" /></td></tr>
               ) : (
-                coupons.map((coupon) => (
+                coupons.map((coupon) => {
+                  const status = getCouponStatus(coupon);
+                  return (
                   <tr key={coupon._id} className="border-b border-gray-50 hover:bg-gray-50/50">
                     <td className="px-4 py-3">
                       <p className="font-mono font-medium text-gray-900">{coupon.code}</p>
@@ -154,19 +160,23 @@ const B2BCouponsModule = () => {
                       </p>
                       <p className="text-xs text-gray-500">Min order: PHP {coupon.minOrderAmount}</p>
                     </td>
-                    <td className="px-4 py-3 text-gray-900">{coupon.usageCount} / {coupon.usageLimit || 'Unlimited'}</td>
+                    <td className="px-4 py-3 text-gray-900">
+                      <p>{coupon.usageCount || 0} total</p>
+                      <p className="text-xs text-gray-500">Per user: {coupon.perUserLimit || coupon.usageLimit || 'Unlimited'}</p>
+                    </td>
                     <td className="px-4 py-3 text-gray-600">{new Date(coupon.endDate).toLocaleDateString()}</td>
                     <td className="px-4 py-3">
-                      <Badge color={isActive(coupon) ? 'green' : 'red'}>{isActive(coupon) ? 'Active' : isExpired(coupon) ? 'Expired' : 'Inactive'}</Badge>
+                      <Badge color={status.color}>{status.label}</Badge>
                     </td>
                     <td className="px-4 py-3 text-right">
                       <div className="flex items-center justify-end gap-1">
-                        <button onClick={() => openEdit(coupon)} className="p-1.5 hover:bg-blue-50 rounded-lg text-gray-400 hover:text-blue-600 transition-colors"><Edit2 className="w-4 h-4" /></button>
-                        <button onClick={() => setDeleteId(coupon._id)} className="p-1.5 hover:bg-red-50 rounded-lg text-gray-400 hover:text-red-600 transition-colors"><Trash2 className="w-4 h-4" /></button>
+                        <button onClick={() => openEdit(coupon)} className="pressable p-1.5 hover:bg-blue-50 rounded-lg text-gray-400 hover:text-blue-600 transition-colors"><Edit2 className="w-4 h-4" /></button>
+                        <button onClick={() => setDeleteId(coupon._id)} className="pressable p-1.5 hover:bg-red-50 rounded-lg text-gray-400 hover:text-red-600 transition-colors"><Trash2 className="w-4 h-4" /></button>
                       </div>
                     </td>
                   </tr>
-                ))
+                  );
+                })
               )}
             </tbody>
           </table>
@@ -180,7 +190,7 @@ const B2BCouponsModule = () => {
           <Input label="Discount Value" type="number" value={formData.discountValue} onChange={(e) => setFormData({ ...formData, discountValue: e.target.value })} />
           <Input label="Min Order Amount" type="number" value={formData.minOrderAmount} onChange={(e) => setFormData({ ...formData, minOrderAmount: e.target.value })} />
           <Input label="Max Discount Amount" type="number" value={formData.maxDiscountAmount} onChange={(e) => setFormData({ ...formData, maxDiscountAmount: e.target.value })} />
-          <Input label="Usage Limit" type="number" value={formData.usageLimit} onChange={(e) => setFormData({ ...formData, usageLimit: e.target.value })} />
+          <Input label="Per User Limit" type="number" min={1} value={formData.perUserLimit} onChange={(e) => setFormData({ ...formData, perUserLimit: e.target.value })} />
           <Input label="Start Date" type="date" value={formData.startDate} onChange={(e) => setFormData({ ...formData, startDate: e.target.value })} />
           <Input label="End Date" type="date" value={formData.endDate} onChange={(e) => setFormData({ ...formData, endDate: e.target.value })} />
           <Textarea label="Description" value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} className="sm:col-span-2" />

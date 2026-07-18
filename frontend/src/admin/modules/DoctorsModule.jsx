@@ -426,14 +426,14 @@ const DoctorsModule = () => {
               className="pl-9 pr-4 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand/20"
             />
           </div>
-          <button onClick={openCreate} className="flex items-center gap-2 px-4 py-2 bg-brand text-white text-sm font-medium rounded-lg hover:bg-brand-dark cursor-pointer">
+          <button onClick={openCreate} className="pressable flex items-center gap-2 px-4 py-2 bg-brand text-white text-sm font-medium rounded-lg hover:bg-brand-dark cursor-pointer">
             <Plus className="w-4 h-4" /> Add Doctor
           </button>
           <button
             type="button"
             onClick={handleExportExcel}
             disabled={exportLoading}
-            className="inline-flex items-center justify-center gap-1.5 px-4 py-2 text-sm font-semibold text-white bg-brand rounded-lg hover:bg-brand-dark focus:outline-none transition-all whitespace-nowrap disabled:opacity-50 cursor-pointer h-[38px]"
+            className="pressable inline-flex items-center justify-center gap-1.5 px-4 py-2 text-sm font-semibold text-white bg-brand rounded-lg hover:bg-brand-dark focus:outline-none transition-all whitespace-nowrap disabled:opacity-50 cursor-pointer h-[38px]"
           >
             {exportLoading ? (
               <Loader2 className="w-4 h-4 animate-spin text-white" />
@@ -467,7 +467,7 @@ const DoctorsModule = () => {
             </p>
             <button
               onClick={openCreate}
-              className="inline-flex items-center gap-2 px-5 py-2.5 bg-brand hover:bg-brand-dark text-white text-sm font-medium rounded-xl transition-colors"
+              className="pressable inline-flex items-center gap-2 px-5 py-2.5 bg-brand hover:bg-brand-dark text-white text-sm font-medium rounded-xl transition-colors"
             >
               <Plus className="w-4 h-4" /> Add Your First Doctor
             </button>
@@ -531,10 +531,10 @@ const DoctorsModule = () => {
                   </td>
                   <td className="px-4 py-3 text-right">
                     <div className="flex items-center justify-end gap-1">
-                      <button onClick={() => openEdit(doctor)} className="p-1.5 hover:bg-blue-50 rounded-lg text-gray-400 hover:text-blue-500">
+                      <button onClick={() => openEdit(doctor)} className="pressable p-1.5 hover:bg-blue-50 rounded-lg text-gray-400 hover:text-blue-500">
                         <Edit2 className="w-4 h-4" />
                       </button>
-                      <button onClick={() => setDeleteId(doctor._id)} className="p-1.5 hover:bg-red-50 rounded-lg text-gray-400 hover:text-red-500">
+                      <button onClick={() => setDeleteId(doctor._id)} className="pressable p-1.5 hover:bg-red-50 rounded-lg text-gray-400 hover:text-red-500">
                         <Trash2 className="w-4 h-4" />
                       </button>
                     </div>
@@ -790,7 +790,7 @@ const LocationManagement = ({ tab, onTabChange }) => {
     <div>
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
         <h2 className="text-xl font-bold text-gray-900">{tabLabel}</h2>
-        <button onClick={openCreate} className="flex items-center gap-2 px-4 py-2 bg-brand text-white text-sm font-medium rounded-lg hover:bg-brand-dark">
+        <button onClick={openCreate} className="pressable flex items-center gap-2 px-4 py-2 bg-brand text-white text-sm font-medium rounded-lg hover:bg-brand-dark">
           <Plus className="w-4 h-4" /> Add {tabLabel.slice(0, -1)}
         </button>
       </div>
@@ -836,8 +836,8 @@ const LocationManagement = ({ tab, onTabChange }) => {
                   <td className="px-4 py-3 text-gray-600">{item.order || 0}</td>
                   <td className="px-4 py-3 text-right">
                     <div className="flex items-center justify-end gap-1">
-                      <button onClick={() => openEdit(item)} className="p-1.5 hover:bg-blue-50 rounded-lg text-gray-400 hover:text-blue-500"><Edit2 className="w-4 h-4" /></button>
-                      <button onClick={() => setDeleteId(item._id)} className="p-1.5 hover:bg-red-50 rounded-lg text-gray-400 hover:text-red-500"><Trash2 className="w-4 h-4" /></button>
+                      <button onClick={() => openEdit(item)} className="pressable p-1.5 hover:bg-blue-50 rounded-lg text-gray-400 hover:text-blue-500"><Edit2 className="w-4 h-4" /></button>
+                      <button onClick={() => setDeleteId(item._id)} className="pressable p-1.5 hover:bg-red-50 rounded-lg text-gray-400 hover:text-red-500"><Trash2 className="w-4 h-4" /></button>
                     </div>
                   </td>
                 </tr>

@@ -98,7 +98,7 @@ const ProductCard = ({
   };
 
   const cardClasses =
-    "group bg-white border border-gray-100 rounded-2xl overflow-hidden hover:shadow-lg active:shadow-lg transition-shadow cursor-pointer min-w-0";
+    "pressable group bg-white border border-gray-100 rounded-2xl overflow-hidden hover:shadow-lg active:shadow-lg transition-shadow cursor-pointer min-w-0";
 
   const cardProps = {
     onClick: handleCardClick,
@@ -133,7 +133,7 @@ const ProductCard = ({
           onClick={handleHeartClick}
           whileHover={{ scale: 1.12 }}
           whileTap={{ scale: 0.88 }}
-          className="absolute top-2 right-2 w-8 h-8 bg-white/90 rounded-full flex items-center justify-center opacity-100 transition-opacity hover:bg-red-50 sm:top-3 sm:right-3 sm:opacity-0 sm:group-hover:opacity-100"
+          className="pressable absolute top-2 right-2 w-8 h-8 bg-white/90 rounded-full flex items-center justify-center opacity-100 transition-opacity hover:bg-red-50 sm:top-3 sm:right-3 sm:opacity-0 sm:group-hover:opacity-100"
         >
           <Heart className="w-4 h-4 text-gray-600 hover:text-red-500" />
         </motion.button>
@@ -196,7 +196,7 @@ const ProductCard = ({
               onClick={handleActionClick}
               whileHover={{ scale: 1.025 }}
               whileTap={{ scale: 0.97 }}
-              className="flex-1 py-2 bg-brand/10 hover:bg-brand text-brand hover:text-white text-sm font-medium rounded-lg transition-colors flex items-center justify-center gap-2"
+              className="pressable flex-1 py-2 bg-brand/10 hover:bg-brand text-brand hover:text-white text-sm font-medium rounded-lg transition-colors flex items-center justify-center gap-2"
             >
               {actionIcon || <ShoppingCart className="w-4 h-4" />}
               {actionLabel}
@@ -204,7 +204,7 @@ const ProductCard = ({
             {showRemoveButton && onRemoveClick && (
               <button
                 onClick={handleRemoveClick}
-                className="p-2 hover:bg-red-50 rounded-lg text-gray-400 hover:text-red-500 transition-colors"
+                className="pressable p-2 hover:bg-red-50 rounded-lg text-gray-400 hover:text-red-500 transition-colors"
               >
                 <Trash2 className="w-4 h-4" />
               </button>
@@ -245,7 +245,7 @@ const ProductCard = ({
                 onClick={handleActionClick}
                 whileHover={{ scale: 1.025 }}
                 whileTap={{ scale: 0.97 }}
-                className="flex-1 py-2 bg-brand/10 hover:bg-brand text-brand hover:text-white text-sm font-medium rounded-lg transition-colors flex items-center justify-center gap-2"
+                className="pressable flex-1 py-2 bg-brand/10 hover:bg-brand text-brand hover:text-white text-sm font-medium rounded-lg transition-colors flex items-center justify-center gap-2"
               >
                 {actionIcon || <ShoppingCart className="w-4 h-4" />}
                 {actionLabel}
@@ -253,7 +253,7 @@ const ProductCard = ({
               {showRemoveButton && onRemoveClick && (
                 <button
                   onClick={handleRemoveClick}
-                  className="p-2 hover:bg-red-50 rounded-lg text-gray-400 hover:text-red-500 transition-colors"
+                  className="pressable p-2 hover:bg-red-50 rounded-lg text-gray-400 hover:text-red-500 transition-colors"
                 >
                   <Trash2 className="w-4 h-4" />
                 </button>
@@ -264,7 +264,7 @@ const ProductCard = ({
               onClick={handleCartClick}
               whileHover={{ scale: 1.12 }}
               whileTap={{ scale: 0.88 }}
-              className="w-7 h-7 rounded-full flex items-center justify-center transition-colors bg-brand/10 hover:bg-brand text-brand hover:text-white sm:h-8 sm:w-8"
+              className="pressable w-7 h-7 rounded-full flex items-center justify-center transition-colors bg-brand/10 hover:bg-brand text-brand hover:text-white sm:h-8 sm:w-8"
               title="Add to Cart"
             >
               <ShoppingCart className="w-4 h-4" />

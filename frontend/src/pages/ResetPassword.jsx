@@ -29,7 +29,7 @@ const ResetPassword = () => {
         <div className="w-full max-w-md bg-white rounded-2xl shadow-sm p-8 text-center">
           <h1 className="text-2xl font-bold text-gray-900 mb-2">Invalid Link</h1>
           <p className="text-gray-500 mb-6">The reset link is missing or invalid.</p>
-          <Link to="/forgot-password" className="inline-block text-brand font-medium hover:underline">Request a new link</Link>
+          <Link to="/forgot-password" className="pressable inline-block text-brand font-medium hover:underline">Request a new link</Link>
         </div>
       </div>
     );
@@ -38,7 +38,7 @@ const ResetPassword = () => {
   return (
     <div className="min-h-screen bg-[#f5f5f0] flex items-center justify-center py-12 px-4">
       <div className="w-full max-w-md">
-        <Link to="/login" replace className="inline-flex items-center gap-2 text-gray-600 hover:text-brand mb-6 transition-colors">
+        <Link to="/login" replace className="pressable inline-flex items-center gap-2 text-gray-600 hover:text-brand mb-6 transition-colors">
           <ArrowLeft className="w-4 h-4" /> Back to Login
         </Link>
         <div className="bg-white rounded-2xl shadow-sm p-8">
@@ -88,7 +88,7 @@ const ResetPassword = () => {
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full py-3 bg-brand hover:bg-brand-dark text-white font-semibold rounded-xl transition-colors disabled:opacity-50"
+                  className="pressable w-full py-3 bg-brand hover:bg-brand-dark text-white font-semibold rounded-xl transition-colors disabled:opacity-50"
                 >
                   {isSubmitting ? 'Resetting...' : 'Reset Password'}
                 </button>

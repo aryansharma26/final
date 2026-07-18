@@ -112,7 +112,7 @@ const Profile = () => {
           <button
             type="button"
             onClick={handleBack}
-            className="mt-0.5 rounded-xl p-2 transition-colors hover:bg-gray-100"
+            className="pressable mt-0.5 rounded-xl p-2 transition-colors hover:bg-gray-100"
             aria-label="Go back"
           >
             <ArrowLeft className="h-5 w-5 text-gray-600" />
@@ -153,14 +153,14 @@ const Profile = () => {
               ))}
               <Link
                 to="/orders"
-                className="flex min-h-11 items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-sm font-semibold text-gray-600 transition-colors hover:bg-gray-50 lg:w-full lg:justify-start lg:gap-3 lg:px-4"
+                className="pressable flex min-h-11 items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-sm font-semibold text-gray-600 transition-colors hover:bg-gray-50 lg:w-full lg:justify-start lg:gap-3 lg:px-4"
               >
                 <Package className="h-4 w-4" />
                 Orders
               </Link>
               <Link
                 to="/prescriptions"
-                className="flex min-h-11 items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-sm font-semibold text-gray-600 transition-colors hover:bg-gray-50 lg:w-full lg:justify-start lg:gap-3 lg:px-4"
+                className="pressable flex min-h-11 items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-sm font-semibold text-gray-600 transition-colors hover:bg-gray-50 lg:w-full lg:justify-start lg:gap-3 lg:px-4"
               >
                 <FileText className="h-4 w-4" />
                 Prescriptions
@@ -168,7 +168,7 @@ const Profile = () => {
               <button
                 type="button"
                 onClick={handleLogout}
-                className="col-span-2 flex min-h-11 items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-sm font-semibold text-red-600 transition-colors hover:bg-red-50 lg:col-span-1 lg:w-full lg:justify-start lg:gap-3 lg:px-4"
+                className="pressable col-span-2 flex min-h-11 items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-sm font-semibold text-red-600 transition-colors hover:bg-red-50 lg:col-span-1 lg:w-full lg:justify-start lg:gap-3 lg:px-4"
               >
                 <LogOut className="h-4 w-4" />
                 Logout
@@ -260,11 +260,11 @@ const Profile = () => {
                     <span className="text-sm text-gray-600">Set as default address</span>
                   </label>
                   <div className="flex flex-col gap-3 sm:col-span-2 sm:flex-row">
-                    <button type="submit" className="rounded-xl bg-brand px-6 py-3 font-semibold text-white transition-colors hover:bg-brand-dark">
+                    <button type="submit" className="pressable rounded-xl bg-brand px-6 py-3 font-semibold text-white transition-colors hover:bg-brand-dark">
                       {editingAddressId ? 'Update Address' : 'Add Address'}
                     </button>
                     {editingAddressId && (
-                      <button type="button" onClick={() => { setEditingAddressId(null); resetAddress(); }} className="rounded-xl border border-gray-200 px-6 py-3 text-gray-700 transition-colors hover:bg-gray-50">
+                      <button type="button" onClick={() => { setEditingAddressId(null); resetAddress(); }} className="pressable rounded-xl border border-gray-200 px-6 py-3 text-gray-700 transition-colors hover:bg-gray-50">
                         Cancel
                       </button>
                     )}
@@ -286,10 +286,10 @@ const Profile = () => {
                             <p className="text-sm text-gray-555">{addr.phone}</p>
                           </div>
                           <div className="flex items-center gap-1">
-                            <button type="button" onClick={() => { setEditingAddressId(addr._id); resetAddress(addr); }} className="rounded p-1 text-gray-400 transition-colors hover:bg-brand/10 hover:text-brand">
+                            <button type="button" onClick={() => { setEditingAddressId(addr._id); resetAddress(addr); }} className="pressable rounded p-1 text-gray-400 transition-colors hover:bg-brand/10 hover:text-brand">
                               <Edit2 className="h-4 w-4" />
                             </button>
-                            <button type="button" onClick={() => onDeleteAddress(addr._id)} className="rounded p-1 text-gray-400 transition-colors hover:bg-red-50 hover:text-red-500">
+                            <button type="button" onClick={() => onDeleteAddress(addr._id)} className="pressable rounded p-1 text-gray-400 transition-colors hover:bg-red-50 hover:text-red-500">
                               <Trash2 className="h-4 w-4" />
                             </button>
                           </div>

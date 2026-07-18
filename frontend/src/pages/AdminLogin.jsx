@@ -23,7 +23,7 @@ const AdminLogin = () => {
   return (
     <div className="min-h-screen bg-dark flex items-center justify-center py-12 px-4">
       <div className="w-full max-w-md">
-        <Link to="/" className="inline-flex items-center gap-2 text-gray-400 hover:text-white mb-6 transition-colors">
+        <Link to="/" className="pressable inline-flex items-center gap-2 text-gray-400 hover:text-white mb-6 transition-colors">
           <ArrowLeft className="w-4 h-4" /> Back to Site
         </Link>
         <div className="bg-[#252525] rounded-2xl p-8 border border-gray-800">
@@ -69,7 +69,7 @@ const AdminLogin = () => {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full py-3 bg-brand hover:bg-brand-dark text-white font-semibold rounded-xl transition-colors disabled:opacity-50"
+              className="pressable w-full py-3 bg-brand hover:bg-brand-dark text-white font-semibold rounded-xl transition-colors disabled:opacity-50"
             >
               {isSubmitting ? 'Signing in...' : 'Sign In'}
             </button>

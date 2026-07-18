@@ -187,7 +187,7 @@ const CategoriesModule = () => {
             type="button"
             onClick={handleExportExcel}
             disabled={exportLoading}
-            className="inline-flex items-center justify-center gap-1.5 px-4 py-2 text-sm font-semibold text-white bg-brand rounded-xl hover:bg-brand-dark focus:outline-none transition-all whitespace-nowrap disabled:opacity-50 cursor-pointer"
+            className="pressable inline-flex items-center justify-center gap-1.5 px-4 py-2 text-sm font-semibold text-white bg-brand rounded-xl hover:bg-brand-dark focus:outline-none transition-all whitespace-nowrap disabled:opacity-50 cursor-pointer"
           >
             {exportLoading ? (
               <Loader2 className="w-4 h-4 animate-spin text-white" />
@@ -238,9 +238,9 @@ const CategoriesModule = () => {
                         <td className="px-4 py-3"><Badge color={category.isActive === false ? 'gray' : 'green'}>{category.isActive === false ? 'Inactive' : 'Active'}</Badge></td>
                         <td className="px-4 py-3 text-right">
                           <div className="flex items-center justify-end gap-1">
-                            <button onClick={() => openCreate(category._id)} className="p-1.5 hover:bg-green-50 rounded-lg text-gray-400 hover:text-green-600 transition-colors" title="Add subcategory"><Plus className="w-4 h-4" /></button>
-                            <button onClick={() => openEdit(category)} className="p-1.5 hover:bg-blue-50 rounded-lg text-gray-400 hover:text-blue-600 transition-colors" title="Edit category"><Edit2 className="w-4 h-4" /></button>
-                            <button onClick={() => setDeleteId(category._id)} className="p-1.5 hover:bg-red-50 rounded-lg text-gray-400 hover:text-red-600 transition-colors" title="Delete category"><Trash2 className="w-4 h-4" /></button>
+                            <button onClick={() => openCreate(category._id)} className="pressable p-1.5 hover:bg-green-50 rounded-lg text-gray-400 hover:text-green-600 transition-colors" title="Add subcategory"><Plus className="w-4 h-4" /></button>
+                            <button onClick={() => openEdit(category)} className="pressable p-1.5 hover:bg-blue-50 rounded-lg text-gray-400 hover:text-blue-600 transition-colors" title="Edit category"><Edit2 className="w-4 h-4" /></button>
+                            <button onClick={() => setDeleteId(category._id)} className="pressable p-1.5 hover:bg-red-50 rounded-lg text-gray-400 hover:text-red-600 transition-colors" title="Delete category"><Trash2 className="w-4 h-4" /></button>
                           </div>
                         </td>
                       </tr>
@@ -260,8 +260,8 @@ const CategoriesModule = () => {
                           <td className="px-4 py-3"><Badge color={child.isActive === false ? 'gray' : 'green'}>{child.isActive === false ? 'Inactive' : 'Active'}</Badge></td>
                           <td className="px-4 py-3 text-right">
                             <div className="flex items-center justify-end gap-1">
-                              <button onClick={() => openEdit(child)} className="p-1.5 hover:bg-blue-50 rounded-lg text-gray-400 hover:text-blue-600 transition-colors" title="Edit subcategory"><Edit2 className="w-4 h-4" /></button>
-                              <button onClick={() => setDeleteId(child._id)} className="p-1.5 hover:bg-red-50 rounded-lg text-gray-400 hover:text-red-600 transition-colors" title="Delete subcategory"><Trash2 className="w-4 h-4" /></button>
+                              <button onClick={() => openEdit(child)} className="pressable p-1.5 hover:bg-blue-50 rounded-lg text-gray-400 hover:text-blue-600 transition-colors" title="Edit subcategory"><Edit2 className="w-4 h-4" /></button>
+                              <button onClick={() => setDeleteId(child._id)} className="pressable p-1.5 hover:bg-red-50 rounded-lg text-gray-400 hover:text-red-600 transition-colors" title="Delete subcategory"><Trash2 className="w-4 h-4" /></button>
                             </div>
                           </td>
                         </tr>

@@ -12,10 +12,14 @@ const normalizeCouponPayload = (payload) => {
       next[field] = Number(next[field]);
     }
   });
-  if (next.usageLimit === '' || next.usageLimit === null) {
-    next.usageLimit = null;
-  } else if (next.usageLimit !== undefined) {
-    next.usageLimit = Number(next.usageLimit);
+  if (next.perUserLimit === undefined && next.usageLimit !== undefined) {
+    next.perUserLimit = next.usageLimit;
+  }
+  delete next.usageLimit;
+  if (next.perUserLimit === '' || next.perUserLimit === null) {
+    next.perUserLimit = null;
+  } else if (next.perUserLimit !== undefined) {
+    next.perUserLimit = Number(next.perUserLimit);
   }
   return next;
 };
@@ -30,7 +34,18 @@ const validateCouponRules = (couponData) => {
   if (couponData.maxDiscountAmount !== null && couponData.maxDiscountAmount !== undefined && Number(couponData.maxDiscountAmount) < 0) {
     return 'Maximum discount amount must be zero or greater';
   }
+  if (couponData.perUserLimit !== null && couponData.perUserLimit !== undefined && Number(couponData.perUserLimit) < 1) {
+    return 'Per user limit must be at least 1 or left empty for unlimited use';
+  }
   return null;
+};
+
+const getPerUserLimit = (coupon) => coupon.perUserLimit ?? coupon.usageLimit ?? null;
+
+const getUserCouponUsage = (coupon, userId) => {
+  const usage = coupon.usageByUser?.find((entry) => entry.user?.equals(userId));
+  if (usage) return usage.count || 0;
+  return coupon.usedBy?.some((id) => id.equals(userId)) ? 1 : 0;
 };
 
 const getCartSubtotal = async (userId) => {
@@ -141,11 +156,9 @@ export const validateCoupon = async (req, res, next) => {
     if (coupon.endDate < now) {
       return res.status(400).json({ success: false, message: 'Coupon has expired' });
     }
-    if (coupon.usageLimit && coupon.usageCount >= coupon.usageLimit) {
-      return res.status(400).json({ success: false, message: 'Coupon usage limit reached' });
-    }
-    if (coupon.usedBy && coupon.usedBy.some((userId) => userId.equals(req.user._id))) {
-      return res.status(400).json({ success: false, message: 'You have already used this coupon' });
+    const perUserLimit = getPerUserLimit(coupon);
+    if (perUserLimit && getUserCouponUsage(coupon, req.user._id) >= perUserLimit) {
+      return res.status(400).json({ success: false, message: `You have reached the per-user limit for this coupon (${perUserLimit})` });
     }
 
     const orderAmount = await getCartSubtotal(req.user._id);

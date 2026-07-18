@@ -59,7 +59,7 @@ const PopularProducts = () => {
           <p className="text-red-500 mb-2">{error}</p>
           <button
             onClick={loadProducts}
-            className="px-4 py-2 bg-brand text-white rounded-lg text-sm hover:bg-brand-dark transition-colors"
+            className="pressable px-4 py-2 bg-brand text-white rounded-lg text-sm hover:bg-brand-dark transition-colors"
           >
             Retry
           </button>
@@ -107,7 +107,11 @@ const PopularProducts = () => {
         <div className="mt-7 sm:mt-10 flex justify-center">
           <Link
             to="/medicines"
-            className="inline-flex items-center justify-center gap-2 rounded-full bg-brand px-7 py-3 text-sm font-semibold text-white shadow-lg shadow-brand/25 transition-all duration-200 hover:-translate-y-0.5 hover:bg-brand-dark hover:shadow-xl hover:shadow-brand/30"
+            onClick={(e) => {
+              e.preventDefault();
+              window.setTimeout(() => navigate("/medicines"), 160);
+            }}
+            className="pressable route-pressable inline-flex items-center justify-center gap-2 rounded-full bg-brand px-7 py-3 text-sm font-semibold text-white shadow-lg shadow-brand/25 transition-all duration-200 hover:-translate-y-0.5 hover:bg-brand-dark hover:shadow-xl hover:shadow-brand/30"
           >
             View All Products <ArrowRight className="w-4 h-4" />
           </Link>

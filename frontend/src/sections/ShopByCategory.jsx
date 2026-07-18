@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { categoryAPI } from "../api/index.js";
+import useSessionOnce from "../hooks/useSessionOnce.js";
 
 const MotionLink = motion(Link);
 
@@ -69,6 +70,7 @@ const CategoryIllustration = ({ categoryName, active = false }) => {
 };
 
 const ShopByCategory = () => {
+  const shouldAnimate = useSessionOnce("homeAnimationsSeen");
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -155,7 +157,7 @@ const ShopByCategory = () => {
           <p className="mb-3 text-sm font-medium text-red-500">{error}</p>
           <button
             onClick={loadCategories}
-            className="rounded-full bg-brand px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-dark"
+            className="pressable rounded-full bg-brand px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-dark"
           >
             Retry
           </button>
@@ -202,8 +204,8 @@ const ShopByCategory = () => {
                 key={category._id}
                 to={`/medicines?category=${category._id}`}
                 onClick={(e) => handleCategoryClick(e, category._id)}
-                initial={{ opacity: 0, y: 15 }}
-                whileInView={{
+                initial={shouldAnimate ? { opacity: 0, y: 15 } : false}
+                whileInView={shouldAnimate ? {
                   opacity: 1,
                   y: 0,
                   transition: {
@@ -211,8 +213,8 @@ const ShopByCategory = () => {
                     delay: index * 0.05,
                     ease: "easeOut",
                   },
-                }}
-                viewport={{ once: true }}
+                } : undefined}
+                viewport={shouldAnimate ? { once: true } : undefined}
                 whileHover={{
                   y: -6,
                   scale: 1.02,
@@ -245,7 +247,7 @@ const ShopByCategory = () => {
                     damping: 10,
                   },
                 }}
-                className={`group relative overflow-hidden rounded-2xl border border-gray-100 bg-white p-3 text-left shadow-sm transition-colors hover:border-brand/25 hover:shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-brand/30 sm:p-4 ${
+                className={`pressable group relative overflow-hidden rounded-2xl border border-gray-100 bg-white p-3 text-left shadow-sm transition-colors hover:border-brand/25 hover:shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-brand/30 sm:p-4 ${
                   isPressed ? "shadow-lg" : ""
                 }`}
               >

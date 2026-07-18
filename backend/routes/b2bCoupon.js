@@ -22,7 +22,8 @@ const createValidation = [
   body('maxDiscountAmount').optional({ nullable: true, checkFalsy: true }).isFloat({ min: 0 }).withMessage('Maximum discount amount must be zero or greater'),
   body('startDate').isISO8601().withMessage('Start date is required'),
   body('endDate').isISO8601().withMessage('End date is required'),
-  body('usageLimit').optional({ nullable: true, checkFalsy: true }).isInt({ min: 1 }).withMessage('Usage limit must be at least 1'),
+  body('perUserLimit').optional({ nullable: true, checkFalsy: true }).isInt({ min: 1 }).withMessage('Per user limit must be at least 1'),
+  body('usageLimit').optional({ nullable: true, checkFalsy: true }).isInt({ min: 1 }).withMessage('Per user limit must be at least 1'),
   body('isActive').optional().isBoolean().withMessage('Active status must be true or false'),
 ];
 
@@ -35,7 +36,8 @@ const updateValidation = [
   body('maxDiscountAmount').optional({ nullable: true, checkFalsy: true }).isFloat({ min: 0 }).withMessage('Maximum discount amount must be zero or greater'),
   body('startDate').optional().isISO8601().withMessage('Start date must be valid'),
   body('endDate').optional().isISO8601().withMessage('End date must be valid'),
-  body('usageLimit').optional({ nullable: true, checkFalsy: true }).isInt({ min: 1 }).withMessage('Usage limit must be at least 1'),
+  body('perUserLimit').optional({ nullable: true, checkFalsy: true }).isInt({ min: 1 }).withMessage('Per user limit must be at least 1'),
+  body('usageLimit').optional({ nullable: true, checkFalsy: true }).isInt({ min: 1 }).withMessage('Per user limit must be at least 1'),
   body('isActive').optional().isBoolean().withMessage('Active status must be true or false'),
 ];
 

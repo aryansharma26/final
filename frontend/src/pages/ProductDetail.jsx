@@ -372,7 +372,7 @@ const ProductDetail = () => {
     <div className="container-custom py-3 lg:py-5">
       <button
         onClick={handleGoBack}
-        className="inline-flex items-center gap-1.5 text-sm font-medium text-gray-500 transition-colors hover:text-brand"
+        className="pressable inline-flex items-center gap-1.5 text-sm font-medium text-gray-500 transition-colors hover:text-brand"
       >
         <ArrowLeft className="w-4 h-4" /> Back to Products
       </button>
@@ -583,7 +583,7 @@ const ProductDetail = () => {
                   type="button"
                   onClick={handleToggleWishlist}
                   disabled={wishlistLoading}
-                  className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full border bg-white shadow-sm transition-colors ${isWishlisted ? 'border-red-200 bg-red-50' : 'border-gray-200 hover:border-red-200 hover:bg-red-50'}`}
+                  className={`pressable flex h-11 w-11 shrink-0 items-center justify-center rounded-full border bg-white shadow-sm transition-colors ${isWishlisted ? 'border-red-200 bg-red-50' : 'border-gray-200 hover:border-red-200 hover:bg-red-50'}`}
                   aria-label={isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
                 >
                   <Heart className={`h-5 w-5 transition-colors ${isWishlisted ? 'fill-red-500 text-red-500' : 'text-gray-400 hover:text-red-500'}`} />
@@ -596,7 +596,7 @@ const ProductDetail = () => {
                     <button
                       onClick={goToLogin}
                       disabled={rxUploading}
-                      className="col-span-2 flex items-center justify-center gap-2 rounded-2xl bg-amber-500 py-3.5 text-sm font-semibold text-white shadow-lg shadow-amber-500/25 transition-all duration-200 hover:-translate-y-0.5 hover:bg-amber-600 disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:translate-y-0"
+                      className="pressable col-span-2 flex items-center justify-center gap-2 rounded-2xl bg-amber-500 py-3.5 text-sm font-semibold text-white shadow-lg shadow-amber-500/25 transition-all duration-200 hover:-translate-y-0.5 hover:bg-amber-600 disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:translate-y-0"
                     >
                       {rxUploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
                       Log in to Upload Prescription
@@ -627,7 +627,7 @@ const ProductDetail = () => {
                   <>
                     <button
                       onClick={handleAddToCart}
-                      className={`flex items-center justify-center gap-2 rounded-2xl py-3.5 text-sm font-semibold shadow-lg transition-all duration-200 hover:-translate-y-0.5 ${
+                      className={`pressable flex items-center justify-center gap-2 rounded-2xl py-3.5 text-sm font-semibold shadow-lg transition-all duration-200 hover:-translate-y-0.5 ${
                         added ? 'bg-green-500 text-white shadow-green-500/25' : addError ? 'bg-red-500 text-white shadow-red-500/25' : 'bg-brand hover:bg-brand-dark text-white shadow-brand/25'
                       }`}
                     >
@@ -635,9 +635,9 @@ const ProductDetail = () => {
                       {added ? 'Added!' : addError ? 'Failed' : 'Add to Cart'}
                     </button>
                     <button
-                      onClick={handleBuyNow}
+                      onClick={() => window.setTimeout(handleBuyNow, 160)}
                       disabled={buyingNow}
-                      className="flex items-center justify-center gap-2 rounded-2xl bg-gray-950 py-3.5 text-sm font-semibold text-white shadow-lg shadow-gray-950/20 transition-all duration-200 hover:-translate-y-0.5 hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:translate-y-0"
+                      className="pressable buy-now-pressable flex items-center justify-center gap-2 rounded-2xl bg-gray-950 py-3.5 text-sm font-semibold text-white shadow-lg shadow-gray-950/20 transition-all duration-200 hover:-translate-y-0.5 hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:translate-y-0"
                     >
                       <CreditCard className="w-4 h-4" />
                       {buyingNow ? 'Processing...' : 'Buy Now'}
@@ -857,7 +857,7 @@ const ProductDetail = () => {
                 <button
                   type="submit"
                   disabled={reviewSubmitting}
-                  className="w-full py-2.5 bg-brand hover:bg-brand-dark text-white text-sm font-semibold rounded-xl shadow-lg shadow-brand/20 transition-all duration-200 hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:translate-y-0"
+                  className="pressable w-full py-2.5 bg-brand hover:bg-brand-dark text-white text-sm font-semibold rounded-xl shadow-lg shadow-brand/20 transition-all duration-200 hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:translate-y-0"
                 >
                   {reviewSubmitting ? 'Submitting...' : 'Submit Review'}
                 </button>

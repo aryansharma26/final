@@ -185,35 +185,63 @@ const B2BEnquiry = () => {
 
       <div className="max-w-6xl mx-auto">
         {/* Header */}
-        <div className="mb-5 overflow-hidden rounded-2xl border border-brand/10 bg-gradient-to-br from-brand-light via-white to-white shadow-sm">
-          <div className="p-4 sm:p-6">
-            <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-white px-3 py-1 text-xs font-semibold uppercase tracking-wide text-brand shadow-sm sm:mb-4">
-              <Building2 className="w-3.5 h-3.5" />
-              Bulk Orders & Business Partnerships
-            </div>
-            <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-              <div className="max-w-2xl">
-                <h1 className="text-2xl font-extrabold leading-tight text-gray-950 sm:text-3xl">
-                  Wholesale medicines and healthcare stock for your business.
-                </h1>
-                <p className="mt-2 max-w-2xl text-sm leading-5 text-gray-600 sm:text-base sm:leading-6">
-                  Browse the bulk catalog, shortlist products, and submit one clear enquiry for pricing, stock availability, and delivery coordination.
-                </p>
+        <div className="mb-5 overflow-hidden rounded-[26px] border border-slate-200 bg-white shadow-[0_18px_55px_rgba(15,23,42,0.08)] sm:mb-6">
+          <div className="grid gap-4 p-4 sm:p-6 lg:grid-cols-[1.35fr_0.85fr] lg:gap-6 lg:p-7">
+            <div className="min-w-0">
+              <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-brand/15 bg-brand-light/70 px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-wide text-brand sm:mb-4">
+                <Building2 className="h-3.5 w-3.5" />
+                Bulk Orders & Business Partnerships
               </div>
-              
+
+              <h1 className="max-w-3xl text-2xl font-extrabold leading-tight text-gray-950 sm:text-4xl">
+                Wholesale medicines and healthcare stock for your business.
+              </h1>
+              <p className="mt-2 max-w-2xl text-sm leading-5 text-gray-600 sm:mt-3 sm:text-base sm:leading-6">
+                Browse the bulk catalog, shortlist products, and submit one clear enquiry for pricing, stock availability, and delivery coordination.
+              </p>
+
+              <div className="-mx-1 mt-4 flex gap-2 overflow-x-auto px-1 pb-1 no-scrollbar sm:flex-wrap sm:overflow-visible sm:pb-0">
+                {[
+                  { icon: Warehouse, title: 'Bulk stock' },
+                  { icon: Percent, title: 'Business rates' },
+                  { icon: Handshake, title: 'Direct support' },
+                ].map(({ icon: Icon, title }) => (
+                  <div key={title} className="flex shrink-0 items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-bold text-gray-700">
+                    <Icon className="h-3.5 w-3.5 text-brand" />
+                    {title}
+                  </div>
+                ))}
+              </div>
             </div>
 
-            <div className="mt-3 flex flex-wrap gap-2 sm:mt-4">
-              {[
-                { icon: Warehouse, title: 'Bulk stock' },
-                { icon: Percent, title: 'Business rates' },
-                { icon: Handshake, title: 'Direct support' },
-              ].map(({ icon: Icon, title }) => (
-                <div key={title} className="flex items-center gap-2 rounded-full bg-white px-3 py-2 text-xs font-semibold text-gray-700 shadow-sm">
-                  <Icon className="h-3.5 w-3.5 text-brand" />
-                  {title}
+            <div className="rounded-2xl border border-slate-100 bg-slate-50/80 p-3 sm:p-4 lg:self-stretch">
+              <div className="mb-3 flex items-center gap-2.5">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-white text-brand shadow-sm">
+                  <Package className="h-4.5 w-4.5" />
                 </div>
-              ))}
+                <div className="min-w-0">
+                  <p className="text-sm font-extrabold text-gray-950">Business ordering</p>
+                  <p className="text-xs font-medium text-gray-500">Simple 3-step flow</p>
+                </div>
+              </div>
+
+              <div className="grid gap-2 sm:grid-cols-3 lg:grid-cols-1">
+                {[
+                  { step: '1', title: 'Browse stock', desc: 'Open bulk rates' },
+                  { step: '2', title: 'Shortlist items', desc: 'Pick quantities' },
+                  { step: '3', title: 'Send enquiry', desc: 'Get support' },
+                ].map((item) => (
+                  <div key={item.step} className="flex items-center gap-2 rounded-xl bg-white p-2.5 shadow-sm">
+                    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-brand text-xs font-extrabold text-white">
+                      {item.step}
+                    </span>
+                    <span className="min-w-0">
+                      <span className="block text-xs font-extrabold text-gray-900">{item.title}</span>
+                      <span className="block truncate text-[11px] font-medium text-gray-500">{item.desc}</span>
+                    </span>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>
@@ -296,7 +324,7 @@ const B2BEnquiry = () => {
                   whileHover={{ y: -6 }}
                   whileTap={{ y: -6 }}
                   transition={{ type: 'spring', stiffness: 400, damping: 22 }}
-                  className="group cursor-pointer overflow-hidden rounded-2xl border border-gray-100 bg-white transition-shadow hover:shadow-lg active:shadow-lg"
+                  className="pressable group cursor-pointer overflow-hidden rounded-2xl border border-gray-100 bg-white transition-shadow hover:shadow-lg active:shadow-lg"
                 >
                   <div className="relative aspect-square overflow-hidden bg-gray-50">
                     <img
@@ -324,7 +352,7 @@ const B2BEnquiry = () => {
                         <p className="text-[11px] font-bold text-gray-900 sm:text-xs">View rates & stock</p>
                         <p className="hidden truncate text-[10px] text-gray-400 sm:block">Business pricing on detail page</p>
                       </div>
-                      <button className="flex shrink-0 items-center gap-1 rounded-lg bg-white px-2.5 py-2 text-xs font-bold text-brand shadow-sm transition-colors group-hover:bg-brand group-hover:text-white sm:px-3">
+                      <button className="pressable flex shrink-0 items-center gap-1 rounded-lg bg-white px-2.5 py-2 text-xs font-bold text-brand shadow-sm transition-colors group-hover:bg-brand group-hover:text-white sm:px-3">
                         <ShoppingCart className="hidden h-3 w-3 sm:block" /> Details <ChevronRight className="h-3 w-3" />
                       </button>
                     </div>
@@ -452,7 +480,7 @@ const B2BEnquiry = () => {
             <button
               type="submit"
               disabled={submitting}
-              className="w-full py-3.5 bg-brand hover:bg-brand-dark text-white font-semibold rounded-xl transition-colors flex items-center justify-center gap-2 shadow-lg shadow-brand/20 disabled:opacity-70"
+              className="pressable w-full py-3.5 bg-brand hover:bg-brand-dark text-white font-semibold rounded-xl transition-colors flex items-center justify-center gap-2 shadow-lg shadow-brand/20 disabled:opacity-70"
             >
               {submitting ? (
                 <>

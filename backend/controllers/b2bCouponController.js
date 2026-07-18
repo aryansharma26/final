@@ -11,10 +11,14 @@ const normalizeCouponPayload = (payload) => {
       next[field] = Number(next[field]);
     }
   });
-  if (next.usageLimit === '' || next.usageLimit === null) {
-    next.usageLimit = null;
-  } else if (next.usageLimit !== undefined) {
-    next.usageLimit = Number(next.usageLimit);
+  if (next.perUserLimit === undefined && next.usageLimit !== undefined) {
+    next.perUserLimit = next.usageLimit;
+  }
+  delete next.usageLimit;
+  if (next.perUserLimit === '' || next.perUserLimit === null) {
+    next.perUserLimit = null;
+  } else if (next.perUserLimit !== undefined) {
+    next.perUserLimit = Number(next.perUserLimit);
   }
   return next;
 };
@@ -26,7 +30,41 @@ const validateRules = (couponData) => {
   if (couponData.startDate && couponData.endDate && new Date(couponData.endDate) <= new Date(couponData.startDate)) {
     return 'End date must be after start date';
   }
+  if (couponData.maxDiscountAmount !== null && couponData.maxDiscountAmount !== undefined && Number(couponData.maxDiscountAmount) < 0) {
+    return 'Maximum discount amount must be zero or greater';
+  }
+  if (couponData.perUserLimit !== null && couponData.perUserLimit !== undefined && Number(couponData.perUserLimit) < 1) {
+    return 'Per user limit must be at least 1 or left empty for unlimited use';
+  }
   return null;
+};
+
+const getPerUserLimit = (coupon) => coupon.perUserLimit ?? coupon.usageLimit ?? null;
+
+const getUserCouponUsage = (coupon, userId) => {
+  const usage = coupon.usageByUser?.find((entry) => entry.user?.equals(userId));
+  if (usage) return usage.count || 0;
+  return coupon.usedBy?.some((id) => id.equals(userId)) ? 1 : 0;
+};
+
+const incrementUserCouponUsage = async ({ coupon, userId, session }) => {
+  const updatedExisting = await B2BCoupon.updateOne(
+    { _id: coupon._id, 'usageByUser.user': userId },
+    { $inc: { usageCount: 1, 'usageByUser.$.count': 1 }, $addToSet: { usedBy: userId } },
+    { session }
+  );
+
+  if (updatedExisting.matchedCount === 0) {
+    await B2BCoupon.findByIdAndUpdate(
+      coupon._id,
+      {
+        $inc: { usageCount: 1 },
+        $addToSet: { usedBy: userId },
+        $push: { usageByUser: { user: userId, count: getUserCouponUsage(coupon, userId) + 1 } },
+      },
+      { session }
+    );
+  }
 };
 
 const calculateDiscount = (coupon, orderAmount) => {
@@ -44,11 +82,9 @@ const getUsableCoupon = async (code, userId) => {
   if (!coupon.isActive) return { error: { status: 400, message: 'B2B coupon is inactive' } };
   if (coupon.startDate > now) return { error: { status: 400, message: 'B2B coupon not yet active' } };
   if (coupon.endDate < now) return { error: { status: 400, message: 'B2B coupon has expired' } };
-  if (coupon.usageLimit && coupon.usageCount >= coupon.usageLimit) {
-    return { error: { status: 400, message: 'B2B coupon usage limit reached' } };
-  }
-  if (coupon.usedBy?.some((id) => id.equals(userId))) {
-    return { error: { status: 400, message: 'You have already used this B2B coupon' } };
+  const perUserLimit = getPerUserLimit(coupon);
+  if (perUserLimit && getUserCouponUsage(coupon, userId) >= perUserLimit) {
+    return { error: { status: 400, message: `You have reached the per-user limit for this B2B coupon (${perUserLimit})` } };
   }
   return { coupon };
 };
@@ -142,10 +178,6 @@ export const resolveB2BCouponForOrder = async ({ code, userId, orderAmount, sess
     throw err;
   }
   const couponDiscount = calculateDiscount(coupon, orderAmount);
-  await B2BCoupon.findByIdAndUpdate(
-    coupon._id,
-    { $inc: { usageCount: 1 }, $addToSet: { usedBy: userId } },
-    { session }
-  );
+  await incrementUserCouponUsage({ coupon, userId, session });
   return { couponDiscount, coupon };
 };

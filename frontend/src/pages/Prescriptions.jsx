@@ -398,7 +398,7 @@ const Prescriptions = () => {
               <button
                 type="button"
                 onClick={loadPrescriptions}
-                className="inline-flex items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm font-bold text-gray-600 shadow-sm transition-colors hover:border-brand/30 hover:text-brand"
+                className="pressable inline-flex items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm font-bold text-gray-600 shadow-sm transition-colors hover:border-brand/30 hover:text-brand"
               >
                 <RotateCw className="h-4 w-4" />
                 Refresh
@@ -526,11 +526,11 @@ const Prescriptions = () => {
                       <Icon className="h-3.5 w-3.5" />
                       {status.label}
                     </span>
-                    <button type="button" onClick={() => handleView(item)} className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-gray-200 px-3 py-2 text-xs font-semibold text-gray-700 transition-colors hover:border-brand/30 hover:text-brand">
+                    <button type="button" onClick={() => handleView(item)} className="pressable inline-flex items-center justify-center gap-1.5 rounded-xl border border-gray-200 px-3 py-2 text-xs font-semibold text-gray-700 transition-colors hover:border-brand/30 hover:text-brand">
                       {viewingId === item._id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Eye className="h-3.5 w-3.5" />}
                       View
                     </button>
-                    <button type="button" onClick={() => handleDownload(item)} className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-gray-950 px-3 py-2 text-xs font-semibold text-white transition-colors hover:bg-gray-800">
+                    <button type="button" onClick={() => handleDownload(item)} className="pressable inline-flex items-center justify-center gap-1.5 rounded-xl bg-gray-950 px-3 py-2 text-xs font-semibold text-white transition-colors hover:bg-gray-800">
                       {downloadingId === item._id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Download className="h-3.5 w-3.5" />}
                       Download
                     </button>
@@ -574,7 +574,7 @@ const Prescriptions = () => {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5">
           <button
             type="button"
-            className="absolute inset-0 bg-gray-950/60"
+            className="pressable absolute inset-0 bg-gray-950/60"
             onClick={closePreview}
             aria-label="Close preview"
           />
@@ -587,7 +587,7 @@ const Prescriptions = () => {
               <button
                 type="button"
                 onClick={closePreview}
-                className="rounded-xl p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-700"
+                className="pressable rounded-xl p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-700"
                 aria-label="Close"
               >
                 <X className="h-5 w-5" />
@@ -601,10 +601,10 @@ const Prescriptions = () => {
               )}
             </div>
             <div className="flex justify-end gap-2 border-t border-gray-100 p-4">
-              <button type="button" onClick={closePreview} className="rounded-xl border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50">
+              <button type="button" onClick={closePreview} className="pressable rounded-xl border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50">
                 Close
               </button>
-              <button type="button" onClick={() => handleDownload(previewItem)} className="inline-flex items-center gap-1.5 rounded-xl bg-gray-950 px-4 py-2 text-sm font-semibold text-white hover:bg-gray-800">
+              <button type="button" onClick={() => handleDownload(previewItem)} className="pressable inline-flex items-center gap-1.5 rounded-xl bg-gray-950 px-4 py-2 text-sm font-semibold text-white hover:bg-gray-800">
                 <Download className="h-4 w-4" />
                 Download
               </button>
@@ -617,7 +617,7 @@ const Prescriptions = () => {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5">
           <button
             type="button"
-            className="absolute inset-0 bg-gray-950/60"
+            className="pressable absolute inset-0 bg-gray-950/60"
             onClick={uploading ? undefined : cancelPendingUpload}
             aria-label="Close address selector"
           />
@@ -638,7 +638,7 @@ const Prescriptions = () => {
                 type="button"
                 onClick={cancelPendingUpload}
                 disabled={uploading}
-                className="rounded-xl p-2 text-gray-400 transition-colors hover:bg-white hover:text-gray-700 disabled:opacity-50"
+                className="pressable rounded-xl p-2 text-gray-400 transition-colors hover:bg-white hover:text-gray-700 disabled:opacity-50"
                 aria-label="Close"
               >
                 <X className="h-5 w-5" />
@@ -651,7 +651,7 @@ const Prescriptions = () => {
                   <MapPin className="mx-auto mb-3 h-9 w-9 text-gray-300" />
                   <p className="text-sm font-semibold text-gray-900">No saved address</p>
                   <p className="mt-1 text-sm text-gray-500">Add a delivery address before uploading your prescription.</p>
-                  <button type="button" onClick={openAddAddress} className="mt-4 rounded-xl bg-brand px-4 py-2 text-sm font-semibold text-white hover:bg-brand-dark">
+                  <button type="button" onClick={openAddAddress} className="pressable mt-4 rounded-xl bg-brand px-4 py-2 text-sm font-semibold text-white hover:bg-brand-dark">
                     Add Address
                   </button>
                 </div>
@@ -685,7 +685,7 @@ const Prescriptions = () => {
                 <div className="mt-4 rounded-2xl border border-gray-100 bg-gray-50 p-4">
                   <div className="mb-4 flex items-center justify-between">
                     <h3 className="text-sm font-bold text-gray-900">{editingAddress ? 'Edit Address' : 'Add New Address'}</h3>
-                    <button type="button" onClick={() => setShowAddressForm(false)} className="rounded-lg p-1 text-gray-400 hover:bg-white hover:text-gray-700">
+                    <button type="button" onClick={() => setShowAddressForm(false)} className="pressable rounded-lg p-1 text-gray-400 hover:bg-white hover:text-gray-700">
                       <X className="h-4 w-4" />
                     </button>
                   </div>
@@ -705,15 +705,15 @@ const Prescriptions = () => {
                     </label>
                   </div>
                   <div className="mt-4 flex justify-end gap-2">
-                    <button type="button" onClick={() => setShowAddressForm(false)} className="rounded-xl px-4 py-2 text-sm font-semibold text-gray-600 hover:bg-white">Cancel</button>
-                    <button type="button" onClick={saveAddress} disabled={formLoading} className="rounded-xl bg-brand px-4 py-2 text-sm font-semibold text-white hover:bg-brand-dark disabled:opacity-60">
+                    <button type="button" onClick={() => setShowAddressForm(false)} className="pressable rounded-xl px-4 py-2 text-sm font-semibold text-gray-600 hover:bg-white">Cancel</button>
+                    <button type="button" onClick={saveAddress} disabled={formLoading} className="pressable rounded-xl bg-brand px-4 py-2 text-sm font-semibold text-white hover:bg-brand-dark disabled:opacity-60">
                       {formLoading ? 'Saving...' : editingAddress ? 'Update Address' : 'Save Address'}
                     </button>
                   </div>
                 </div>
               ) : (
                 addresses.length > 0 && (
-                  <button type="button" onClick={openAddAddress} className="mt-4 inline-flex items-center gap-1.5 rounded-xl border border-gray-200 px-3 py-2 text-xs font-semibold text-gray-600 hover:border-brand/30 hover:text-brand">
+                  <button type="button" onClick={openAddAddress} className="pressable mt-4 inline-flex items-center gap-1.5 rounded-xl border border-gray-200 px-3 py-2 text-xs font-semibold text-gray-600 hover:border-brand/30 hover:text-brand">
                     <Plus className="h-3.5 w-3.5" />
                     Add another address
                   </button>
@@ -726,7 +726,7 @@ const Prescriptions = () => {
                 type="button"
                 onClick={cancelPendingUpload}
                 disabled={uploading}
-                className="rounded-xl border border-gray-200 px-4 py-2.5 text-sm font-semibold text-gray-600 hover:bg-gray-50 disabled:opacity-60"
+                className="pressable rounded-xl border border-gray-200 px-4 py-2.5 text-sm font-semibold text-gray-600 hover:bg-gray-50 disabled:opacity-60"
               >
                 Cancel
               </button>
@@ -734,7 +734,7 @@ const Prescriptions = () => {
                 type="button"
                 onClick={confirmPendingUpload}
                 disabled={uploading || !selectedDeliveryAddress || !isCompleteAddress(selectedDeliveryAddress)}
-                className="inline-flex items-center justify-center gap-2 rounded-xl bg-brand px-5 py-2.5 text-sm font-semibold text-white hover:bg-brand-dark disabled:cursor-not-allowed disabled:opacity-60"
+                className="pressable inline-flex items-center justify-center gap-2 rounded-xl bg-brand px-5 py-2.5 text-sm font-semibold text-white hover:bg-brand-dark disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
                 Confirm & Upload

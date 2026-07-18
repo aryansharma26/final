@@ -24,7 +24,7 @@ export const Button = ({ children, onClick, variant = 'primary', size = 'md', di
     ghost: 'hover:bg-gray-100 text-gray-600 disabled:opacity-50',
   };
   return (
-    <button type={type} onClick={onClick} disabled={disabled} className={`${base} ${sizes[size]} ${variants[variant]} ${className}`}>
+    <button type={type} onClick={onClick} disabled={disabled} className={`pressable ${base} ${sizes[size]} ${variants[variant]} ${className}`}>
       {children}
     </button>
   );
@@ -72,11 +72,11 @@ export const Modal = ({ open, onClose, title, children, maxWidth = 'max-w-lg' })
   if (!open) return null;
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/40" onClick={onClose} />
+      <div className="pressable absolute inset-0 bg-black/40" onClick={onClose} />
       <div className={`relative bg-white rounded-2xl shadow-xl w-full ${maxWidth} max-h-[90vh] overflow-y-auto`}>
         <div className="flex items-center justify-between p-6 border-b border-gray-100">
           <h3 className="text-lg font-bold text-gray-900">{title}</h3>
-          <button onClick={onClose} className="p-1 hover:bg-gray-100 rounded-lg transition-colors">
+          <button onClick={onClose} className="pressable p-1 hover:bg-gray-100 rounded-lg transition-colors">
             <svg className="text-brand-teal w-5 h-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
             </svg>
@@ -112,7 +112,7 @@ export const EmptyState = ({ icon: Icon, title, subtitle, message, action, onAct
     {action && onAction && (
       <button
         onClick={onAction}
-        className="mt-4 px-5 py-2.5 bg-brand hover:bg-brand-dark text-white text-sm font-medium rounded-xl transition-colors"
+        className="pressable mt-4 px-5 py-2.5 bg-brand hover:bg-brand-dark text-white text-sm font-medium rounded-xl transition-colors"
       >
         {action}
       </button>

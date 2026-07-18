@@ -380,7 +380,7 @@ const Checkout = () => {
 
   return (
     <div className="container-custom py-4 lg:py-8">
-      <button onClick={() => (b2bItem || isBuyNow ? navigate(-1) : navigate('/cart', { replace: true }))} className="inline-flex items-center gap-2 text-gray-600 hover:text-brand mb-6 transition-colors">
+      <button onClick={() => (b2bItem || isBuyNow ? navigate(-1) : navigate('/cart', { replace: true }))} className="pressable inline-flex items-center gap-2 text-gray-600 hover:text-brand mb-6 transition-colors">
         <ArrowLeft className="w-4 h-4" /> {b2bItem || isBuyNow ? 'Back' : 'Back to Cart'}
       </button>
 
@@ -487,7 +487,7 @@ const Checkout = () => {
                 <button
                   type="button"
                   onClick={handleOpenAddForm}
-                  className="inline-flex items-center gap-1.5 text-sm font-medium text-brand hover:text-brand-dark transition-colors"
+                  className="pressable inline-flex items-center gap-1.5 text-sm font-medium text-brand hover:text-brand-dark transition-colors"
                 >
                   <Plus className="w-4 h-4" /> Add New Address
                 </button>
@@ -501,7 +501,7 @@ const Checkout = () => {
                   <h3 className="font-semibold text-gray-900">
                     {editingAddress ? 'Edit Address' : 'Add New Address'}
                   </h3>
-                  <button type="button" onClick={handleCloseForm} className="p-1 hover:bg-gray-200 rounded-lg transition-colors">
+                  <button type="button" onClick={handleCloseForm} className="pressable p-1 hover:bg-gray-200 rounded-lg transition-colors">
                     <X className="w-4 h-4 text-gray-500" />
                   </button>
                 </div>
@@ -575,13 +575,13 @@ const Checkout = () => {
                   <div className="flex flex-col-reverse gap-2 sm:col-span-2 sm:flex-row sm:justify-end">
                     <button
                       type="button" onClick={handleCloseForm}
-                      className="px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                      className="pressable px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
                     >
                       Cancel
                     </button>
                     <button
                       type="button" onClick={handleSaveAddress} disabled={formLoading}
-                      className="px-5 py-2 bg-brand hover:bg-brand-dark text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50"
+                      className="pressable px-5 py-2 bg-brand hover:bg-brand-dark text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50"
                     >
                       {formLoading ? 'Saving...' : (editingAddress ? 'Update Address' : 'Save Address')}
                     </button>
@@ -596,7 +596,7 @@ const Checkout = () => {
                 <p className="text-gray-500 mb-3">No saved addresses</p>
                 <button
                   type="button" onClick={handleOpenAddForm}
-                  className="px-4 py-2 bg-brand text-white rounded-lg text-sm font-medium"
+                  className="pressable px-4 py-2 bg-brand text-white rounded-lg text-sm font-medium"
                 >
                   Add Your First Address
                 </button>
@@ -744,7 +744,7 @@ const Checkout = () => {
                       type="button"
                       onClick={handleApplyB2BCoupon}
                       disabled={b2bCouponLoading || !b2bCouponCode.trim()}
-                      className="rounded-xl bg-brand px-3 py-2 text-xs font-bold text-white disabled:opacity-50"
+                      className="pressable rounded-xl bg-brand px-3 py-2 text-xs font-bold text-white disabled:opacity-50"
                     >
                       {b2bCouponLoading ? 'Applying' : 'Apply'}
                     </button>
@@ -793,7 +793,7 @@ const Checkout = () => {
                       type="button"
                       onClick={handleApplyB2CCoupon}
                       disabled={couponLoading || !couponCode.trim()}
-                      className="rounded-xl bg-brand px-3 py-2 text-xs font-bold text-white disabled:opacity-50"
+                      className="pressable rounded-xl bg-brand px-3 py-2 text-xs font-bold text-white disabled:opacity-50"
                     >
                       {couponLoading ? 'Applying' : 'Apply'}
                     </button>
@@ -849,7 +849,7 @@ const Checkout = () => {
             <button
               type="submit"
               disabled={loading || addresses.length === 0}
-              className="w-full mt-6 py-3 bg-brand hover:bg-brand-dark text-white font-semibold rounded-xl transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+              className="pressable w-full mt-6 py-3 bg-brand hover:bg-brand-dark text-white font-semibold rounded-xl transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
             >
               {loading ? 'Placing Order...' : `Place Order • ₱${total.toFixed(0)}`}
             </button>

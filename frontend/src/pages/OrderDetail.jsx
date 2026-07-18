@@ -72,7 +72,7 @@ const OrderDetail = () => {
     return (
       <div className="container-custom py-20 text-center">
         <p className="text-gray-500">Order not found</p>
-        <button onClick={() => navigate(-1)} className="text-brand font-medium hover:underline mt-4 inline-block">Back</button>
+        <button onClick={() => navigate(-1)} className="pressable text-brand font-medium hover:underline mt-4 inline-block">Back</button>
       </div>
     );
   }
@@ -88,7 +88,7 @@ const OrderDetail = () => {
 
   return (
     <div className="container-custom py-5 sm:py-8">
-      <button onClick={() => navigate(-1)} className="inline-flex items-center gap-2 text-gray-600 hover:text-brand mb-4 sm:mb-6 transition-colors">
+      <button onClick={() => navigate(-1)} className="pressable inline-flex items-center gap-2 text-gray-600 hover:text-brand mb-4 sm:mb-6 transition-colors">
         <ArrowLeft className="w-4 h-4" /> Back
       </button>
 
@@ -171,11 +171,11 @@ const OrderDetail = () => {
                 const productImage = item.image || item.product?.images?.[0]?.url || item.product?.images?.[0] || 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=200&h=200&fit=crop';
                 return (
                 <div key={index} className="flex gap-3 sm:gap-4">
-                  <Link to={productLink} className="w-16 h-16 sm:w-20 sm:h-20 bg-gray-50 rounded-xl overflow-hidden shrink-0 transition-opacity hover:opacity-80">
+                  <Link to={productLink} className="pressable w-16 h-16 sm:w-20 sm:h-20 bg-gray-50 rounded-xl overflow-hidden shrink-0 transition-opacity hover:opacity-80">
                     <img src={productImage} alt={item.name} className="w-full h-full object-cover" />
                   </Link>
                   <div className="min-w-0 flex-1">
-                    <Link to={productLink} className="line-clamp-2 font-medium text-gray-900 transition-colors hover:text-brand">{item.name}</Link>
+                    <Link to={productLink} className="pressable line-clamp-2 font-medium text-gray-900 transition-colors hover:text-brand">{item.name}</Link>
                     <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-sm text-gray-500">
                       <span>Qty: {item.quantity}</span>
                       <span>
@@ -293,7 +293,7 @@ const OrderDetail = () => {
 
       {cancelDialogOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/40" onClick={() => !cancelling && setCancelDialogOpen(false)} />
+          <div className="pressable absolute inset-0 bg-black/40" onClick={() => !cancelling && setCancelDialogOpen(false)} />
           <div className="relative w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
             <div className="mb-4 flex items-start gap-3">
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-red-50">
@@ -319,7 +319,7 @@ const OrderDetail = () => {
                 type="button"
                 onClick={handleCancel}
                 disabled={cancelling}
-                className="rounded-xl bg-red-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-red-700 disabled:opacity-50"
+                className="pressable rounded-xl bg-red-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-red-700 disabled:opacity-50"
               >
                 {cancelling ? 'Cancelling...' : 'Yes, Cancel'}
               </button>

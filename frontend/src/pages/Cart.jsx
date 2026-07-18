@@ -135,7 +135,7 @@ const Cart = () => {
           </div>
           <h2 className="text-2xl font-bold text-gray-900 mb-2">Your Cart is Empty</h2>
           <p className="max-w-sm text-gray-500 mb-7">Looks like you haven't added anything yet.</p>
-          <Link to="/medicines" className="inline-flex items-center gap-2 px-7 py-3 bg-brand hover:bg-brand-dark text-white font-semibold rounded-xl transition-colors">
+          <Link to="/medicines" className="pressable inline-flex items-center gap-2 px-7 py-3 bg-brand hover:bg-brand-dark text-white font-semibold rounded-xl transition-colors">
             Start Shopping <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
@@ -188,7 +188,7 @@ const Cart = () => {
                       {/* Product Image */}
                       <Link
                         to={`/product/${item.product?.slug}`}
-                        className="w-20 h-20 sm:w-24 sm:h-24 bg-gray-50 rounded-xl overflow-hidden shrink-0 hover:opacity-80 transition-opacity border border-gray-100"
+                        className="pressable w-20 h-20 sm:w-24 sm:h-24 bg-gray-50 rounded-xl overflow-hidden shrink-0 hover:opacity-80 transition-opacity border border-gray-100"
                       >
                         <img
                           src={item.product?.images?.[0] || 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=200&h=200&fit=crop'}
@@ -212,7 +212,7 @@ const Cart = () => {
                                 </span>
                               )}
                             </div>
-                            <Link to={`/product/${item.product?.slug}`} className="font-bold text-gray-900 text-sm sm:text-base hover:text-brand transition-colors line-clamp-2 block leading-snug">
+                            <Link to={`/product/${item.product?.slug}`} className="pressable font-bold text-gray-900 text-sm sm:text-base hover:text-brand transition-colors line-clamp-2 block leading-snug">
                               {item.product?.name}
                             </Link>
                             <p className="text-xs text-gray-400 mt-1">{item.product?.dosageForm || 'Medicine'}</p>
@@ -299,7 +299,7 @@ const Cart = () => {
                       <p className="text-xs text-green-600">Coupon applied</p>
                     </div>
                   </div>
-                  <button onClick={removeCoupon} className="p-1.5 hover:bg-green-100 rounded-lg text-green-600 hover:text-red-500 transition-colors">
+                  <button onClick={removeCoupon} className="pressable p-1.5 hover:bg-green-100 rounded-lg text-green-600 hover:text-red-500 transition-colors">
                     <X className="w-4 h-4" />
                   </button>
                 </div>
@@ -320,7 +320,7 @@ const Cart = () => {
                     <button
                       onClick={handleApplyCoupon}
                       disabled={!couponCode.trim()}
-                      className="px-5 py-2.5 bg-gray-900 hover:bg-gray-800 disabled:bg-gray-200 disabled:text-gray-400 text-white text-sm font-medium rounded-xl transition-colors"
+                      className="pressable px-5 py-2.5 bg-gray-900 hover:bg-gray-800 disabled:bg-gray-200 disabled:text-gray-400 text-white text-sm font-medium rounded-xl transition-colors"
                     >
                       Apply
                     </button>

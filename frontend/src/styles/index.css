@@ -23,9 +23,63 @@
   input, textarea, select {
     font-size: 16px;
   }
+
+  :where(button, a[href], [role="button"], summary, label[for], .pressable):not(:disabled):not([aria-disabled="true"]) {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  :where(button, a[href], [role="button"], summary, label[for], .pressable):not(:disabled):not([aria-disabled="true"]):active {
+    transform: translateY(1px) scale(0.94);
+    transition: transform 220ms ease, box-shadow 220ms ease, background-color 220ms ease;
+  }
+
+  @media (hover: none) {
+    :where(button, a[href], [role="button"], summary, label[for], .pressable):not(:disabled):not([aria-disabled="true"]):active {
+      transform: translateY(1px) scale(0.92);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    :where(button, a[href], [role="button"], summary, label[for], .pressable):active {
+      transform: none;
+    }
+  }
 }
 
 @layer components {
+  .pressable {
+    @apply cursor-pointer select-none;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+
+  .buy-now-pressable:not(:disabled):not([aria-disabled="true"]):active {
+    transform: translateY(3px) scale(0.84);
+    transition: transform 420ms ease, box-shadow 420ms ease, background-color 420ms ease;
+  }
+
+  .route-pressable:not(:disabled):not([aria-disabled="true"]):active {
+    transform: translateY(3px) scale(0.86);
+    transition: transform 380ms ease, box-shadow 380ms ease, background-color 380ms ease;
+  }
+
+  @media (hover: none) {
+    .route-pressable:not(:disabled):not([aria-disabled="true"]):active {
+      transform: translateY(3px) scale(0.82);
+      transition-duration: 460ms;
+    }
+
+    .buy-now-pressable:not(:disabled):not([aria-disabled="true"]):active {
+      transform: translateY(3px) scale(0.8);
+      transition-duration: 480ms;
+    }
+  }
+
+  .no-press-animation:not(:disabled):not([aria-disabled="true"]):active {
+    transform: none;
+    transition: background-color 120ms ease, color 120ms ease, border-color 120ms ease;
+  }
+
   .container-custom {
     @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
   }

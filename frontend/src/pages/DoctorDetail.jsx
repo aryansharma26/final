@@ -72,7 +72,7 @@ const DoctorDetail = () => {
       <div className="container-custom py-16 text-center">
         <User className="w-12 h-12 text-gray-300 mx-auto mb-4" />
         <p className="text-gray-500 font-medium">{error || 'Doctor not found'}</p>
-        <button onClick={() => navigate(-1)} className="text-brand font-medium hover:underline mt-4 inline-flex items-center gap-1">
+        <button onClick={() => navigate(-1)} className="pressable text-brand font-medium hover:underline mt-4 inline-flex items-center gap-1">
           <ArrowLeft className="w-4 h-4" /> Go Back
         </button>
       </div>
@@ -82,7 +82,7 @@ const DoctorDetail = () => {
   return (
     <div className="container-custom py-6">
       {/* Back */}
-      <button onClick={() => navigate(-1)} className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-brand mb-4 transition-colors">
+      <button onClick={() => navigate(-1)} className="pressable inline-flex items-center gap-2 text-sm text-gray-500 hover:text-brand mb-4 transition-colors">
         <ArrowLeft className="w-4 h-4" /> Back
       </button>
 
@@ -275,7 +275,7 @@ const DoctorDetail = () => {
                   <Link
                     key={d._id}
                     to={`/doctors/${d.slug}`}
-                    className="flex items-center gap-3 p-3 rounded-xl border border-gray-100 hover:border-gray-200 hover:bg-gray-50 transition-colors"
+                    className="pressable flex items-center gap-3 p-3 rounded-xl border border-gray-100 hover:border-gray-200 hover:bg-gray-50 transition-colors"
                   >
                     <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-100 shrink-0">
                       <img

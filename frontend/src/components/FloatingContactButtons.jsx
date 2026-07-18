@@ -129,8 +129,10 @@ export default function FloatingContactButtons() {
                 onClick={contact.id === 'viber' ? (e) => handleViberClick(e, contact.number) : undefined}
                 target="_blank"
                 rel="noopener noreferrer"
+                whileTap={{ scale: 0.84, y: 2 }}
+                transition={{ type: 'spring', stiffness: 260, damping: 18 }}
                 variants={contactVariants}
-                className="group flex transform-gpu items-center gap-2"
+                className="pressable group flex transform-gpu items-center gap-2"
                 aria-label={`Chat on ${contact.label}`}
               >
                 <span
@@ -158,10 +160,10 @@ export default function FloatingContactButtons() {
 
       <motion.button
         onClick={handleToggle}
-        whileTap={{ scale: 0.92 }}
+        whileTap={{ scale: 0.82, y: 2 }}
         animate={{ rotate: open ? 90 : 0, scale: open ? 1.03 : 1 }}
-        transition={{ type: 'spring', stiffness: 420, damping: 24 }}
-        className={`relative flex h-12 w-12 items-center justify-center rounded-full transition-transform duration-300 hover:scale-110 lg:h-14 lg:w-14 ${!open ? 'animate-messenger-pulse' : ''}`}
+        transition={{ type: 'spring', stiffness: 260, damping: 18 }}
+        className={`pressable relative flex h-12 w-12 items-center justify-center rounded-full transition-transform duration-300 hover:scale-110 lg:h-14 lg:w-14 ${!open ? 'animate-messenger-pulse' : ''}`}
         style={{
           backgroundColor: '#2563EB',
           boxShadow: '0 7px 34px rgba(37,99,235,0.68), 0 0 0 4px rgba(37,99,235,0.12)',

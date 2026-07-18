@@ -380,7 +380,7 @@ const UsersModule = () => {
             type="button"
             onClick={handleExportExcel}
             disabled={exportLoading}
-            className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 text-sm font-semibold text-white bg-brand rounded-xl hover:bg-brand-dark focus:outline-none transition-all whitespace-nowrap disabled:opacity-50 cursor-pointer"
+            className="pressable inline-flex items-center justify-center gap-1.5 px-4 py-2.5 text-sm font-semibold text-white bg-brand rounded-xl hover:bg-brand-dark focus:outline-none transition-all whitespace-nowrap disabled:opacity-50 cursor-pointer"
           >
             {exportLoading ? (
               <Loader2 className="w-4 h-4 animate-spin text-white" />
@@ -517,10 +517,10 @@ const UsersModule = () => {
                     <td className="px-4 py-3 text-gray-500 text-xs">{new Date(u.createdAt).toLocaleDateString()}</td>
                     <td className="px-4 py-3 text-right" onClick={(e) => e.stopPropagation()}>
                       <div className="flex items-center justify-end gap-1">
-                        <button onClick={() => openUserDetails(u)} className="rounded-lg p-1.5 text-gray-400 transition-colors hover:bg-blue-50 hover:text-blue-600" title="View full details">
+                        <button onClick={() => openUserDetails(u)} className="pressable rounded-lg p-1.5 text-gray-400 transition-colors hover:bg-blue-50 hover:text-blue-600" title="View full details">
                           {detailsLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Eye className="h-4 w-4" />}
                         </button>
-                        <button onClick={() => setToggleUser(u)} className={`rounded-lg p-1.5 transition-colors ${u.isActive ? 'text-gray-400 hover:bg-red-50 hover:text-red-600' : 'text-gray-400 hover:bg-green-50 hover:text-green-600'}`} title={u.isActive ? 'Block user' : 'Unblock user'}>
+                        <button onClick={() => setToggleUser(u)} className={`pressable rounded-lg p-1.5 transition-colors ${u.isActive ? 'text-gray-400 hover:bg-red-50 hover:text-red-600' : 'text-gray-400 hover:bg-green-50 hover:text-green-600'}`} title={u.isActive ? 'Block user' : 'Unblock user'}>
                           {u.isActive ? <XCircle className="h-4 w-4" /> : <CheckCircle className="h-4 w-4" />}
                         </button>
                       </div>

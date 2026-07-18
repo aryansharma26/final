@@ -129,7 +129,7 @@ const ForgotPassword = () => {
               to={loginTarget}
               replace
               state={location.state}
-              className="mb-5 inline-flex items-center gap-2 text-sm font-semibold text-slate-500 transition-colors hover:text-pills-pink"
+              className="pressable mb-5 inline-flex items-center gap-2 text-sm font-semibold text-slate-500 transition-colors hover:text-pills-pink"
             >
               <ArrowLeft className="h-4 w-4" /> Back to Login
             </Link>
@@ -183,7 +183,7 @@ const ForgotPassword = () => {
                         type="button"
                         onClick={handleResend}
                         disabled={resending || resendCooldown > 0}
-                        className="flex h-12 w-full items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white text-sm font-bold text-slate-700 transition-all hover:border-pills-pink/30 hover:text-pills-pink disabled:cursor-not-allowed disabled:opacity-60"
+                        className="pressable flex h-12 w-full items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white text-sm font-bold text-slate-700 transition-all hover:border-pills-pink/30 hover:text-pills-pink disabled:cursor-not-allowed disabled:opacity-60"
                       >
                         {resending ? (
                           <span className="h-5 w-5 rounded-full border-2 border-pills-pink/25 border-t-pills-pink animate-spin" />
@@ -197,7 +197,7 @@ const ForgotPassword = () => {
                       <button
                         type="button"
                         onClick={changeEmail}
-                        className="text-sm font-semibold text-pills-pink hover:text-pills-pink-dark"
+                        className="pressable text-sm font-semibold text-pills-pink hover:text-pills-pink-dark"
                       >
                         Use a different email
                       </button>
@@ -205,7 +205,7 @@ const ForgotPassword = () => {
                         to={loginTarget}
                         replace
                         state={location.state}
-                        className="block text-sm font-semibold text-slate-500 hover:text-slate-800"
+                        className="pressable block text-sm font-semibold text-slate-500 hover:text-slate-800"
                       >
                         Back to Login
                       </Link>
@@ -246,7 +246,7 @@ const ForgotPassword = () => {
                     <button
                       type="submit"
                       disabled={isSubmitting}
-                      className="flex h-12 w-full items-center justify-center gap-2 rounded-2xl bg-pills-pink text-sm font-bold text-white shadow-lg shadow-pills-pink/25 transition-all duration-200 hover:-translate-y-0.5 hover:bg-pills-pink-dark disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0"
+                      className="pressable flex h-12 w-full items-center justify-center gap-2 rounded-2xl bg-pills-pink text-sm font-bold text-white shadow-lg shadow-pills-pink/25 transition-all duration-200 hover:-translate-y-0.5 hover:bg-pills-pink-dark disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0"
                     >
                       {isSubmitting ? (
                         <span className="h-5 w-5 rounded-full border-2 border-white/30 border-t-white animate-spin" />

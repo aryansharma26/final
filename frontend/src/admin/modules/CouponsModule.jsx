@@ -8,7 +8,7 @@ const CouponsModule = ({ embedded = false }) => {
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   const [editingCoupon, setEditingCoupon] = useState(null);
-  const [formData, setFormData] = useState({ code: '', description: '', discountType: 'percentage', discountValue: '', minOrderAmount: '', maxDiscountAmount: '', startDate: '', endDate: '', usageLimit: '', isActive: true });
+  const [formData, setFormData] = useState({ code: '', description: '', discountType: 'percentage', discountValue: '', minOrderAmount: '', maxDiscountAmount: '', startDate: '', endDate: '', perUserLimit: '', isActive: true });
   const [submitting, setSubmitting] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
@@ -30,7 +30,7 @@ const CouponsModule = ({ embedded = false }) => {
 
   const openCreate = () => {
     setEditingCoupon(null);
-    setFormData({ code: '', description: '', discountType: 'percentage', discountValue: '', minOrderAmount: '', maxDiscountAmount: '', startDate: '', endDate: '', usageLimit: '', isActive: true });
+    setFormData({ code: '', description: '', discountType: 'percentage', discountValue: '', minOrderAmount: '', maxDiscountAmount: '', startDate: '', endDate: '', perUserLimit: '', isActive: true });
     setModalOpen(true);
   };
 
@@ -45,7 +45,7 @@ const CouponsModule = ({ embedded = false }) => {
       maxDiscountAmount: coupon.maxDiscountAmount || '',
       startDate: coupon.startDate ? new Date(coupon.startDate).toISOString().slice(0, 10) : '',
       endDate: coupon.endDate ? new Date(coupon.endDate).toISOString().slice(0, 10) : '',
-      usageLimit: coupon.usageLimit || '',
+      perUserLimit: coupon.perUserLimit || coupon.usageLimit || '',
       isActive: coupon.isActive ?? true,
     });
     setModalOpen(true);
@@ -59,7 +59,7 @@ const CouponsModule = ({ embedded = false }) => {
         discountValue: Number(formData.discountValue),
         minOrderAmount: Number(formData.minOrderAmount) || 0,
         maxDiscountAmount: formData.maxDiscountAmount ? Number(formData.maxDiscountAmount) : null,
-        usageLimit: formData.usageLimit ? Number(formData.usageLimit) : null,
+        perUserLimit: formData.perUserLimit ? Number(formData.perUserLimit) : null,
       };
       if (editingCoupon) {
         await adminAPI.updateCoupon(editingCoupon._id, data);
@@ -95,7 +95,11 @@ const CouponsModule = ({ embedded = false }) => {
   };
 
   const isExpired = (coupon) => new Date(coupon.endDate) < new Date();
-  const isActive = (coupon) => coupon.isActive && !isExpired(coupon) && (!coupon.usageLimit || coupon.usageCount < coupon.usageLimit);
+  const getCouponStatus = (coupon) => {
+    if (!coupon.isActive) return { label: 'Inactive', color: 'red' };
+    if (isExpired(coupon)) return { label: 'Expired', color: 'red' };
+    return { label: 'Active', color: 'green' };
+  };
 
   return (
     <div className={embedded ? 'space-y-4' : 'space-y-6'}>
@@ -128,7 +132,9 @@ const CouponsModule = ({ embedded = false }) => {
               ) : coupons.length === 0 ? (
                 <tr><td colSpan={6}><EmptyState icon={Tag} title="No coupons found" subtitle="Create your first coupon" /></td></tr>
               ) : (
-                coupons.map((c) => (
+                coupons.map((c) => {
+                  const status = getCouponStatus(c);
+                  return (
                   <tr key={c._id} className="border-b border-gray-50 hover:bg-gray-50/50">
                     <td className="px-4 py-3">
                       <p className="font-mono font-medium text-gray-900">{c.code}</p>
@@ -141,19 +147,23 @@ const CouponsModule = ({ embedded = false }) => {
                       </p>
                       <p className="text-xs text-gray-500">Min order: ₱{c.minOrderAmount}</p>
                     </td>
-                    <td className="px-4 py-3 text-gray-900">{c.usageCount} / {c.usageLimit || '∞'}</td>
+                    <td className="px-4 py-3 text-gray-900">
+                      <p>{c.usageCount || 0} total</p>
+                      <p className="text-xs text-gray-500">Per user: {c.perUserLimit || c.usageLimit || '∞'}</p>
+                    </td>
                     <td className="px-4 py-3 text-gray-600">{new Date(c.endDate).toLocaleDateString()}</td>
                     <td className="px-4 py-3">
-                      <Badge color={isActive(c) ? 'green' : 'red'}>{isActive(c) ? 'Active' : isExpired(c) ? 'Expired' : 'Inactive'}</Badge>
+                      <Badge color={status.color}>{status.label}</Badge>
                     </td>
                     <td className="px-4 py-3 text-right">
                       <div className="flex items-center justify-end gap-1">
-                        <button onClick={() => openEdit(c)} className="p-1.5 hover:bg-blue-50 rounded-lg text-gray-400 hover:text-blue-600 transition-colors"><Edit2 className="w-4 h-4" /></button>
-                        <button onClick={() => setDeleteId(c._id)} className="p-1.5 hover:bg-red-50 rounded-lg text-gray-400 hover:text-red-600 transition-colors"><Trash2 className="w-4 h-4" /></button>
+                        <button onClick={() => openEdit(c)} className="pressable p-1.5 hover:bg-blue-50 rounded-lg text-gray-400 hover:text-blue-600 transition-colors"><Edit2 className="w-4 h-4" /></button>
+                        <button onClick={() => setDeleteId(c._id)} className="pressable p-1.5 hover:bg-red-50 rounded-lg text-gray-400 hover:text-red-600 transition-colors"><Trash2 className="w-4 h-4" /></button>
                       </div>
                     </td>
                   </tr>
-                ))
+                  );
+                })
               )}
             </tbody>
           </table>
@@ -167,7 +177,7 @@ const CouponsModule = ({ embedded = false }) => {
           <Input label="Discount Value" type="number" value={formData.discountValue} onChange={(e) => setFormData({ ...formData, discountValue: e.target.value })} />
           <Input label="Min Order Amount" type="number" value={formData.minOrderAmount} onChange={(e) => setFormData({ ...formData, minOrderAmount: e.target.value })} />
           <Input label="Max Discount Amount" type="number" value={formData.maxDiscountAmount} onChange={(e) => setFormData({ ...formData, maxDiscountAmount: e.target.value })} />
-          <Input label="Usage Limit" type="number" value={formData.usageLimit} onChange={(e) => setFormData({ ...formData, usageLimit: e.target.value })} />
+          <Input label="Per User Limit" type="number" min={1} value={formData.perUserLimit} onChange={(e) => setFormData({ ...formData, perUserLimit: e.target.value })} />
           <Input label="Start Date" type="date" value={formData.startDate} onChange={(e) => setFormData({ ...formData, startDate: e.target.value })} />
           <Input label="End Date" type="date" value={formData.endDate} onChange={(e) => setFormData({ ...formData, endDate: e.target.value })} />
           <Textarea label="Description" value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} className="sm:col-span-2" />

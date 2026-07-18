@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { Quote, ShieldCheck, Star } from "lucide-react";
+import useSessionOnce from "../hooks/useSessionOnce.js";
 
 import familyBackground from "../assets/testimonials/family-testimonial.png";
 
@@ -48,6 +49,8 @@ const renderStars = (rating) => (
 );
 
 const Testimonials = () => {
+  const shouldAnimate = useSessionOnce("homeAnimationsSeen");
+
   return (
     <section className="relative overflow-hidden bg-white py-8 sm:py-12 lg:py-16">
       <div className="absolute inset-x-0 top-6 h-[560px] overflow-hidden">
@@ -70,10 +73,10 @@ const Testimonials = () => {
 
           <div className="relative">
             <motion.div
-              initial={{ opacity: 0, y: 18 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.25 }}
-              transition={{ duration: 0.45 }}
+              initial={shouldAnimate ? { opacity: 0, y: 18 } : false}
+              whileInView={shouldAnimate ? { opacity: 1, y: 0 } : undefined}
+              viewport={shouldAnimate ? { once: true, amount: 0.25 } : undefined}
+              transition={shouldAnimate ? { duration: 0.45 } : undefined}
               className="mx-auto mb-6 max-w-2xl text-center sm:mb-9"
             >
               <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-brand-light px-3 py-1.5 text-xs font-semibold text-brand shadow-sm sm:px-4 sm:py-2">
@@ -107,10 +110,10 @@ const Testimonials = () => {
               {REVIEWS.map((review, index) => (
                 <motion.article
                   key={review.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, amount: 0.25 }}
-                  transition={{ duration: 0.4, delay: index * 0.08 }}
+                  initial={shouldAnimate ? { opacity: 0, y: 20 } : false}
+                  whileInView={shouldAnimate ? { opacity: 1, y: 0 } : undefined}
+                  viewport={shouldAnimate ? { once: true, amount: 0.25 } : undefined}
+                  transition={shouldAnimate ? { duration: 0.4, delay: index * 0.08 } : undefined}
                   className="flex h-full flex-col rounded-2xl bg-white/78 p-4 shadow-[0_18px_45px_rgba(17,24,39,0.08)] backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:bg-white/90 hover:shadow-[0_22px_55px_rgba(17,24,39,0.12)] sm:p-5"
                 >
                   <div className="mb-4 flex items-start justify-between gap-4">

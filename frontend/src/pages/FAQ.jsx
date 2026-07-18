@@ -161,7 +161,7 @@ const FAQ = () => {
 
   return (
     <div className="container-custom py-6 sm:py-10">
-      <Link to="/" className="mb-6 inline-flex items-center gap-1.5 text-sm font-semibold text-gray-500 hover:text-brand">
+      <Link to="/" className="pressable mb-6 inline-flex items-center gap-1.5 text-sm font-semibold text-gray-500 hover:text-brand">
         <ArrowLeft className="h-4 w-4" />
         Back to home
       </Link>
@@ -177,7 +177,7 @@ const FAQ = () => {
             <Link
               key={id}
               to={`/faq#${id}`}
-              className="rounded-full border border-gray-200 bg-gray-50 px-3 py-1.5 text-xs font-semibold text-gray-600 transition-all hover:border-brand/30 hover:bg-brand/5 hover:text-brand"
+              className="pressable rounded-full border border-gray-200 bg-gray-50 px-3 py-1.5 text-xs font-semibold text-gray-600 transition-all hover:border-brand/30 hover:bg-brand/5 hover:text-brand"
             >
               {title}
             </Link>

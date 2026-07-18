@@ -38,7 +38,7 @@ const EmergencyDoctors = () => {
               <p className="text-sm text-gray-500">Available for urgent medical care</p>
             </div>
           </div>
-          <Link to="/doctors?emergency=true" className="hidden sm:flex items-center gap-1 text-red-600 font-medium text-sm hover:underline">
+          <Link to="/doctors?emergency=true" className="pressable hidden sm:flex items-center gap-1 text-red-600 font-medium text-sm hover:underline">
             View All <ChevronRight className="w-4 h-4" />
           </Link>
         </div>
@@ -95,7 +95,7 @@ const EmergencyDoctors = () => {
                   </a>
                   <Link
                     to={`/doctors/${doctor.slug}`}
-                    className="px-3 py-2 border border-gray-200 text-gray-700 text-xs font-medium rounded-xl hover:bg-gray-50 flex items-center justify-center transition-colors"
+                    className="pressable px-3 py-2 border border-gray-200 text-gray-700 text-xs font-medium rounded-xl hover:bg-gray-50 flex items-center justify-center transition-colors"
                   >
                     View
                   </Link>
@@ -106,7 +106,7 @@ const EmergencyDoctors = () => {
         )}
 
         <div className="sm:hidden mt-4 text-center">
-          <Link to="/doctors?emergency=true" className="inline-flex items-center gap-1 text-red-600 font-medium text-sm hover:underline">
+          <Link to="/doctors?emergency=true" className="pressable inline-flex items-center gap-1 text-red-600 font-medium text-sm hover:underline">
             View All Emergency Doctors <ChevronRight className="w-4 h-4" />
           </Link>
         </div>

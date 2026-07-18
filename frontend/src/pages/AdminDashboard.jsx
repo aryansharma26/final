@@ -105,7 +105,7 @@ const AdminDashboard = () => {
       {/* Mobile overlay */}
       {sidebarOpen && (
         <div
-          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+          className="pressable fixed inset-0 bg-black/50 z-40 lg:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}
@@ -113,7 +113,7 @@ const AdminDashboard = () => {
       {/* Mobile hamburger */}
       <button
         onClick={() => setSidebarOpen(!sidebarOpen)}
-        className="fixed top-4 left-4 z-50 lg:hidden p-2 bg-dark text-white rounded-lg shadow-lg"
+        className="pressable fixed top-4 left-4 z-50 lg:hidden p-2 bg-dark text-white rounded-lg shadow-lg"
       >
         <Menu className="w-5 h-5" />
       </button>
@@ -124,7 +124,7 @@ const AdminDashboard = () => {
         }`}
       >
         <div className="p-6">
-          <Link to="/" className="flex items-center gap-2">
+          <Link to="/" className="pressable flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg flex items-center justify-center overflow-hidden bg-white">
               <img src={logo} alt="Capsandpills" className="w-full h-full object-contain" />
             </div>
@@ -136,7 +136,7 @@ const AdminDashboard = () => {
             <button
               key={tab.id}
               onClick={() => { setActiveTab(tab.id); setSidebarOpen(false); }}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors mb-1 ${
+              className={`pressable w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors mb-1 ${
                 activeTab === tab.id ? 'bg-brand text-white' : 'text-gray-400 hover:text-white hover:bg-white/5'
               }`}
             >
@@ -146,7 +146,7 @@ const AdminDashboard = () => {
           ))}
           <button
             onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-colors mt-4"
+            className="pressable w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-colors mt-4"
           >
             <LogOut className="w-4 h-4" />
             Logout

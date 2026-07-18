@@ -130,10 +130,10 @@ const ReviewsModule = () => {
                     <td className="px-4 py-3"><Badge color={r.isApproved ? 'green' : 'yellow'}>{r.isApproved ? 'Approved' : 'Pending'}</Badge></td>
                     <td className="px-4 py-3 text-right">
                       <div className="flex items-center justify-end gap-1">
-                        <button onClick={() => handleToggleApproval(r)} className="p-1.5 hover:bg-green-50 rounded-lg text-gray-400 hover:text-green-600 transition-colors" title={r.isApproved ? 'Reject' : 'Approve'}>
+                        <button onClick={() => handleToggleApproval(r)} className="pressable p-1.5 hover:bg-green-50 rounded-lg text-gray-400 hover:text-green-600 transition-colors" title={r.isApproved ? 'Reject' : 'Approve'}>
                           {r.isApproved ? <XCircle className="w-4 h-4" /> : <CheckCircle className="w-4 h-4" />}
                         </button>
-                        <button onClick={() => setDeleteId(r._id)} className="p-1.5 hover:bg-red-50 rounded-lg text-gray-400 hover:text-red-600 transition-colors"><Trash2 className="w-4 h-4" /></button>
+                        <button onClick={() => setDeleteId(r._id)} className="pressable p-1.5 hover:bg-red-50 rounded-lg text-gray-400 hover:text-red-600 transition-colors"><Trash2 className="w-4 h-4" /></button>
                       </div>
                     </td>
                   </tr>

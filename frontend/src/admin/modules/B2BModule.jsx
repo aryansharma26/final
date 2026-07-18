@@ -213,11 +213,11 @@ const B2BModule = () => {
                       <td className="px-4 py-3 text-gray-500 text-xs">{new Date(e.createdAt).toLocaleDateString()}</td>
                       <td className="px-4 py-3 text-right">
                         <div className="flex items-center justify-end gap-1">
-                          <button onClick={() => setViewEnquiry(e)} className="p-1.5 hover:bg-blue-50 rounded-lg text-gray-400 hover:text-blue-600 transition-colors"><Eye className="w-4 h-4" /></button>
-                          <button onClick={() => handleToggleRead(e)} className="p-1.5 hover:bg-green-50 rounded-lg text-gray-400 hover:text-green-600 transition-colors" title={e.isRead ? 'Mark New' : 'Mark Reviewed'}>
+                          <button onClick={() => setViewEnquiry(e)} className="pressable p-1.5 hover:bg-blue-50 rounded-lg text-gray-400 hover:text-blue-600 transition-colors"><Eye className="w-4 h-4" /></button>
+                          <button onClick={() => handleToggleRead(e)} className="pressable p-1.5 hover:bg-green-50 rounded-lg text-gray-400 hover:text-green-600 transition-colors" title={e.isRead ? 'Mark New' : 'Mark Reviewed'}>
                             <CheckCircle className="w-4 h-4" />
                           </button>
-                          <button onClick={() => setDeleteId(e._id)} className="p-1.5 hover:bg-red-50 rounded-lg text-gray-400 hover:text-red-600 transition-colors"><Trash2 className="w-4 h-4" /></button>
+                          <button onClick={() => setDeleteId(e._id)} className="pressable p-1.5 hover:bg-red-50 rounded-lg text-gray-400 hover:text-red-600 transition-colors"><Trash2 className="w-4 h-4" /></button>
                         </div>
                       </td>
                     </tr>

@@ -139,7 +139,7 @@ export default function Login() {
             <div className="relative z-10 max-w-full overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-[0_24px_80px_rgba(15,23,42,0.10)]">
               <button
                 onClick={handleClose}
-                className="absolute right-4 top-4 inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 shadow-sm transition-colors hover:text-pills-pink"
+                className="pressable absolute right-4 top-4 inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 shadow-sm transition-colors hover:text-pills-pink"
                 aria-label="Close"
               >
                 <X className="h-4 w-4" />
@@ -218,7 +218,7 @@ export default function Login() {
                 <div className="flex items-center justify-end">
                   <Link
                     to="/forgot-password"
-                    className="text-sm font-semibold text-pills-pink hover:text-pills-pink-dark"
+                    className="pressable text-sm font-semibold text-pills-pink hover:text-pills-pink-dark"
                   >
                     Forgot password?
                   </Link>
@@ -227,7 +227,7 @@ export default function Login() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="flex h-12 w-full items-center justify-center gap-2 rounded-2xl bg-pills-pink text-sm font-bold text-white shadow-lg shadow-pills-pink/25 transition-all duration-200 hover:-translate-y-0.5 hover:bg-pills-pink-dark disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0"
+                  className="pressable flex h-12 w-full items-center justify-center gap-2 rounded-2xl bg-pills-pink text-sm font-bold text-white shadow-lg shadow-pills-pink/25 transition-all duration-200 hover:-translate-y-0.5 hover:bg-pills-pink-dark disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0"
                 >
                   {loading ? (
                     <span className="h-5 w-5 rounded-full border-2 border-white/30 border-t-white animate-spin" />
@@ -244,7 +244,7 @@ export default function Login() {
                 <Link
                   to={`/register?redirect=${encodeURIComponent(redirect)}`}
                   state={location.state}
-                  className="font-bold text-pills-pink hover:text-pills-pink-dark"
+                  className="pressable font-bold text-pills-pink hover:text-pills-pink-dark"
                 >
                   Create account
                 </Link>

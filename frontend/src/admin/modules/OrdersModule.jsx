@@ -282,7 +282,7 @@ const OrdersModule = ({ defaultTypeFilter = 'all', hideTypeFilter = false }) => 
           type="button"
           onClick={handleExportExcel}
           disabled={exportLoading}
-          className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-4 py-2.5 text-sm font-semibold text-white bg-brand rounded-xl hover:bg-brand-dark focus:outline-none transition-all whitespace-nowrap disabled:opacity-50 cursor-pointer"
+          className="pressable w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-4 py-2.5 text-sm font-semibold text-white bg-brand rounded-xl hover:bg-brand-dark focus:outline-none transition-all whitespace-nowrap disabled:opacity-50 cursor-pointer"
         >
           {exportLoading ? (
             <Loader2 className="w-4 h-4 animate-spin text-white" />
@@ -316,7 +316,7 @@ const OrdersModule = ({ defaultTypeFilter = 'all', hideTypeFilter = false }) => 
                 filteredOrders.map((o) => {
                   const theme = getOrderStatusTheme(o.status);
                   return (
-                  <tr key={o._id} onClick={() => setViewOrder(o)} className={`border-b border-l-4 border-gray-50 ${theme.border} ${theme.row} cursor-pointer transition-all animate-fadeIn`}>
+                  <tr key={o._id} onClick={() => setViewOrder(o)} className={`pressable border-b border-l-4 border-gray-50 ${theme.border} ${theme.row} cursor-pointer transition-all animate-fadeIn`}>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
                         <span className="font-mono text-xs font-semibold text-gray-500 bg-gray-50 px-2 py-0.5 rounded border border-gray-100" title={`Order Code: ${shortId(o._id)} | Full Order ID: ${o._id}`}>
@@ -379,8 +379,8 @@ const OrdersModule = ({ defaultTypeFilter = 'all', hideTypeFilter = false }) => 
                     </td>
                     <td className="px-4 py-3 text-right" onClick={(e) => e.stopPropagation()}>
                       <div className="flex items-center justify-end gap-1">
-                        <button onClick={() => setViewOrder(o)} className="p-1.5 hover:bg-blue-50 rounded-lg text-gray-400 hover:text-blue-600 transition-colors" title="View Invoice"><Eye className="w-4 h-4" /></button>
-                        <button onClick={() => { setUpdateId(o._id); setNewStatus(o.status); }} className="p-1.5 hover:bg-green-50 rounded-lg text-gray-400 hover:text-green-600 transition-colors" title="Quick Status Edit"><Edit2 className="w-4 h-4" /></button>
+                        <button onClick={() => setViewOrder(o)} className="pressable p-1.5 hover:bg-blue-50 rounded-lg text-gray-400 hover:text-blue-600 transition-colors" title="View Invoice"><Eye className="w-4 h-4" /></button>
+                        <button onClick={() => { setUpdateId(o._id); setNewStatus(o.status); }} className="pressable p-1.5 hover:bg-green-50 rounded-lg text-gray-400 hover:text-green-600 transition-colors" title="Quick Status Edit"><Edit2 className="w-4 h-4" /></button>
                       </div>
                     </td>
                   </tr>
@@ -670,7 +670,7 @@ const OrdersModule = ({ defaultTypeFilter = 'all', hideTypeFilter = false }) => 
                   {viewOrder.seniorCitizenStatus === 'pending' && (
                     <div className="flex gap-2">
                       <button 
-                        className="px-3 py-1.5 bg-green-50 text-green-700 hover:bg-green-100 border border-green-200 rounded-lg text-xs font-semibold transition-colors"
+                        className="pressable px-3 py-1.5 bg-green-50 text-green-700 hover:bg-green-100 border border-green-200 rounded-lg text-xs font-semibold transition-colors"
                         onClick={async () => {
                           if (!confirm('Approve this Senior Citizen verification?')) return;
                           try {
@@ -685,7 +685,7 @@ const OrdersModule = ({ defaultTypeFilter = 'all', hideTypeFilter = false }) => 
                         Approve ID
                       </button>
                       <button 
-                        className="px-3 py-1.5 bg-red-50 text-red-700 hover:bg-red-100 border border-red-200 rounded-lg text-xs font-semibold transition-colors"
+                        className="pressable px-3 py-1.5 bg-red-50 text-red-700 hover:bg-red-100 border border-red-200 rounded-lg text-xs font-semibold transition-colors"
                         onClick={async () => {
                           if (!confirm('Reject this Senior Citizen verification?')) return;
                           try {

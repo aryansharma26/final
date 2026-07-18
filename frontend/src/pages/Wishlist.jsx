@@ -77,7 +77,7 @@ const Wishlist = () => {
           <Heart className="w-14 h-14 sm:w-16 sm:h-16 text-gray-300 mb-4 sm:mb-5" />
           <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">Your Wishlist is Empty</h2>
           <p className="text-gray-500 mb-5 sm:mb-7">Save items you love for later.</p>
-          <Link to="/medicines" className="inline-flex items-center gap-2 px-7 py-3 bg-brand hover:bg-brand-dark text-white font-semibold rounded-xl transition-colors">
+          <Link to="/medicines" className="pressable inline-flex items-center gap-2 px-7 py-3 bg-brand hover:bg-brand-dark text-white font-semibold rounded-xl transition-colors">
             Start Shopping <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
