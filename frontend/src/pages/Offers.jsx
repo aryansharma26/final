@@ -39,16 +39,16 @@ const Offers = () => {
   };
 
   return (
-    <div className="container-custom py-8">
+    <div className="container-custom py-5 sm:py-8">
       <button
         onClick={() => navigate(-1)}
-        className="inline-flex items-center gap-2 text-gray-600 hover:text-brand mb-6 transition-colors"
+        className="inline-flex items-center gap-2 text-gray-600 hover:text-brand mb-4 sm:mb-6 transition-colors"
       >
         <ArrowLeft className="w-4 h-4" /> Back
       </button>
 
       {/* Flash banner */}
-      <div className="bg-gradient-to-r from-brand-deep to-brand rounded-2xl p-6 mb-8 text-white">
+      <div className="bg-gradient-to-r from-brand-deep to-brand rounded-2xl p-4 mb-5 text-white sm:p-6 sm:mb-8">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
           <div>
             <h1 className="text-2xl font-bold mb-1">Special Offers</h1>
@@ -62,7 +62,7 @@ const Offers = () => {
       </div>
 
       {coupons.length > 0 && (
-        <div className="mb-6 rounded-2xl border border-green-100 bg-green-50/70 p-4">
+        <div className="mb-5 rounded-2xl border border-green-100 bg-green-50/70 p-3 sm:mb-6 sm:p-4">
           <div className="mb-3 flex items-center gap-2">
             <Tag className="h-4 w-4 text-green-700" />
             <h2 className="text-sm font-bold text-green-950">Coupons</h2>
@@ -83,9 +83,9 @@ const Offers = () => {
       )}
 
       {loading ? (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4 lg:gap-4">
           {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
-            <div key={i} className="bg-white border border-gray-100 rounded-2xl p-4 animate-pulse">
+            <div key={i} className="bg-white border border-gray-100 rounded-2xl p-3 animate-pulse sm:p-4">
               <div className="aspect-square bg-gray-200 rounded-xl mb-3" />
               <div className="h-4 bg-gray-200 rounded w-3/4 mb-2" />
               <div className="h-4 bg-gray-200 rounded w-1/2" />
@@ -93,12 +93,12 @@ const Offers = () => {
           ))}
         </div>
       ) : products.length === 0 ? (
-        <div className="text-center py-20">
+        <div className="text-center py-12 sm:py-20">
           <Tag className="w-12 h-12 text-gray-300 mx-auto mb-4" />
           <p className="text-gray-500">No active offers at the moment</p>
         </div>
       ) : (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 lg:gap-6">
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4 lg:gap-6">
           {products.map((product, index) => (
             <ProductCard
               key={product._id}

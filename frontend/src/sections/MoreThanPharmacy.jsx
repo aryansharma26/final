@@ -51,9 +51,9 @@ const services = [
 
 const MoreThanPharmacy = () => {
   return (
-    <section className="py-12 lg:py-20 bg-white">
+    <section className="py-8 sm:py-12 lg:py-20 bg-white">
       <div className="container-custom">
-        <div className="text-center mb-10 lg:mb-12">
+        <div className="text-center mb-6 sm:mb-10 lg:mb-12">
           <h2 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-3">
             More Than Just a Pharmacy
           </h2>
@@ -62,7 +62,7 @@ const MoreThanPharmacy = () => {
           </p>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-3 lg:gap-8">
+        <div className="grid gap-5 md:grid-cols-3 lg:gap-8">
           {services.map((service, index) => {
             const Illustration = service.Illustration;
             return (
@@ -75,12 +75,12 @@ const MoreThanPharmacy = () => {
                 className="group"
               >
                 {/* SVG Area — Bada, Borderless */}
-                <div className="relative flex h-40 items-center justify-center overflow-hidden sm:h-48 lg:h-56">
+                <div className="relative flex h-32 items-center justify-center overflow-hidden sm:h-48 lg:h-56">
                   <Illustration />
                 </div>
 
                 {/* Content */}
-                <div className="pt-5 text-center">
+                <div className="pt-3 text-center sm:pt-5">
                   <h3 className="text-lg font-semibold text-gray-900 mb-2">{service.title}</h3>
                   <p className="text-sm text-gray-600 leading-relaxed">{service.description}</p>
                 </div>

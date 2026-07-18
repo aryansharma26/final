@@ -102,7 +102,7 @@ const BusinessCard = ({ title, subtitle, prefix, data = {}, orders = [], icon: I
         {[
           ['Revenue', formatMoney(data.paidRevenue)],
           ['Orders', data.totalOrders || 0],
-          ['Paid Orders', data.paidOrders || 0],
+          ['Delivered Orders', data.delivered || 0],
           ['AOV', formatMoney(data.averageOrderValue)],
         ].map(([label, value]) => (
           <div key={label} className="rounded-xl bg-gray-50 p-3">
@@ -266,7 +266,7 @@ const DashboardModule = ({ stats, loading, setActiveTab }) => {
                   </div>
                   <div className="flex items-center gap-2 text-xs font-semibold text-green-600 bg-green-50 px-2.5 py-1 rounded-full border border-green-100">
                     <TrendingUp className="w-3.5 h-3.5" />
-                    Paid Orders
+                    Paid Revenue
                   </div>
                 </div>
                 {hasRevenueData ? (

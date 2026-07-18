@@ -26,9 +26,9 @@ const EmergencyDoctors = () => {
   if (!loading && doctors.length === 0) return null;
 
   return (
-    <section className="py-10 bg-red-50/50">
+    <section className="py-7 sm:py-10 bg-red-50/50">
       <div className="container-custom">
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center justify-between mb-4 sm:mb-6">
           <div className="flex items-center gap-2">
             <div className="w-9 h-9 bg-red-100 rounded-lg flex items-center justify-center">
               <Siren className="w-5 h-5 text-red-600" />

@@ -145,11 +145,11 @@ const Hero = () => {
     suggestions.categories.length > 0;
 
   return (
-    <section className="relative z-20 overflow-visible bg-[#f7f8f3] pt-8 pb-10 lg:pt-4 lg:pb-12">
+    <section className="relative z-20 overflow-visible bg-[#f7f8f3] pt-4 pb-10 sm:pt-8 lg:pt-3 lg:pb-12">
       <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(15,23,42,0.05)_1px,transparent_1px),linear-gradient(180deg,rgba(15,23,42,0.05)_1px,transparent_1px)] bg-[size:52px_52px]" />{" "}
       <div className="container-custom relative">
         <div className="mx-auto max-w-4xl text-center">
-          <div className="mb-3 inline-flex items-center gap-1.5 rounded-full border border-emerald-100 bg-white/85 px-3 py-1.5 text-xs font-semibold text-emerald-700 shadow-sm">
+          <div className="mb-2 inline-flex items-center gap-1.5 rounded-full border border-emerald-100 bg-white/85 px-3 py-1.5 text-xs font-semibold text-emerald-700 shadow-sm">
             <BadgeCheck className="h-3.5 w-3.5" />
             Trusted healthcare at your doorstep
           </div>

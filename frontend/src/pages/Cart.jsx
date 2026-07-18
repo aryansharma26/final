@@ -144,22 +144,22 @@ const Cart = () => {
   }
 
   return (
-    <div className="container-custom py-8">
+    <div className="container-custom py-5 sm:py-8">
       {/* Header */}
-      <div className="flex items-center gap-4 mb-8">
+      <div className="flex items-center gap-3 sm:gap-4 mb-5 sm:mb-8">
         <button
           onClick={() => navigate(-1)}
-          className="p-2 hover:bg-gray-100 rounded-xl transition-colors"
+          className="p-2 hover:bg-gray-100 rounded-xl transition-colors shrink-0"
         >
           <ArrowLeft className="w-5 h-5 text-gray-600" />
         </button>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Shopping Cart</h1>
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Shopping Cart</h1>
           <p className="text-sm text-gray-500">{itemCount} {itemCount === 1 ? 'item' : 'items'} in your cart</p>
         </div>
       </div>
 
-      <div className="grid lg:grid-cols-12 gap-8">
+      <div className="grid lg:grid-cols-12 gap-5 lg:gap-8">
         {/* Cart Items */}
         <div className="lg:col-span-7 xl:col-span-8">
           <div className="space-y-4">
@@ -182,9 +182,9 @@ const Cart = () => {
                     initial={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.95, x: -50 }}
                     transition={{ duration: 0.3 }}
-                    className={`bg-white border border-gray-100 rounded-2xl p-5 transition-all shadow-sm hover:shadow-md ${isRemoving ? 'opacity-50' : ''}`}
+                    className={`bg-white border border-gray-100 rounded-2xl p-3.5 sm:p-5 transition-all shadow-sm hover:shadow-md ${isRemoving ? 'opacity-50' : ''}`}
                   >
-                    <div className="flex items-start gap-5">
+                    <div className="flex items-start gap-3 sm:gap-5">
                       {/* Product Image */}
                       <Link
                         to={`/product/${item.product?.slug}`}
@@ -200,7 +200,7 @@ const Cart = () => {
                       {/* Product Info */}
                       <div className="flex-1 min-w-0 flex flex-col justify-between self-stretch py-0.5">
                         {/* Top: Name + Delivery tag */}
-                        <div className="flex items-start justify-between gap-3">
+                        <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-3">
                           <div className="min-w-0">
                             <div className="flex flex-wrap gap-1 mb-1">
                               <span className="inline-block px-2 py-0.5 bg-brand/10 text-brand text-[10px] sm:text-xs font-semibold uppercase tracking-wider rounded-md">
@@ -217,11 +217,11 @@ const Cart = () => {
                             </Link>
                             <p className="text-xs text-gray-400 mt-1">{item.product?.dosageForm || 'Medicine'}</p>
                           </div>
-                          <span className="text-[10px] sm:text-xs text-green-600 font-semibold bg-green-50 px-2.5 py-1 rounded-full shrink-0 whitespace-nowrap">Delivery in 2 days</span>
+                          <span className="w-fit text-[10px] sm:text-xs text-green-600 font-semibold bg-green-50 px-2.5 py-1 rounded-full shrink-0 whitespace-nowrap">Delivery in 2 days</span>
                         </div>
 
                         {/* Bottom: Price + Qty + Remove */}
-                        <div className="flex items-center justify-between mt-3">
+                        <div className="mt-3 space-y-3 sm:flex sm:items-center sm:justify-between sm:space-y-0">
                           {/* Price Block */}
                           <div className="flex items-baseline gap-2 flex-wrap">
                             {hasDiscount && (
@@ -235,7 +235,7 @@ const Cart = () => {
                           </div>
 
                           {/* Actions: Qty + Remove */}
-                          <div className="flex items-center gap-3">
+                          <div className="flex items-center justify-between gap-2 sm:justify-end sm:gap-3">
                             {/* Quantity Stepper */}
                             <div className="flex items-center bg-gray-50 border border-gray-200 rounded-lg">
                               <button
@@ -256,10 +256,10 @@ const Cart = () => {
                             </div>
 
                             {/* Price Block */}
-                            <div className="text-right w-20">
+                            <div className="text-right min-w-[4.75rem] sm:w-20">
                               <span className="text-sm font-bold text-gray-900 block">₱{itemTotal.toFixed(0)}</span>
                               <p className="text-[10px] text-gray-400">₱{(item.price || 0).toFixed(0)} each</p>
-                              <span className="text-[9px] text-gray-400 block font-normal leading-tight">Inclusive of Tax</span>
+                              <span className="hidden sm:block text-[9px] text-gray-400 font-normal leading-tight">Inclusive of Tax</span>
                             </div>
 
                             <button
@@ -283,7 +283,7 @@ const Cart = () => {
 
         {/* Order Summary */}
         <div className="lg:col-span-5 xl:col-span-4">
-          <div className="bg-white border border-gray-100 rounded-2xl p-6 sticky top-24 shadow-sm">
+          <div className="bg-white border border-gray-100 rounded-2xl p-4 sm:p-6 lg:sticky lg:top-24 shadow-sm">
             <h2 className="text-lg font-bold text-gray-900 mb-5">Order Summary</h2>
 
             {/* Coupon Section */}
@@ -305,7 +305,7 @@ const Cart = () => {
                 </div>
               ) : (
                 <div className="space-y-2">
-                  <div className="flex gap-2">
+                  <div className="flex flex-col sm:flex-row gap-2">
                     <div className="flex-1 relative">
                       <Tag className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                       <input

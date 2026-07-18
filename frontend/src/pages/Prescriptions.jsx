@@ -474,8 +474,8 @@ const Prescriptions = () => {
               const status = statusStyles[item.status] || statusStyles.pending;
               const Icon = status.icon;
               return (
-                <div key={item._id} className="flex flex-col gap-3 p-4 sm:p-5 lg:flex-row lg:items-center lg:justify-between">
-                  <div className="min-w-0">
+                <div key={item._id} className="flex flex-col gap-3 p-4 sm:p-5 md:flex-row md:items-center md:justify-between">
+                  <div className="flex-1 min-w-0">
                     <p className="truncate text-sm font-semibold text-gray-950">{item.originalFileName}</p>
                     <p className="mt-0.5 text-xs text-gray-500">
                       {formatSize(item.fileSize)} | Uploaded {new Date(item.uploadedAt || item.createdAt).toLocaleDateString()}
@@ -510,7 +510,7 @@ const Prescriptions = () => {
                     )}
                     {item.adminNotes && <p className="mt-2 text-sm text-gray-600">{item.adminNotes}</p>}
                   </div>
-                  <div className="flex flex-wrap items-center gap-2">
+                  <div className="flex flex-row flex-nowrap items-center justify-end gap-1.5 sm:gap-2 shrink-0 w-full md:w-auto">
                     <span className={`inline-flex w-fit items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold ${status.className}`}>
                       <Icon className="h-3.5 w-3.5" />
                       {status.label}

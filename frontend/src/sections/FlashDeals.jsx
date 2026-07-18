@@ -53,7 +53,7 @@ const FlashDeals = () => {
   return (
     <section className="bg-gray-900 py-2.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] sm:py-4">
       <div className="container-custom">
-        <div className="flex min-w-0 flex-row items-center justify-between gap-2 sm:gap-4">
+        <div className="flex min-w-0 flex-wrap items-center justify-between gap-2 sm:flex-nowrap sm:gap-4">
           {/* Left */}
           <div className="flex min-w-0 flex-1 items-center gap-2 sm:gap-3">
             <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-pills-pink/30 bg-pills-pink/15 shadow-inner sm:h-10 sm:w-10 sm:rounded-2xl">
@@ -65,9 +65,11 @@ const FlashDeals = () => {
                 {flashDeal.headline}
               </h3>
 
-              <p className="hidden truncate text-[11px] font-medium text-gray-400 min-[430px]:block sm:text-sm">
-                {flashDeal.subtext}
-              </p>
+              {flashDeal.subtext && (
+                <p className="mt-0.5 line-clamp-2 text-[11px] font-medium leading-snug text-gray-400 sm:truncate sm:text-sm">
+                  {flashDeal.subtext}
+                </p>
+              )}
             </div>
           </div>
 

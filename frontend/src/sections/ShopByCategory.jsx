@@ -98,9 +98,9 @@ const ShopByCategory = () => {
 
   if (loading) {
     return (
-      <section className="bg-white py-10 lg:py-14">
+      <section className="bg-white py-7 sm:py-10 lg:py-14">
         <div className="container-custom">
-          <div className="mb-7 flex items-end justify-between">
+          <div className="mb-5 sm:mb-7 flex items-end justify-between">
             <div>
               <div className="mb-3 h-4 w-24 animate-pulse rounded-full bg-gray-200" />
               <div className="h-8 w-56 animate-pulse rounded-lg bg-gray-200" />
@@ -126,7 +126,7 @@ const ShopByCategory = () => {
 
   if (error) {
     return (
-      <section className="bg-white py-10 lg:py-14">
+      <section className="bg-white py-7 sm:py-10 lg:py-14">
         <div className="container-custom text-center">
           <p className="mb-3 text-sm font-medium text-red-500">{error}</p>
           <button
@@ -142,7 +142,7 @@ const ShopByCategory = () => {
 
   if (categories.length === 0) {
     return (
-      <section className="bg-white py-10 lg:py-14">
+      <section className="bg-white py-7 sm:py-10 lg:py-14">
         <div className="container-custom text-center">
           <p className="text-gray-500">No categories available.</p>
         </div>
@@ -151,9 +151,9 @@ const ShopByCategory = () => {
   }
 
   return (
-    <section className="bg-white py-10 lg:py-14">
+    <section className="bg-white py-7 sm:py-10 lg:py-14">
       <div className="container-custom">
-        <div className="mb-7 flex items-end justify-between gap-4">
+        <div className="mb-5 sm:mb-7 flex items-end justify-between gap-4">
           <div>
             <div className="mb-2 inline-flex items-center gap-1.5 rounded-full bg-pills-pink-light px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.14em] text-pills-pink-dark">
               <Sparkles className="h-3 w-3" />
@@ -177,10 +177,10 @@ const ShopByCategory = () => {
               <Link
                 key={category._id}
                 to={`/medicines?category=${category._id}`}
-                className="group relative overflow-hidden rounded-2xl border border-gray-100 bg-white p-4 text-left shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-brand/25 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-brand/30"
+                className="group relative overflow-hidden rounded-2xl border border-gray-100 bg-white p-3 text-left shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-brand/25 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-brand/30 sm:p-4"
               >
                 <div className="absolute inset-x-0 top-0 h-1 bg-pills-pink/60 opacity-0 transition-opacity group-hover:opacity-100" />
-                <div className="mb-4 flex items-start justify-between gap-3">
+                <div className="mb-3 flex items-start justify-between gap-3 sm:mb-4">
                   <CategoryIllustration categoryName={category.name} />
                   <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gray-50 text-gray-400 transition-colors group-hover:bg-brand group-hover:text-white">
                     <ArrowRight className="h-4 w-4" />

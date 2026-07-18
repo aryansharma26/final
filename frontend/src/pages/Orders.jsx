@@ -70,7 +70,7 @@ const Orders = () => {
 
   return (
     <div className="container-custom py-5 sm:py-8">
-      <div className="mb-6 flex items-start justify-between gap-3">
+      <div className="mb-4 flex items-start justify-between gap-3 sm:mb-6">
         <div className="flex min-w-0 items-start gap-3">
           <button
             type="button"
@@ -103,16 +103,16 @@ const Orders = () => {
       )}
 
       {orders.length === 0 ? (
-        <div className="flex min-h-[42vh] flex-col items-center justify-center rounded-2xl border border-gray-100 bg-white px-5 py-12 text-center">
-          <Package className="mb-5 h-16 w-16 text-gray-300" />
-          <h2 className="mb-2 text-2xl font-bold text-gray-950">No Orders Yet</h2>
-          <p className="mb-7 max-w-sm text-sm text-gray-500">When you place an order, tracking and payment details will appear here.</p>
+        <div className="flex min-h-[34vh] flex-col items-center justify-center rounded-2xl border border-gray-100 bg-white px-5 py-8 text-center sm:min-h-[42vh] sm:py-12">
+          <Package className="mb-4 h-14 w-14 text-gray-300 sm:mb-5 sm:h-16 sm:w-16" />
+          <h2 className="mb-2 text-xl font-bold text-gray-950 sm:text-2xl">No Orders Yet</h2>
+          <p className="mb-5 max-w-sm text-sm text-gray-500 sm:mb-7">When you place an order, tracking and payment details will appear here.</p>
           <Link to="/medicines" className="inline-flex items-center gap-2 rounded-xl bg-brand px-7 py-3 font-semibold text-white transition-colors hover:bg-brand-dark">
             Start Shopping <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-3 sm:space-y-4">
           {orders.map((order) => {
             const firstItem = order.orderItems?.[0];
             const itemCount = order.orderItems?.length || 0;

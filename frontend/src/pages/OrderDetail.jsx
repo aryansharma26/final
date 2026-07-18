@@ -87,30 +87,30 @@ const OrderDetail = () => {
   const formatMoney = (value) => `PHP ${Number(value || 0).toLocaleString()}`;
 
   return (
-    <div className="container-custom py-8">
-      <button onClick={() => navigate(-1)} className="inline-flex items-center gap-2 text-gray-600 hover:text-brand mb-6 transition-colors">
+    <div className="container-custom py-5 sm:py-8">
+      <button onClick={() => navigate(-1)} className="inline-flex items-center gap-2 text-gray-600 hover:text-brand mb-4 sm:mb-6 transition-colors">
         <ArrowLeft className="w-4 h-4" /> Back
       </button>
 
       {success && currentStatus !== 'cancelled' && !message && (
-        <div className="mb-6 p-4 bg-green-50 text-green-700 rounded-xl flex items-center gap-3">
+        <div className="mb-4 p-3 bg-green-50 text-green-700 rounded-xl flex items-center gap-3 sm:mb-6 sm:p-4">
           <CheckCircle className="w-5 h-5" />
           <span className="font-medium">Order placed successfully!</span>
         </div>
       )}
 
       {message && (
-        <div className={`mb-6 p-4 rounded-xl flex items-center gap-3 ${message.includes('success') ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
+        <div className={`mb-4 p-3 rounded-xl flex items-center gap-3 sm:mb-6 sm:p-4 ${message.includes('success') ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
           {message.includes('success') ? <CheckCircle className="w-5 h-5" /> : <XCircle className="w-5 h-5" />}
           <span className="font-medium">{message}</span>
         </div>
       )}
 
-      <div className="grid lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 space-y-6">
+      <div className="grid gap-5 lg:grid-cols-3 lg:gap-8">
+        <div className="lg:col-span-2 space-y-4 sm:space-y-6">
           {/* Status Tracker */}
           {currentStatus !== 'cancelled' && (
-            <div className="bg-white border border-gray-100 rounded-2xl p-6">
+            <div className="bg-white border border-gray-100 rounded-2xl p-4 sm:p-6">
               <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
                 <h2 className="text-lg font-bold text-gray-900">Order Status</h2>
                 {order.isB2B && (
@@ -133,10 +133,10 @@ const OrderDetail = () => {
                   return (
                     <div key={step} className="flex items-center flex-1">
                       <div className="flex flex-col items-center">
-                        <div className={`w-10 h-10 rounded-full flex items-center justify-center ${isActive ? config.bg : 'bg-gray-100'}`}>
-                          <config.icon className={`w-5 h-5 ${isActive ? config.color : 'text-gray-400'}`} />
+                        <div className={`w-8 h-8 rounded-full flex items-center justify-center sm:h-10 sm:w-10 ${isActive ? config.bg : 'bg-gray-100'}`}>
+                          <config.icon className={`w-4 h-4 sm:h-5 sm:w-5 ${isActive ? config.color : 'text-gray-400'}`} />
                         </div>
-                        <span className={`text-xs mt-2 font-medium text-center ${isCurrent ? config.color : isActive ? 'text-gray-700' : 'text-gray-400'}`}>
+                        <span className={`text-[10px] mt-1.5 font-medium text-center sm:mt-2 sm:text-xs ${isCurrent ? config.color : isActive ? 'text-gray-700' : 'text-gray-400'}`}>
                           {config.label}
                         </span>
                       </div>
@@ -151,7 +151,7 @@ const OrderDetail = () => {
           )}
 
           {currentStatus === 'cancelled' && (
-            <div className="bg-red-50 border border-red-100 rounded-2xl p-6">
+            <div className="bg-red-50 border border-red-100 rounded-2xl p-4 sm:p-6">
               <div className="flex items-center gap-3">
                 <XCircle className="w-6 h-6 text-red-600" />
                 <div>
@@ -163,15 +163,15 @@ const OrderDetail = () => {
           )}
 
           {/* Order Items */}
-          <div className="bg-white border border-gray-100 rounded-2xl p-6">
+          <div className="bg-white border border-gray-100 rounded-2xl p-4 sm:p-6">
             <h2 className="text-lg font-bold text-gray-900 mb-4">Order Items</h2>
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
               {order.orderItems.map((item, index) => {
                 const productLink = getProductLink(item) || `/orders/${order._id}`;
                 const productImage = item.image || item.product?.images?.[0]?.url || item.product?.images?.[0] || 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=200&h=200&fit=crop';
                 return (
-                <div key={index} className="flex gap-4">
-                  <Link to={productLink} className="w-20 h-20 bg-gray-50 rounded-xl overflow-hidden shrink-0 transition-opacity hover:opacity-80">
+                <div key={index} className="flex gap-3 sm:gap-4">
+                  <Link to={productLink} className="w-16 h-16 sm:w-20 sm:h-20 bg-gray-50 rounded-xl overflow-hidden shrink-0 transition-opacity hover:opacity-80">
                     <img src={productImage} alt={item.name} className="w-full h-full object-cover" />
                   </Link>
                   <div className="min-w-0 flex-1">
@@ -197,8 +197,8 @@ const OrderDetail = () => {
         </div>
 
         {/* Order Info */}
-        <div className="lg:col-span-1 space-y-6">
-          <div className="bg-white border border-gray-100 rounded-2xl p-6">
+        <div className="lg:col-span-1 space-y-4 sm:space-y-6">
+          <div className="bg-white border border-gray-100 rounded-2xl p-4 sm:p-6">
             <h2 className="text-lg font-bold text-gray-900 mb-4">Order Details</h2>
             <div className="space-y-3 text-sm">
               <div className="flex justify-between">
@@ -235,7 +235,7 @@ const OrderDetail = () => {
             )}
           </div>
 
-          <div className="bg-white border border-gray-100 rounded-2xl p-6">
+          <div className="bg-white border border-gray-100 rounded-2xl p-4 sm:p-6">
             <div className="flex items-center gap-2 mb-4">
               <MapPin className="w-5 h-5 text-brand" />
               <h2 className="text-lg font-bold text-gray-900">Shipping Address</h2>
@@ -249,7 +249,7 @@ const OrderDetail = () => {
             </div>
           </div>
 
-          <div className="bg-white border border-gray-100 rounded-2xl p-6">
+          <div className="bg-white border border-gray-100 rounded-2xl p-4 sm:p-6">
             <h2 className="text-lg font-bold text-gray-900 mb-4">Payment Summary</h2>
             <div className="space-y-2 text-sm">
               <div className="flex justify-between text-gray-600">

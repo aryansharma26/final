@@ -213,14 +213,14 @@ const Medicines = () => {
   };
 
   return (
-    <div className="container-custom py-8">
+    <div className="container-custom py-5 sm:py-8">
       <button
         onClick={() => navigate(-1)}
-        className="inline-flex items-center gap-2 text-gray-600 hover:text-brand mb-6 transition-colors"
+        className="inline-flex items-center gap-2 text-gray-600 hover:text-brand mb-4 sm:mb-6 transition-colors"
       >
         <ArrowLeft className="w-4 h-4" /> Back
       </button>
-      <div className="mb-6">
+      <div className="mb-4 sm:mb-6">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">
             {selectedCategoryData ? selectedCategoryData.name : 'All Medicines'}
@@ -238,7 +238,7 @@ const Medicines = () => {
         <div
           ref={categoryScrollRef}
           onScroll={(e) => updateScrollState('parent', e.currentTarget)}
-          className={`flex snap-x gap-2 overflow-x-auto pb-2 scrollbar-hide ${
+          className={`flex snap-x gap-2 overflow-x-auto overscroll-x-contain pb-2 scrollbar-hide ${
             categoryScrollState.parent.left ? 'pl-10' : 'pl-0'
           } ${categoryScrollState.parent.right ? 'pr-12' : 'pr-0'}`}
           style={{ scrollbarWidth: 'none' }}
@@ -299,11 +299,11 @@ const Medicines = () => {
 
       {/* Child Categories Strip */}
       {visibleSubCategories.length > 0 && (
-        <div className="relative mb-6">
+        <div className="relative mb-4 sm:mb-6">
           <div
             ref={subCategoryScrollRef}
             onScroll={(e) => updateScrollState('child', e.currentTarget)}
-            className={`flex snap-x gap-2 overflow-x-auto pb-2 scrollbar-hide ${
+            className={`flex snap-x gap-2 overflow-x-auto overscroll-x-contain pb-2 scrollbar-hide ${
               categoryScrollState.child.left ? 'pl-10' : 'pl-0'
             } ${categoryScrollState.child.right ? 'pr-12' : 'pr-0'}`}
             style={{ scrollbarWidth: 'none' }}
@@ -351,9 +351,9 @@ const Medicines = () => {
       )}
 
       {initialLoading ? (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4 lg:gap-4">
           {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
-            <div key={i} className="bg-white border border-gray-100 rounded-2xl p-4 animate-pulse">
+            <div key={i} className="bg-white border border-gray-100 rounded-2xl p-3 animate-pulse sm:p-4">
               <div className="aspect-square bg-gray-200 rounded-xl mb-3" />
               <div className="h-4 bg-gray-200 rounded w-3/4 mb-2" />
               <div className="h-4 bg-gray-200 rounded w-1/2" />
@@ -361,13 +361,13 @@ const Medicines = () => {
           ))}
         </div>
       ) : products.length === 0 ? (
-        <div className="text-center py-20">
+        <div className="text-center py-12 sm:py-20">
           <Pill className="w-12 h-12 text-gray-300 mx-auto mb-4" />
           <p className="text-gray-500">No products found</p>
         </div>
       ) : (
         <>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 lg:gap-6">
+          <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4 lg:gap-6">
             {products.map((product, index) => (
               <ProductCard
                 key={product._id}
@@ -383,13 +383,13 @@ const Medicines = () => {
 
           {/* Infinite Scroll Loader */}
           {hasMore && (
-            <div ref={loaderRef} className="flex items-center justify-center py-8">
+            <div ref={loaderRef} className="flex items-center justify-center py-5 sm:py-8">
               <div className="animate-spin w-8 h-8 border-2 border-brand border-t-transparent rounded-full" />
             </div>
           )}
 
           {!hasMore && products.length > 0 && (
-            <p className="text-center text-gray-400 py-8 text-sm">No more products</p>
+            <p className="text-center text-gray-400 py-5 text-sm sm:py-8">No more products</p>
           )}
         </>
       )}

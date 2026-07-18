@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo, useRef } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import { AnimatePresence, motion } from "framer-motion";
 import {
   Menu,
   X,
@@ -31,6 +32,12 @@ const getImageUrl = (product) => {
 const formatPrice = (product) => {
   const price = product?.discountPrice > 0 ? product.discountPrice : product?.price;
   return typeof price === "number" ? `PHP ${price.toLocaleString()}` : "";
+};
+
+const mobileItemMotion = {
+  initial: { opacity: 0, y: 8 },
+  animate: { opacity: 1, y: 0 },
+  transition: { duration: 0.18 },
 };
 
 const SearchSuggestions = ({
@@ -175,6 +182,7 @@ const Navbar = () => {
   const [suggestionsLoading, setSuggestionsLoading] = useState(false);
   const [categories, setCategories] = useState([]);
   const [catLoading, setCatLoading] = useState(true);
+  const [mobileExpandedCategory, setMobileExpandedCategory] = useState(null);
   const dropdownTimeoutRef = useRef(null);
   const location = useLocation();
   const navigate = useNavigate();
@@ -185,6 +193,18 @@ const Navbar = () => {
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const dropdownRef = useRef(null);
   const mobileSearchRef = useRef(null);
+
+  useEffect(() => {
+    if (!isOpen) return undefined;
+    const previousOverflow = document.body.style.overflow;
+    const previousOverscroll = document.body.style.overscrollBehavior;
+    document.body.style.overflow = "hidden";
+    document.body.style.overscrollBehavior = "none";
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      document.body.style.overscrollBehavior = previousOverscroll;
+    };
+  }, [isOpen]);
 
   const openDropdown = (id) => {
     if (dropdownTimeoutRef.current) {
@@ -410,7 +430,7 @@ const Navbar = () => {
 
   return (
     <nav
-      className={`fixed top-0 left-0 right-0 z-50 bg-white transition-shadow duration-300 ${scrolled ? "shadow-sm" : ""}`}
+      className={`fixed top-0 left-0 right-0 z-50 border-b border-gray-100 bg-white bg-opacity-100 transition-shadow duration-300 lg:border-b-0 ${scrolled || isOpen ? "shadow-sm" : ""}`}
     >
       {/* Dynamic Offer Banner */}
       {banner && banner.show && (
@@ -426,14 +446,14 @@ const Navbar = () => {
           )}
         </div>
       )}
-      <div className="container-custom">
-        <div className="flex h-16 items-center justify-between gap-2 sm:h-16 lg:h-[72px]">
+      <div className="container-custom bg-white">
+        <div className="flex h-[54px] items-center justify-between gap-2 pb-0.5 sm:h-16 sm:pb-0 lg:h-[72px]">
           <Link to="/" className="flex h-full shrink-0 items-center overflow-hidden">
-            <div className="flex h-32 w-40 items-center justify-center overflow-hidden rounded-lg sm:h-36 sm:w-44 lg:h-40 lg:w-44">
+            <div className="flex h-[76px] w-32 items-center justify-center overflow-hidden rounded-lg sm:h-28 sm:w-40 lg:h-40 lg:w-44">
               <img
                 src={logo}
                 alt="Capsandpills"
-                className="h-full w-full object-contain translate-y-0.5"
+                className="h-full w-full translate-y-1 object-contain sm:translate-y-1 lg:translate-y-0.5"
               />
             </div>
           </Link>
@@ -486,14 +506,18 @@ const Navbar = () => {
                 setIsOpen(false);
                 setIsMobileSearchOpen((prev) => !prev);
               }}
-              className="rounded-full p-2 transition-colors hover:bg-gray-50 lg:hidden"
+              className={`rounded-full border p-2 shadow-sm transition-all hover:-translate-y-0.5 lg:hidden ${
+                isMobileSearchOpen
+                  ? "border-brand/20 bg-brand text-white shadow-brand/20"
+                  : "border-gray-100 bg-white hover:bg-gray-50"
+              }`}
               aria-label="Search products"
             >
-              <Search className="h-5 w-5 text-gray-600" />
+              <Search className={`h-5 w-5 ${isMobileSearchOpen ? "text-white" : "text-gray-600"}`} />
             </button>
             <Link
               to="/wishlist"
-              className="hidden md:block relative p-2 hover:bg-gray-50 rounded-full transition-colors"
+              className="hidden md:block relative rounded-full border border-gray-100 bg-white p-2 shadow-sm transition-all hover:-translate-y-0.5 hover:bg-gray-50"
             >
               <Heart className="w-5 h-5 text-gray-600" />
             </Link>
@@ -508,7 +532,7 @@ const Navbar = () => {
             </Link>
             <Link
               to="/cart"
-              className="relative p-2 hover:bg-gray-50 rounded-full transition-colors"
+              className="relative rounded-full border border-gray-100 bg-white p-2 shadow-sm transition-all hover:-translate-y-0.5 hover:bg-gray-50"
             >
               <ShoppingCart className="w-5 h-5 text-gray-600" />
               {itemCount > 0 && (
@@ -536,8 +560,15 @@ const Navbar = () => {
                     className={`w-3.5 h-3.5 text-gray-400 transition-transform ${userMenuOpen ? "rotate-180" : ""}`}
                   />
                 </button>
-                {userMenuOpen && (
-                  <div className="absolute right-0 top-full z-[70] mt-1 w-48 rounded-xl border border-gray-100 bg-white py-2 shadow-lg">
+                <AnimatePresence>
+                  {userMenuOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -8, scale: 0.98 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: -6, scale: 0.98 }}
+                    transition={{ duration: 0.18, ease: "easeOut" }}
+                    className="absolute right-0 top-full z-[70] mt-1 w-48 rounded-xl border border-gray-100 bg-white py-2 shadow-lg"
+                  >
                     <Link
                       to="/profile"
                       onClick={() => setUserMenuOpen(false)}
@@ -568,13 +599,14 @@ const Navbar = () => {
                     >
                       <LogOut className="w-4 h-4" /> Logout
                     </button>
-                  </div>
-                )}
+                  </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             ) : (
               <Link
                 to="/login"
-                className="p-2 hover:bg-gray-50 rounded-full transition-colors"
+                className="rounded-full border border-gray-100 bg-white p-2 shadow-sm transition-all hover:-translate-y-0.5 hover:bg-gray-50"
               >
                 <User className="w-5 h-5 text-gray-600" />
               </Link>
@@ -582,23 +614,49 @@ const Navbar = () => {
 
             <button
               onClick={() => {
-                setIsOpen((prev) => !prev);
+                setIsOpen((prev) => {
+                  const next = !prev;
+                  if (next) setMobileExpandedCategory(null);
+                  return next;
+                });
                 setIsMobileSearchOpen(false);
               }}
-              className="rounded-full p-2 transition-colors hover:bg-gray-50 lg:hidden"
+              className={`rounded-full border p-2 shadow-sm transition-all hover:-translate-y-0.5 lg:hidden ${
+                isOpen
+                  ? "border-brand/20 bg-brand/10 text-brand shadow-brand/10"
+                  : "border-gray-100 bg-white text-gray-600 hover:bg-gray-50"
+              }`}
+              aria-label={isOpen ? "Close menu" : "Open menu"}
             >
-              {isOpen ? (
-                <X className="w-5 h-5 text-gray-600" />
-              ) : (
-                <Menu className="w-5 h-5 text-gray-600" />
-              )}
+              <AnimatePresence mode="wait" initial={false}>
+                <motion.span
+                  key={isOpen ? "close" : "menu"}
+                  initial={{ opacity: 0, rotate: -45, scale: 0.8 }}
+                  animate={{ opacity: 1, rotate: 0, scale: 1 }}
+                  exit={{ opacity: 0, rotate: 45, scale: 0.8 }}
+                  transition={{ duration: 0.14 }}
+                  className="block"
+                >
+                  {isOpen ? (
+                    <X className="h-5 w-5 text-brand" />
+                  ) : (
+                    <Menu className="h-5 w-5 text-gray-600" />
+                  )}
+                </motion.span>
+              </AnimatePresence>
             </button>
           </div>
         </div>
       </div>
 
-      <div
-        className={`border-t border-gray-100 bg-white shadow-sm lg:hidden transition-all duration-200 ${isMobileSearchOpen ? 'px-3 py-3 opacity-100 max-h-[1000px] overflow-visible' : 'px-3 py-0 opacity-0 max-h-0 overflow-hidden pointer-events-none'}`}
+      <AnimatePresence>
+        {isMobileSearchOpen && (
+      <motion.div
+        initial={{ opacity: 0, height: 0, y: -8 }}
+        animate={{ opacity: 1, height: "auto", y: 0 }}
+        exit={{ opacity: 0, height: 0, y: -8 }}
+        transition={{ duration: 0.2, ease: "easeOut" }}
+        className="overflow-visible border-t border-gray-100 bg-white px-3 py-3 shadow-sm lg:hidden"
       >
         <form onSubmit={handleSearch} className="relative" data-search-root="true">
           <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
@@ -637,7 +695,9 @@ const Navbar = () => {
             />
           </div>
         </form>
-      </div>
+      </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* ─── Desktop category bar with simple vertical dropdowns ─── */}
       <div className="hidden lg:block border-t border-gray-100">
@@ -678,8 +738,15 @@ const Navbar = () => {
                       )}
                     </button>
 
-                    {hasChildren && activeDropdown === cat._id && (
-                      <div className="absolute top-full left-0 w-52 bg-white rounded-lg shadow-lg border border-gray-100 py-1 z-50">
+                    <AnimatePresence>
+                      {hasChildren && activeDropdown === cat._id && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -8, scale: 0.98 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: -6, scale: 0.98 }}
+                        transition={{ duration: 0.18, ease: "easeOut" }}
+                        className="absolute top-full left-0 w-52 bg-white rounded-lg shadow-lg border border-gray-100 py-1 z-50"
+                      >
                         {children.map((child) => (
                           <Link
                             key={child._id}
@@ -690,8 +757,9 @@ const Navbar = () => {
                             {child.name}
                           </Link>
                         ))}
-                      </div>
-                    )}
+                      </motion.div>
+                      )}
+                    </AnimatePresence>
                   </div>
                 );
               })}
@@ -701,125 +769,161 @@ const Navbar = () => {
       </div>
 
       {/* ─── Mobile menu ─── */}
-      {isOpen && (
-        <div className="max-h-[80vh] overflow-y-auto border-t border-gray-100 bg-white shadow-lg lg:hidden">
-          <div className="container-custom py-4 space-y-1">
-            <form onSubmit={handleSearch} className="relative mb-4" data-search-root="true">
-              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-              <input
-                type="text"
-                name="mobile-product-search"
-                autoComplete="new-password"
-                autoCorrect="off"
-                autoCapitalize="none"
-                spellCheck={false}
-                value={searchQuery}
-                onChange={(e) => {
-                  setSearchQuery(e.target.value);
-                  if (e.target.value.trim().length >= 1) {
-                    setSuggestionsOpen(true);
-                    setSuggestionsLoading(true);
-                  }
-                }}
-                onFocus={() => {
-                  if (searchQuery.trim().length >= 1) setSuggestionsOpen(true);
-                }}
-                placeholder="Search for medicines, brands..."
-                className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-full text-[16px] focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
-              />
-              <SearchSuggestions
-                query={searchQuery}
-                suggestions={searchSuggestions}
-                loading={suggestionsLoading}
-                open={suggestionsOpen}
-                onSearch={submitSearch}
-                onProduct={handleProductSuggestion}
-                onBrand={handleBrandSuggestion}
-                onCategory={handleCategorySuggestion}
-              />
-            </form>
-            {isAuthenticated && (
-              <div className="px-4 py-3 border-b border-gray-100 mb-2">
-                <p className="font-semibold text-gray-900">{user?.name}</p>
-                <p className="text-sm text-gray-500">{user?.email}</p>
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.16 }}
+            className="lg:hidden"
+          >
+            <div className="fixed inset-x-0 top-[54px] h-[calc(100vh-54px)] bg-gray-100 sm:top-16 sm:h-[calc(100vh-64px)]" />
+            <motion.div
+              initial={{ opacity: 0, y: -14, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -10, scale: 0.98 }}
+              transition={{ duration: 0.22, ease: "easeOut" }}
+              className="relative max-h-[calc(100vh-54px)] overflow-y-auto overscroll-contain border-t border-gray-100 bg-gray-50 shadow-xl sm:max-h-[calc(100vh-64px)]"
+            >
+              <div className="container-custom space-y-2 py-3 pb-24">
+                <motion.form {...mobileItemMotion} onSubmit={handleSearch} className="relative mb-3" data-search-root="true">
+                  <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <input
+                    type="text"
+                    name="mobile-product-search"
+                    autoComplete="new-password"
+                    autoCorrect="off"
+                    autoCapitalize="none"
+                    spellCheck={false}
+                    value={searchQuery}
+                    onChange={(e) => {
+                      setSearchQuery(e.target.value);
+                      if (e.target.value.trim().length >= 1) {
+                        setSuggestionsOpen(true);
+                        setSuggestionsLoading(true);
+                      }
+                    }}
+                    onFocus={() => {
+                      if (searchQuery.trim().length >= 1) setSuggestionsOpen(true);
+                    }}
+                    placeholder="Search for medicines, brands..."
+                    className="w-full rounded-2xl border border-gray-200 bg-white py-3 pl-10 pr-4 text-[16px] shadow-sm focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20"
+                  />
+                  <SearchSuggestions
+                    query={searchQuery}
+                    suggestions={searchSuggestions}
+                    loading={suggestionsLoading}
+                    open={suggestionsOpen}
+                    onSearch={submitSearch}
+                    onProduct={handleProductSuggestion}
+                    onBrand={handleBrandSuggestion}
+                    onCategory={handleCategorySuggestion}
+                  />
+                </motion.form>
+
+                {isAuthenticated && (
+                  <motion.div {...mobileItemMotion} transition={{ duration: 0.18, delay: 0.03 }} className="mb-2 rounded-2xl border border-gray-100 bg-white px-4 py-3 shadow-sm">
+                    <p className="font-semibold text-gray-900">{user?.name}</p>
+                    <p className="text-sm text-gray-500">{user?.email}</p>
+                  </motion.div>
+                )}
+
+                {isAuthenticated ? (
+                  <>
+                    {[
+                      { to: "/profile", label: "My Profile", icon: User },
+                      { to: "/orders", label: "My Orders", icon: ShoppingCart },
+                      { to: "/prescriptions", label: "My Prescriptions", icon: FileText },
+                    ].map(({ to, label, icon: Icon }, index) => (
+                      <motion.div key={to} {...mobileItemMotion} transition={{ duration: 0.18, delay: 0.05 + index * 0.02 }}>
+                        <Link to={to} className="flex w-full items-center gap-2 rounded-2xl bg-white px-4 py-3 text-sm font-medium text-gray-700 shadow-sm transition-colors hover:bg-gray-50">
+                          <Icon className="w-4 h-4" /> {label}
+                        </Link>
+                      </motion.div>
+                    ))}
+                    <motion.button
+                      {...mobileItemMotion}
+                      transition={{ duration: 0.18, delay: 0.11 }}
+                      onClick={handleLogout}
+                      className="flex w-full items-center gap-2 rounded-2xl bg-white px-4 py-3 text-sm font-medium text-red-600 shadow-sm transition-colors hover:bg-red-50"
+                    >
+                      <LogOut className="w-4 h-4" /> Logout
+                    </motion.button>
+                  </>
+                ) : (
+                  <motion.div {...mobileItemMotion} transition={{ duration: 0.18, delay: 0.05 }}>
+                    <Link to="/login" className="flex w-full items-center gap-2 rounded-2xl bg-white px-4 py-3 text-sm font-medium text-gray-700 shadow-sm transition-colors hover:bg-gray-50">
+                      <User className="w-4 h-4" /> Sign In
+                    </Link>
+                  </motion.div>
+                )}
+
+                <motion.div {...mobileItemMotion} transition={{ duration: 0.18, delay: 0.13 }} className="pt-1">
+                  <Link to="/doctors" className="flex w-full items-center gap-2 rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm font-semibold text-gray-700 shadow-sm transition-colors hover:border-gray-600 hover:bg-gray-600 hover:text-white">
+                    <Stethoscope className="w-4 h-4" /> Find Doctor
+                  </Link>
+                </motion.div>
+
+                <motion.div {...mobileItemMotion} transition={{ duration: 0.18, delay: 0.15 }} className="mt-2 rounded-2xl border border-gray-100 bg-white p-2 shadow-sm">
+                  <p className="px-3 py-2 text-xs font-semibold uppercase tracking-wider text-gray-400">
+                    Categories
+                  </p>
+                  {catLoading
+                    ? [1, 2, 3, 4, 5].map((i) => (
+                        <div key={i} className="mb-1 h-8 rounded-lg bg-gray-100 px-4 py-3 animate-pulse" />
+                      ))
+                    : parentCategories.map((cat) => {
+                        const children = childMap[cat._id] || [];
+                        const hasChildren = children.length > 0;
+                        const isExpanded = mobileExpandedCategory === cat._id;
+
+                        return (
+                          <div key={cat._id}>
+                            {hasChildren ? (
+                              <button
+                                type="button"
+                                onClick={() => setMobileExpandedCategory(isExpanded ? null : cat._id)}
+                                className="flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-sm font-semibold text-gray-800 transition-colors hover:bg-gray-50"
+                              >
+                                <span>{cat.name}</span>
+                                <ChevronDown className={`h-4 w-4 text-gray-400 transition-transform ${isExpanded ? "rotate-180" : ""}`} />
+                              </button>
+                            ) : (
+                              <CategoryLink
+                                cat={cat}
+                                className="block rounded-xl px-3 py-2.5 text-sm font-semibold text-gray-800 transition-colors hover:bg-gray-50"
+                              />
+                            )}
+
+                            <AnimatePresence initial={false}>
+                              {isExpanded && (
+                                <motion.div
+                                  initial={{ opacity: 0, height: 0 }}
+                                  animate={{ opacity: 1, height: "auto" }}
+                                  exit={{ opacity: 0, height: 0 }}
+                                  transition={{ duration: 0.18 }}
+                                  className="overflow-hidden"
+                                >
+                                  {children.map((child) => (
+                                    <CategoryLink
+                                      key={child._id}
+                                      cat={child}
+                                      className="ml-3 block rounded-xl px-3 py-2 text-sm text-gray-500 transition-colors hover:bg-gray-50 hover:text-brand"
+                                    />
+                                  ))}
+                                </motion.div>
+                              )}
+                            </AnimatePresence>
+                          </div>
+                        );
+                      })}
+                </motion.div>
               </div>
-            )}
-            {isAuthenticated && (
-              <>
-                <Link
-                  to="/profile"
-                  className="flex items-center gap-2 w-full px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
-                >
-                  <User className="w-4 h-4" /> My Profile
-                </Link>
-                <Link
-                  to="/orders"
-                  className="flex items-center gap-2 w-full px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
-                >
-                  <ShoppingCart className="w-4 h-4" /> My Orders
-                </Link>
-                <Link
-                  to="/prescriptions"
-                  className="flex items-center gap-2 w-full px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
-                >
-                  <FileText className="w-4 h-4" /> My Prescriptions
-                </Link>
-                <button
-                  onClick={handleLogout}
-                  className="flex items-center gap-2 w-full px-4 py-3 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                >
-                  <LogOut className="w-4 h-4" /> Logout
-                </button>
-              </>
-            )}
-            {!isAuthenticated && (
-              <>
-                <Link
-                  to="/login"
-                  className="flex items-center gap-2 w-full px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
-                >
-                  <User className="w-4 h-4" /> Sign In
-                </Link>
-              </>
-            )}
-            <div className="pt-2 border-t border-gray-100">
-              <Link
-                to="/doctors"
-                className="flex items-center gap-2 w-full px-4 py-3 text-sm font-medium text-gray-600 border border-gray-300 bg-white hover:bg-gray-600 hover:border-gray-600 hover:text-white rounded-lg transition-colors"
-              >
-                <Stethoscope className="w-4 h-4" /> Find Doctor
-              </Link>
-            </div>
-            <div className="pt-2 border-t border-gray-100 mt-2">
-              <p className="px-4 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">
-                Categories
-              </p>
-              {catLoading
-                ? [1, 2, 3, 4, 5].map((i) => (
-                    <div
-                      key={i}
-                      className="px-4 py-3 h-8 bg-gray-100 rounded-lg animate-pulse mb-1"
-                    />
-                  ))
-                : parentCategories.map((cat) => (
-                    <div key={cat._id}>
-                      <CategoryLink
-                        cat={cat}
-                        className="block px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
-                      />
-                      {(childMap[cat._id] || []).map((child) => (
-                        <CategoryLink
-                          key={child._id}
-                          cat={child}
-                          className="block px-4 py-2 text-sm text-gray-500 hover:text-brand hover:bg-gray-50 rounded-lg transition-colors pl-8"
-                        />
-                      ))}
-                    </div>
-                  ))}
-            </div>
-          </div>
-        </div>
-      )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </nav>
   );
 };

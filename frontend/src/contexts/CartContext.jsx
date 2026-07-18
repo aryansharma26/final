@@ -1,4 +1,6 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { AlertCircle, CheckCircle, X, XCircle } from 'lucide-react';
 import { cartAPI } from '../api/index.js';
 import { useAuth } from './AuthContext.jsx';
 
@@ -18,6 +20,11 @@ const getGuestCart = () => {
   }
 };
 const setGuestCart = (cart) => localStorage.setItem(GUEST_CART_KEY, JSON.stringify(cart));
+
+const cleanCartErrorMessage = (msg) => {
+  if (!msg) return '';
+  return msg.replace(/\.?\s*you\s+already\s+have\s+.*?\s+in\s+cart\.?/gi, '').trim();
+};
 
 const updateGuestCartPrices = (items) => {
   return items.map((item) => {
@@ -68,6 +75,18 @@ export const CartProvider = ({ children }) => {
   const { isAuthenticated } = useAuth();
   const [cart, setCart] = useState({ items: [], coupon: null, couponDiscount: 0 });
   const [loading, setLoading] = useState(false);
+  const [toast, setToast] = useState(null);
+
+  const showToast = useCallback((message, type = 'success') => {
+    setToast({ message, type });
+  }, []);
+
+  useEffect(() => {
+    if (toast) {
+      const timer = setTimeout(() => setToast(null), 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [toast]);
 
   const loadCart = useCallback(async () => {
     if (!isAuthenticated) {
@@ -99,14 +118,17 @@ export const CartProvider = ({ children }) => {
 
     if (!productId) {
       console.error('addToCart: productId is undefined');
+      showToast('Failed to add: Invalid product', 'error');
       return { success: false, message: 'Invalid product' };
     }
 
     if (!isAuthenticated) {
       if (productData?.isPrescriptionRequired) {
+        const errMsg = 'Please log in and upload a prescription before adding this product.';
+        showToast(errMsg, 'error');
         return {
           success: false,
-          message: 'Please log in and upload a prescription before adding this product to cart.',
+          message: errMsg,
           requiresPrescription: true,
         };
       }
@@ -138,15 +160,20 @@ export const CartProvider = ({ children }) => {
       const { cart: recalcCart, changed, message } = recalculateGuestCoupon(newCart);
       setGuestCart(recalcCart);
       setCart(recalcCart);
+      showToast('Added to cart successfully!', 'success');
       return { success: true, message };
     }
     try {
       const { data } = await cartAPI.addToCart({ productId, quantity });
       setCart(data.cart);
+      showToast(data.message || 'Added to cart successfully!', 'success');
       return { success: true, message: data.message };
     } catch (err) {
-      console.error('Add to cart failed:', err?.response?.data?.message || err.message);
-      return { success: false, message: err?.response?.data?.message || 'Failed to add to cart', requiresPrescription: err?.response?.data?.requiresPrescription };
+      const errMsg = err?.response?.data?.message || err.message || 'Failed to add to cart';
+      const cleanMsg = cleanCartErrorMessage(errMsg);
+      console.error('Add to cart failed:', errMsg);
+      showToast(cleanMsg, 'error');
+      return { success: false, message: cleanMsg, requiresPrescription: err?.response?.data?.requiresPrescription };
     }
   };
 
@@ -169,9 +196,17 @@ export const CartProvider = ({ children }) => {
       setCart(recalcCart);
       return { success: true, message };
     }
-    const { data } = await cartAPI.updateItem({ productId, quantity });
-    setCart(data.cart);
-    return { success: true, message: data.message };
+    try {
+      const { data } = await cartAPI.updateItem({ productId, quantity });
+      setCart(data.cart);
+      return { success: true, message: data.message };
+    } catch (err) {
+      const errMsg = err?.response?.data?.message || err.message || 'Failed to update quantity';
+      const cleanMsg = cleanCartErrorMessage(errMsg);
+      console.error('Update quantity failed:', errMsg);
+      showToast(cleanMsg, 'error');
+      return { success: false, message: cleanMsg };
+    }
   };
 
   const removeItem = async (productId) => {
@@ -240,9 +275,55 @@ export const CartProvider = ({ children }) => {
         applyCoupon,
         removeCoupon,
         refreshCart: loadCart,
+        showToast,
       }}
     >
       {children}
+
+      <AnimatePresence>
+        {toast && (
+          <div className="fixed bottom-24 right-5 z-[9999] max-w-sm w-full px-4 sm:px-0">
+            <motion.div
+              initial={{ opacity: 0, y: 50, scale: 0.9 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 20, scale: 0.9 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+              className={`flex items-start gap-3 p-4 rounded-2xl shadow-xl border ${
+                toast.type === 'error'
+                  ? 'bg-red-50 text-red-800 border-red-100'
+                  : toast.type === 'warning'
+                  ? 'bg-amber-50 text-amber-800 border-amber-100'
+                  : 'bg-green-50 text-green-800 border-green-100'
+              }`}
+            >
+              {/* Icon */}
+              <div className="shrink-0 mt-0.5">
+                {toast.type === 'error' ? (
+                  <XCircle className="w-5 h-5 text-red-600" />
+                ) : toast.type === 'warning' ? (
+                  <AlertCircle className="w-5 h-5 text-amber-600" />
+                ) : (
+                  <CheckCircle className="w-5 h-5 text-green-600" />
+                )}
+              </div>
+
+              {/* Message */}
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold leading-5">{toast.message}</p>
+              </div>
+
+              {/* Close Button */}
+              <button
+                onClick={() => setToast(null)}
+                className="shrink-0 ml-1 rounded-lg p-0.5 text-gray-400 hover:bg-black/5 hover:text-gray-700 transition-colors"
+                aria-label="Dismiss toast"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </CartContext.Provider>
   );
 };

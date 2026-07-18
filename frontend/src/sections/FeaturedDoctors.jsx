@@ -26,9 +26,9 @@ const FeaturedDoctors = () => {
   if (!loading && doctors.length === 0) return null;
 
   return (
-    <section className="py-10 bg-gray-50">
+    <section className="py-7 sm:py-10 bg-gray-50">
       <div className="container-custom">
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center justify-between mb-4 sm:mb-6">
           <div>
             <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
               <Stethoscope className="w-5 h-5 text-brand" />

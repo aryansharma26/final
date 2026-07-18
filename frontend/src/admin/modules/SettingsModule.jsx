@@ -57,7 +57,7 @@ const SettingsModule = () => {
           show: flashDeal?.show || false,
           endDate: flashDeal?.endDate || '2026-08-31 23:59:59',
           headline: flashDeal?.headline || 'Flash Deals',
-          subtext: flashDeal?.subtext || 'Up to 50% off on essential medicines',
+          subtext: flashDeal?.subtext ?? 'Up to 50% off on essential medicines',
           buttonText: flashDeal?.buttonText || 'Shop Now',
           buttonLink: flashDeal?.buttonLink || '/offers',
         }
@@ -295,7 +295,6 @@ const SettingsModule = () => {
                         ...formData,
                         flashDeal: { ...formData.flashDeal, subtext: e.target.value }
                       })}
-                      required={formData.flashDeal.show}
                       placeholder="e.g. Up to 50% off on essential medicines"
                       className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
                     />

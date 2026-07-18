@@ -1,40 +1,57 @@
 import { useState, useEffect, useRef } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import { MessageCircle, X } from 'lucide-react';
+
+const menuVariants = {
+  closed: {
+    opacity: 0,
+    y: 14,
+    scale: 0.96,
+    transition: { duration: 0.16, ease: 'easeIn' },
+  },
+  open: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: {
+      type: 'spring',
+      stiffness: 420,
+      damping: 30,
+      mass: 0.75,
+      staggerChildren: 0.045,
+      delayChildren: 0.02,
+    },
+  },
+};
+
+const contactVariants = {
+  closed: {
+    opacity: 0,
+    y: 12,
+    scale: 0.9,
+    transition: { duration: 0.12, ease: 'easeIn' },
+  },
+  open: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: { type: 'spring', stiffness: 520, damping: 28, mass: 0.7 },
+  },
+};
 
 export default function FloatingContactButtons() {
   const [open, setOpen] = useState(false);
-  const [closing, setClosing] = useState(false);
-  const timeoutRef = useRef(null);
   const containerRef = useRef(null);
 
   const handleToggle = () => {
-    if (open) {
-      setClosing(true);
-      timeoutRef.current = setTimeout(() => {
-        setOpen(false);
-        setClosing(false);
-      }, 280);
-    } else {
-      setOpen(true);
-      setClosing(false);
-    }
+    setOpen((prev) => !prev);
   };
-
-  useEffect(() => {
-    return () => {
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    };
-  }, []);
 
   useEffect(() => {
     if (!open) return;
     const handleClickOutside = (e) => {
       if (containerRef.current && !containerRef.current.contains(e.target)) {
-        setClosing(true);
-        timeoutRef.current = setTimeout(() => {
-          setOpen(false);
-          setClosing(false);
-        }, 280);
+        setOpen(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -94,97 +111,92 @@ export default function FloatingContactButtons() {
     }
   };
 
-  const isVisible = open || closing;
-
   return (
     <div ref={containerRef} className="fixed bottom-24 right-5 z-50 flex flex-col items-end gap-3 lg:bottom-6 lg:right-6">
-      {isVisible && (
-        <div className="flex flex-col items-end gap-3 mb-1">
-          {contacts.map((contact, index) => (
-            <a
-              key={contact.id}
-              href={contact.href}
-              onClick={contact.id === 'viber' ? (e) => handleViberClick(e, contact.number) : undefined}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={`group flex items-center gap-0 transition-all duration-300 hover:gap-2 ${closing ? 'animate-slide-down' : 'animate-slide-up'}`}
-              style={{ animationDelay: closing ? `${(contacts.length - 1 - index) * 0.05}s` : `${index * 0.06}s` }}
-              aria-label={`Chat on ${contact.label}`}
-            >
-              <span
-                className="hidden group-hover:inline-block whitespace-nowrap text-white text-sm font-medium px-3 py-2 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-2 group-hover:translate-x-0"
-                style={{ backgroundColor: contact.color }}
+      <AnimatePresence initial={false}>
+        {open && (
+          <motion.div
+            variants={menuVariants}
+            initial="closed"
+            animate="open"
+            exit="closed"
+            className="mb-1 flex origin-bottom-right transform-gpu flex-col items-end gap-3"
+          >
+            {contacts.map((contact) => (
+              <motion.a
+                key={contact.id}
+                href={contact.href}
+                onClick={contact.id === 'viber' ? (e) => handleViberClick(e, contact.number) : undefined}
+                target="_blank"
+                rel="noopener noreferrer"
+                variants={contactVariants}
+                className="group flex transform-gpu items-center gap-2"
+                aria-label={`Chat on ${contact.label}`}
               >
-                {contact.label}
-              </span>
-              <div
-                className="w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110 lg:h-14 lg:w-14"
-                style={{
-                  backgroundColor: contact.color,
-                  boxShadow: `0 4px 30px ${contact.shadow}`,
-                }}
-                onMouseEnter={(e) => { e.currentTarget.style.boxShadow = `0 6px 40px ${contact.shadowHover}`; }}
-                onMouseLeave={(e) => { e.currentTarget.style.boxShadow = `0 4px 30px ${contact.shadow}`; }}
-              >
-                {contact.icon}
-              </div>
-            </a>
-          ))}
-        </div>
-      )}
+                <span
+                  className="hidden translate-x-2 whitespace-nowrap rounded-full px-3 py-2 text-sm font-medium text-white opacity-0 shadow-lg transition-all duration-300 group-hover:inline-block group-hover:translate-x-0 group-hover:opacity-100"
+                  style={{ backgroundColor: contact.color }}
+                >
+                  {contact.label}
+                </span>
+                <div
+                  className="relative flex h-12 w-12 items-center justify-center rounded-full transition-transform duration-300 hover:scale-110 lg:h-14 lg:w-14"
+                  style={{
+                    backgroundColor: contact.color,
+                    boxShadow: `0 6px 32px ${contact.shadow}`,
+                  }}
+                  onMouseEnter={(e) => { e.currentTarget.style.boxShadow = `0 8px 38px ${contact.shadowHover}`; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.boxShadow = `0 6px 32px ${contact.shadow}`; }}
+                >
+                  {contact.icon}
+                </div>
+              </motion.a>
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-      <button
+      <motion.button
         onClick={handleToggle}
-        className={`w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110 lg:h-14 lg:w-14 ${!isVisible ? 'animate-messenger-pulse' : ''}`}
+        whileTap={{ scale: 0.92 }}
+        animate={{ rotate: open ? 90 : 0, scale: open ? 1.03 : 1 }}
+        transition={{ type: 'spring', stiffness: 420, damping: 24 }}
+        className={`relative flex h-12 w-12 items-center justify-center rounded-full transition-transform duration-300 hover:scale-110 lg:h-14 lg:w-14 ${!open ? 'animate-messenger-pulse' : ''}`}
         style={{
           backgroundColor: '#2563EB',
-          boxShadow: '0 4px 30px rgba(37,99,235,0.55), 0 0 0 0 rgba(37,99,235,0.75)',
+          boxShadow: '0 7px 34px rgba(37,99,235,0.68), 0 0 0 4px rgba(37,99,235,0.12)',
         }}
         aria-label="Contact options"
       >
-        {isVisible ? (
-          <X className="w-6 h-6 text-white lg:h-7 lg:w-7" />
-        ) : (
-          <MessageCircle className="w-6 h-6 text-white lg:h-7 lg:w-7" />
-        )}
-      </button>
+        <span className="pointer-events-none absolute -inset-2 rounded-full bg-blue-500/20 blur-lg" />
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.span
+            key={open ? 'close' : 'chat'}
+            initial={{ opacity: 0, rotate: -45, scale: 0.8 }}
+            animate={{ opacity: 1, rotate: 0, scale: 1 }}
+            exit={{ opacity: 0, rotate: 45, scale: 0.8 }}
+            transition={{ duration: 0.14 }}
+            className="relative z-10 block"
+          >
+            {open ? (
+              <X className="h-6 w-6 text-white lg:h-7 lg:w-7" />
+            ) : (
+              <MessageCircle className="h-6 w-6 text-white lg:h-7 lg:w-7" />
+            )}
+          </motion.span>
+        </AnimatePresence>
+      </motion.button>
 
       <style>{`
-        @keyframes slideUp {
-          from {
-            opacity: 0;
-            transform: translateY(20px) scale(0.8);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0) scale(1);
-          }
-        }
-        @keyframes slideDown {
-          from {
-            opacity: 1;
-            transform: translateY(0) scale(1);
-          }
-          to {
-            opacity: 0;
-            transform: translateY(20px) scale(0.8);
-          }
-        }
-        .animate-slide-up {
-          animation: slideUp 0.25s ease-out both;
-        }
-        .animate-slide-down {
-          animation: slideDown 0.2s ease-in both;
-        }
         @keyframes messenger-pulse {
           0% {
-            box-shadow: 0 4px 30px rgba(37,99,235,0.55), 0 0 0 0 rgba(37,99,235,0.7);
+            box-shadow: 0 7px 34px rgba(37,99,235,0.68), 0 0 0 0 rgba(37,99,235,0.45);
           }
           70% {
-            box-shadow: 0 6px 40px rgba(37,99,235,0.65), 0 0 0 10px rgba(37,99,235,0);
+            box-shadow: 0 9px 40px rgba(37,99,235,0.72), 0 0 0 10px rgba(37,99,235,0);
           }
           100% {
-            box-shadow: 0 4px 30px rgba(37,99,235,0.55), 0 0 0 0 rgba(37,99,235,0);
+            box-shadow: 0 7px 34px rgba(37,99,235,0.68), 0 0 0 0 rgba(37,99,235,0);
           }
         }
         .animate-messenger-pulse {

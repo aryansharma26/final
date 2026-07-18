@@ -35,9 +35,9 @@ const PopularProducts = () => {
 
   if (loading) {
     return (
-      <section className="py-12 lg:py-16 bg-white">
+      <section className="py-8 sm:py-12 lg:py-16 bg-white">
         <div className="container-custom">
-          <div className="h-8 bg-gray-200 rounded w-1/4 mb-8 animate-pulse" />
+          <div className="h-8 bg-gray-200 rounded w-1/4 mb-5 sm:mb-8 animate-pulse" />
           <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4 lg:gap-6">
             {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
               <div key={i} className="bg-white border border-gray-100 rounded-2xl p-3 animate-pulse sm:p-4">
@@ -54,7 +54,7 @@ const PopularProducts = () => {
 
   if (error) {
     return (
-      <section className="py-12 lg:py-16 bg-white">
+      <section className="py-8 sm:py-12 lg:py-16 bg-white">
         <div className="container-custom text-center">
           <p className="text-red-500 mb-2">{error}</p>
           <button
@@ -70,7 +70,7 @@ const PopularProducts = () => {
 
   if (products.length === 0) {
     return (
-      <section className="py-12 lg:py-16 bg-white">
+      <section className="py-8 sm:py-12 lg:py-16 bg-white">
         <div className="container-custom text-center">
           <p className="text-gray-500">No products available.</p>
         </div>
@@ -79,9 +79,9 @@ const PopularProducts = () => {
   }
 
   return (
-    <section className="pt-12 pb-8 lg:pt-16 lg:pb-10 bg-white">
+    <section className="pt-8 pb-6 sm:pt-12 sm:pb-8 lg:pt-16 lg:pb-10 bg-white">
       <div className="container-custom">
-        <div className="mb-8">
+        <div className="mb-5 sm:mb-8">
           <div>
             <h2 className="text-2xl lg:text-3xl font-bold text-gray-900">Popular Products</h2>
             <p className="text-sm text-gray-500 mt-1">Most trusted by our customers</p>
@@ -104,7 +104,7 @@ const PopularProducts = () => {
           ))}
         </div>
 
-        <div className="mt-10 flex justify-center">
+        <div className="mt-7 sm:mt-10 flex justify-center">
           <Link
             to="/medicines"
             className="inline-flex items-center justify-center gap-2 rounded-full bg-brand px-7 py-3 text-sm font-semibold text-white shadow-lg shadow-brand/25 transition-all duration-200 hover:-translate-y-0.5 hover:bg-brand-dark hover:shadow-xl hover:shadow-brand/30"

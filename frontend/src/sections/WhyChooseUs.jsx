@@ -51,7 +51,7 @@ const WhyChooseUs = () => {
         </div>
 
         {/* Features */}
-        <div className="grid items-stretch gap-4 sm:grid-cols-2 lg:grid-cols-4 lg:gap-6">
+        <div className="-mx-4 flex snap-x snap-mandatory gap-4 overflow-x-auto overflow-y-hidden px-4 pb-2 sm:mx-0 sm:grid sm:snap-none sm:grid-cols-2 sm:overflow-visible sm:px-0 sm:pb-0 lg:grid-cols-4 lg:gap-6">
           {features.map((feature, index) => (
             <motion.div
               key={feature.title}
@@ -59,7 +59,7 @@ const WhyChooseUs = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.4, delay: index * 0.1 }}
-              className="flex h-full min-h-[280px] flex-col rounded-2xl bg-white p-5 text-center transition-all duration-300 hover:shadow-lg sm:min-h-[350px] sm:p-6"
+              className="flex h-full min-h-[280px] min-w-[78vw] snap-start flex-col rounded-2xl bg-white p-5 text-center transition-all duration-300 hover:shadow-lg sm:min-h-[350px] sm:min-w-0 sm:p-6"
             >
               {/* Lottie Animation */}
               <div className="mb-4 flex h-28 items-center justify-center sm:mb-5 sm:h-36">

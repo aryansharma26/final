@@ -19,7 +19,7 @@ const MainLayout = () => {
   return (
     <div className="min-h-screen flex flex-col bg-white">
       <Navbar />
-      <main className={`flex-1 pb-24 lg:pb-0 ${showBanner ? 'pt-[108px] lg:pt-[156px]' : 'pt-[72px] lg:pt-[120px]'}`}>
+      <main className={`flex-1 ${showBanner ? 'pt-[94px] lg:pt-[156px]' : 'pt-[54px] lg:pt-[120px]'}`}>
         <Outlet />
       </main>
       <Footer />

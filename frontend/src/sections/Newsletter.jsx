@@ -31,7 +31,7 @@ const Newsletter = () => {
   };
 
   return (
-    <section className="py-12 lg:py-16 bg-gray-900">
+    <section className="py-8 sm:py-12 lg:py-16 bg-gray-900">
       <div className="container-custom">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -40,14 +40,14 @@ const Newsletter = () => {
           transition={{ duration: 0.5 }}
           className="max-w-2xl mx-auto text-center"
         >
-          <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/5 border border-white/10 rounded-full text-xs font-medium text-gray-300 mb-4">
+          <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/5 border border-white/10 rounded-full text-xs font-medium text-gray-300 mb-3 sm:mb-4">
             <Sparkles className="w-3.5 h-3.5 text-gray-300" />
             Health Newsletter
           </div>
-          <h2 className="text-2xl lg:text-3xl font-bold text-white mb-4">
+          <h2 className="text-2xl lg:text-3xl font-bold text-white mb-3 sm:mb-4">
             Stay Healthy, Stay Informed
           </h2>
-          <p className="text-gray-400 mb-8 leading-relaxed">
+          <p className="text-sm text-gray-400 mb-5 leading-relaxed sm:text-base sm:mb-8">
             Subscribe to our health newsletter for medicine reminders, wellness
             tips, and exclusive offers delivered to your inbox.
           </p>

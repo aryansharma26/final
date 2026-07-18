@@ -49,7 +49,7 @@ const renderStars = (rating) => (
 
 const Testimonials = () => {
   return (
-    <section className="relative overflow-hidden bg-white py-12 lg:py-16">
+    <section className="relative overflow-hidden bg-white py-8 sm:py-12 lg:py-16">
       <div className="absolute inset-x-0 top-6 h-[560px] overflow-hidden">
         <img
           src={familyBackground}
@@ -64,7 +64,7 @@ const Testimonials = () => {
       </div>
 
       <div className="container-custom relative">
-        <div className="mx-auto max-w-6xl py-6 lg:py-8">
+        <div className="mx-auto max-w-6xl py-3 sm:py-6 lg:py-8">
           <div className="absolute -left-16 top-20 h-56 w-56 rounded-full bg-brand-light/70 blur-3xl" />
           <div className="absolute -right-14 bottom-0 h-64 w-64 rounded-full bg-emerald-100/70 blur-3xl" />
 
@@ -74,9 +74,9 @@ const Testimonials = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, amount: 0.25 }}
               transition={{ duration: 0.45 }}
-              className="mx-auto mb-9 max-w-2xl text-center"
+              className="mx-auto mb-6 max-w-2xl text-center sm:mb-9"
             >
-              <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-brand-light px-4 py-2 text-xs font-semibold text-brand shadow-sm">
+              <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-brand-light px-3 py-1.5 text-xs font-semibold text-brand shadow-sm sm:px-4 sm:py-2">
                 <ShieldCheck className="h-4 w-4" />
                 Verified family reviews
               </div>
@@ -103,7 +103,7 @@ const Testimonials = () => {
               </p>
             </motion.div>
 
-            <div className="grid gap-5 lg:grid-cols-3">
+            <div className="grid gap-3 sm:gap-5 lg:grid-cols-3">
               {REVIEWS.map((review, index) => (
                 <motion.article
                   key={review.id}
@@ -111,7 +111,7 @@ const Testimonials = () => {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true, amount: 0.25 }}
                   transition={{ duration: 0.4, delay: index * 0.08 }}
-                  className="flex h-full flex-col rounded-2xl bg-white/78 p-5 shadow-[0_18px_45px_rgba(17,24,39,0.08)] backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:bg-white/90 hover:shadow-[0_22px_55px_rgba(17,24,39,0.12)]"
+                  className="flex h-full flex-col rounded-2xl bg-white/78 p-4 shadow-[0_18px_45px_rgba(17,24,39,0.08)] backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:bg-white/90 hover:shadow-[0_22px_55px_rgba(17,24,39,0.12)] sm:p-5"
                 >
                   <div className="mb-4 flex items-start justify-between gap-4">
                     <div>

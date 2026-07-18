@@ -105,14 +105,14 @@ const ProductCard = ({
         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
       />
       {hasDiscount && (
-        <div className="absolute top-3 left-3 bg-pills-pink text-white text-xs font-bold px-2 py-1 rounded-md">
+        <div className="absolute top-2 left-2 bg-pills-pink text-white text-[11px] font-bold px-1.5 py-0.5 rounded-md sm:top-3 sm:left-3 sm:text-xs sm:px-2 sm:py-1">
           -{Math.round(((product.price - product.discountPrice) / product.price) * 100)}%
         </div>
       )}
       {showHeart && (
         <button
           onClick={handleHeartClick}
-          className="absolute top-3 right-3 w-8 h-8 bg-white/90 rounded-full flex items-center justify-center opacity-100 transition-opacity hover:bg-red-50 sm:opacity-0 sm:group-hover:opacity-100"
+          className="absolute top-2 right-2 w-8 h-8 bg-white/90 rounded-full flex items-center justify-center opacity-100 transition-opacity hover:bg-red-50 sm:top-3 sm:right-3 sm:opacity-0 sm:group-hover:opacity-100"
         >
           <Heart className="w-4 h-4 text-gray-600 hover:text-red-500" />
         </button>
@@ -123,12 +123,12 @@ const ProductCard = ({
   const infoSection = (
     <div className="p-2.5 sm:p-3 lg:p-4">
       <p className="truncate text-[11px] font-medium text-gray-500 sm:text-xs mb-1">{product.brand}</p>
-      <h3 className="text-sm font-semibold text-gray-900 line-clamp-2 mb-2 min-h-[2.5rem] hover:text-brand">
+      <h3 className="text-sm font-semibold text-gray-900 line-clamp-2 mb-1.5 min-h-[2.35rem] hover:text-brand sm:mb-2 sm:min-h-[2.5rem]">
         {product.name}
       </h3>
 
       {showRating && (
-        <div className="flex items-center gap-1 mb-2">
+        <div className="flex items-center gap-1 mb-1.5 sm:mb-2">
           <div className="flex items-center gap-0.5 bg-green-50 px-1.5 py-0.5 rounded">
             <span className="text-xs font-semibold text-green-700">{product.rating || 0}</span>
             <Star className="w-3 h-3 text-green-600 fill-green-600" />
@@ -143,7 +143,7 @@ const ProductCard = ({
             {hasDiscount && (
               <span className="text-xs text-gray-400 line-through sm:text-sm">₱{product.price}</span>
             )}
-            <span className="text-base font-bold text-gray-900 sm:text-lg">
+            <span className="text-[15px] font-bold text-gray-900 sm:text-lg">
               ₱{product.discountPrice > 0 ? product.discountPrice : product.price}
             </span>
             {hasDiscount && (
@@ -209,7 +209,7 @@ const ProductCard = ({
           ) : onCartClick ? (
             <button
               onClick={handleCartClick}
-              className="w-8 h-8 rounded-full flex items-center justify-center transition-colors bg-brand/10 hover:bg-brand text-brand hover:text-white"
+              className="w-7 h-7 rounded-full flex items-center justify-center transition-colors bg-brand/10 hover:bg-brand text-brand hover:text-white sm:h-8 sm:w-8"
               title="Add to Cart"
             >
               <ShoppingCart className="w-4 h-4" />
