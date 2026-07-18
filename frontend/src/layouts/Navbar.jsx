@@ -483,7 +483,7 @@ const Navbar = () => {
                 onFocus={() => {
                   if (searchQuery.trim().length >= 1) setSuggestionsOpen(true);
                 }}
-                placeholder="Search for medicines, brands..."
+                placeholder="Search for medicines, brands, or healthcare products..."
                 className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-full text-base lg:text-sm focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand transition-all"
               />
               <SearchSuggestions
@@ -524,7 +524,7 @@ const Navbar = () => {
 
             <Link
               to="/doctors"
-              className="hidden md:flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-600 border border-gray-300 bg-white hover:bg-gray-600 hover:border-gray-600 hover:text-white rounded-full transition-colors"
+              className="hidden md:flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-600 border border-gray-100 bg-white shadow-sm transition-all hover:-translate-y-0.5 hover:bg-gray-50 rounded-full"
               title="Find Doctor"
             >
               <Stethoscope className="w-4 h-4" />
@@ -555,7 +555,7 @@ const Navbar = () => {
               <div className="relative" ref={dropdownRef}>
                 <button
                   onClick={() => setUserMenuOpen((prev) => !prev)}
-                  className="flex items-center gap-2 px-2 py-2 hover:bg-gray-50 rounded-full transition-colors sm:px-3"
+                  className="flex items-center gap-2 px-2 py-1 border border-gray-100 bg-white shadow-sm transition-all hover:-translate-y-0.5 hover:bg-gray-50 rounded-full sm:px-3"
                 >
                   <div className="w-8 h-8 bg-brand/10 rounded-full flex items-center justify-center">
                     <span className="text-brand font-bold text-xs">

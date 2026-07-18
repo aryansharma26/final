@@ -1,9 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import {
-  ArrowRight,
-  Sparkles,
-} from "lucide-react";
+import { ArrowRight, Sparkles } from "lucide-react";
 import { Link } from "react-router-dom";
 import { categoryAPI } from "../api/index.js";
 
@@ -61,7 +58,9 @@ const CategoryIllustration = ({ categoryName }) => {
   const style = CATEGORY_STYLES[categoryName] || FALLBACK_STYLE;
 
   return (
-    <div className={`relative flex h-14 w-14 items-center justify-center rounded-2xl border transition-all duration-300 ${style.bg}`}>
+    <div
+      className={`relative flex h-14 w-14 items-center justify-center rounded-2xl border transition-all duration-300 ${style.bg}`}
+    >
       <span className="text-2xl leading-none transition-transform duration-300 group-hover:scale-110 select-none">
         {style.emoji}
       </span>
@@ -170,7 +169,6 @@ const ShopByCategory = () => {
               Quickly browse trusted health essentials.
             </p>
           </div>
-         
         </div>
 
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
@@ -182,9 +180,25 @@ const ShopByCategory = () => {
                 key={category._id}
                 to={`/medicines?category=${category._id}`}
                 initial={{ opacity: 0, y: 15 }}
-                whileInView={{ opacity: 1, y: 0, transition: { duration: 0.35, delay: index * 0.05, ease: "easeOut" } }}
+                whileInView={{
+                  opacity: 1,
+                  y: 0,
+                  transition: {
+                    duration: 0.35,
+                    delay: index * 0.05,
+                    ease: "easeOut",
+                  },
+                }}
                 viewport={{ once: true }}
-                whileHover={{ y: -6, scale: 1.015, transition: { duration: 0.2, ease: "easeInOut" } }}
+                whileHover={{
+                  y: -6,
+                  scale: 1.02,
+                  transition: {
+                    type: "spring",
+                    stiffness: 500,
+                    damping: 10,
+                  },
+                }}
                 className="group relative overflow-hidden rounded-2xl border border-gray-100 bg-white p-3 text-left shadow-sm focus:outline-none focus:ring-2 focus:ring-brand/30 sm:p-4 hover:border-brand/25 hover:shadow-lg transition-colors"
               >
                 <div className="absolute inset-x-0 top-0 h-1 bg-pills-pink/60 opacity-0 transition-opacity group-hover:opacity-100" />

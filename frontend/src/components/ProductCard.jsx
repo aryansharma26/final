@@ -1,7 +1,7 @@
-import { motion } from 'framer-motion';
-import { Star, ShoppingCart, Heart, Trash2 } from 'lucide-react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext.jsx';
+import { motion } from "framer-motion";
+import { Star, ShoppingCart, Heart, Trash2 } from "lucide-react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { useAuth } from "../contexts/AuthContext.jsx";
 
 /**
  * ProductCard
@@ -56,8 +56,10 @@ const ProductCard = ({
     e.stopPropagation();
     if (product.isPrescriptionRequired) {
       navigate(
-        isAuthenticated ? `/product/${product.slug}` : `/login?redirect=${encodeURIComponent(`/product/${product.slug}`)}`,
-        isAuthenticated ? undefined : { state: { from: location } }
+        isAuthenticated
+          ? `/product/${product.slug}`
+          : `/login?redirect=${encodeURIComponent(`/product/${product.slug}`)}`,
+        isAuthenticated ? undefined : { state: { from: location } },
       );
       return;
     }
@@ -80,33 +82,41 @@ const ProductCard = ({
   };
 
   const handleKeyDown = (e) => {
-    if (e.key === 'Enter' || e.key === ' ') {
+    if (e.key === "Enter" || e.key === " ") {
       e.preventDefault();
       handleCardClick();
     }
   };
 
-  const cardClasses = 'group bg-white border border-gray-100 rounded-2xl overflow-hidden hover:shadow-lg transition-shadow cursor-pointer min-w-0';
+  const cardClasses =
+    "group bg-white border border-gray-100 rounded-2xl overflow-hidden hover:shadow-lg transition-shadow cursor-pointer min-w-0";
 
   const cardProps = {
     onClick: handleCardClick,
     onKeyDown: handleKeyDown,
-    role: 'button',
+    role: "button",
     tabIndex: 0,
-    'aria-label': `View ${product.name}`,
+    "aria-label": `View ${product.name}`,
     className: cardClasses,
   };
 
   const imageSection = (
     <div className="relative aspect-square bg-gray-50 overflow-hidden">
       <img
-        src={product.images?.[0] || 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400&h=400&fit=crop'}
+        src={
+          product.images?.[0] ||
+          "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400&h=400&fit=crop"
+        }
         alt={product.name}
         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
       />
       {hasDiscount && (
         <div className="absolute top-2 left-2 bg-pills-pink text-white text-[11px] font-bold px-1.5 py-0.5 rounded-md sm:top-3 sm:left-3 sm:text-xs sm:px-2 sm:py-1">
-          -{Math.round(((product.price - product.discountPrice) / product.price) * 100)}%
+          -
+          {Math.round(
+            ((product.price - product.discountPrice) / product.price) * 100,
+          )}
+          %
         </div>
       )}
       {showHeart && (
@@ -124,7 +134,9 @@ const ProductCard = ({
 
   const infoSection = (
     <div className="p-2.5 sm:p-3 lg:p-4">
-      <p className="truncate text-[11px] font-medium text-gray-500 sm:text-xs mb-1">{product.brand}</p>
+      <p className="truncate text-[11px] font-medium text-gray-500 sm:text-xs mb-1">
+        {product.brand}
+      </p>
       <h3 className="text-sm font-semibold text-gray-900 line-clamp-2 mb-1.5 min-h-[2.35rem] hover:text-brand sm:mb-2 sm:min-h-[2.5rem]">
         {product.name}
       </h3>
@@ -132,10 +144,14 @@ const ProductCard = ({
       {showRating && (
         <div className="flex items-center gap-1 mb-1.5 sm:mb-2">
           <div className="flex items-center gap-0.5 bg-green-50 px-1.5 py-0.5 rounded">
-            <span className="text-xs font-semibold text-green-700">{product.rating || 0}</span>
+            <span className="text-xs font-semibold text-green-700">
+              {product.rating || 0}
+            </span>
             <Star className="w-3 h-3 text-green-600 fill-green-600" />
           </div>
-          <span className="text-xs text-gray-400">({product.numReviews || 0})</span>
+          <span className="text-xs text-gray-400">
+            ({product.numReviews || 0})
+          </span>
         </div>
       )}
 
@@ -143,17 +159,28 @@ const ProductCard = ({
         <>
           <div className="mb-3 flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
             {hasDiscount && (
-              <span className="text-xs text-gray-400 line-through sm:text-sm">₱{product.price}</span>
+              <span className="text-xs text-gray-400 line-through sm:text-sm">
+                ₱{product.price}
+              </span>
             )}
             <span className="text-[15px] font-bold text-gray-900 sm:text-lg">
-              ₱{product.discountPrice > 0 ? product.discountPrice : product.price}
+              ₱
+              {product.discountPrice > 0
+                ? product.discountPrice
+                : product.price}
             </span>
             {hasDiscount && (
               <span className="text-[11px] font-bold text-pills-pink bg-pills-pink/10 px-1.5 py-0.5 rounded sm:text-xs">
-                {Math.round(((product.price - product.discountPrice) / product.price) * 100)}% off
+                {Math.round(
+                  ((product.price - product.discountPrice) / product.price) *
+                    100,
+                )}
+                % off
               </span>
             )}
-            <span className="text-[10px] text-gray-400 block font-normal w-full">Inclusive of Tax</span>
+            <span className="text-[10px] text-gray-400 block font-normal w-full">
+              Inclusive of Tax
+            </span>
           </div>
           <div className="flex items-center gap-2">
             <motion.button
@@ -179,17 +206,28 @@ const ProductCard = ({
         <div className="flex min-w-0 items-center justify-between gap-2">
           <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
             {hasDiscount && (
-              <span className="text-xs text-gray-400 line-through sm:text-sm">₱{product.price}</span>
+              <span className="text-xs text-gray-400 line-through sm:text-sm">
+                ₱{product.price}
+              </span>
             )}
             <span className="text-base font-bold text-gray-900 sm:text-lg">
-              ₱{product.discountPrice > 0 ? product.discountPrice : product.price}
+              ₱
+              {product.discountPrice > 0
+                ? product.discountPrice
+                : product.price}
             </span>
             {hasDiscount && (
               <span className="hidden text-xs font-bold text-pills-pink bg-pills-pink/10 px-1.5 py-0.5 rounded sm:inline">
-                {Math.round(((product.price - product.discountPrice) / product.price) * 100)}% off
+                {Math.round(
+                  ((product.price - product.discountPrice) / product.price) *
+                    100,
+                )}
+                % off
               </span>
             )}
-            <span className="text-[10px] text-gray-400 block font-normal w-full">Inclusive of Tax</span>
+            <span className="text-[10px] text-gray-400 block font-normal w-full">
+              Inclusive of Tax
+            </span>
           </div>
 
           {onActionClick ? (
@@ -228,21 +266,48 @@ const ProductCard = ({
     </div>
   );
 
-  if (!animated) {
-    return (
-      <div {...cardProps}>
-        {imageSection}
-        {infoSection}
-      </div>
-    );
-  }
-
   return (
     <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
+      initial={animated ? { opacity: 0, y: 10 } : undefined}
+      animate={animated ? { opacity: 1, y: 0 } : undefined}
       whileHover={{ y: -6 }}
-      transition={{ duration: 0.2 }}
+      transition={{ type: 'spring', stiffness: 400, damping: 22 }}
+
+      // initial={animated ? { opacity: 0, y: 15 } : undefined}
+      // whileInView={
+      //   animated
+      //     ? {
+      //         opacity: 1,
+      //         y: 0,
+      //         transition: {
+      //           duration: 0.35,
+      //           delay: index * 0.05,
+      //           ease: "easeOut",
+      //         },
+      //       }
+      //     : undefined
+      // }
+      // viewport={{ once: true }}
+      // whileHover={{
+      //   y: -6,
+      //   scale: 1.015,
+      //   transition: {
+      //     duration: 0.2,
+      //     ease: "easeInOut",
+      //   },
+      // }}
+
+      // initial={animated ? { opacity: 0, y: 10 } : undefined}
+      // animate={animated ? { opacity: 1, y: 0 } : undefined}
+      // whileHover={{
+      //   y: -6,
+      //   scale: 1.015,
+      // }}
+      // transition={{
+      //   type: "spring",
+      //   stiffness: 500,
+      //   damping: 10,
+      // }}
       {...cardProps}
     >
       {imageSection}
