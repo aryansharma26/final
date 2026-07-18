@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { Star, ShoppingCart, Heart, Trash2 } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext.jsx";
+import { useRef, useState } from "react";
 
 /**
  * ProductCard
@@ -47,8 +48,16 @@ const ProductCard = ({
   const navigate = useNavigate();
   const location = useLocation();
   const { isAuthenticated } = useAuth();
+  const tapTimeoutRef = useRef(null);
 
   const handleCardClick = () => {
+    if (typeof window !== "undefined" && window.matchMedia("(hover: none)").matches) {
+      if (tapTimeoutRef.current) clearTimeout(tapTimeoutRef.current);
+      tapTimeoutRef.current = setTimeout(() => {
+        onCardClick?.(product);
+      }, 120);
+      return;
+    }
     onCardClick?.(product);
   };
 
@@ -89,7 +98,7 @@ const ProductCard = ({
   };
 
   const cardClasses =
-    "group bg-white border border-gray-100 rounded-2xl overflow-hidden hover:shadow-lg transition-shadow cursor-pointer min-w-0";
+    "group bg-white border border-gray-100 rounded-2xl overflow-hidden hover:shadow-lg active:shadow-lg transition-shadow cursor-pointer min-w-0";
 
   const cardProps = {
     onClick: handleCardClick,
@@ -108,7 +117,7 @@ const ProductCard = ({
           "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400&h=400&fit=crop"
         }
         alt={product.name}
-        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+        className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105 group-active:scale-105"
       />
       {hasDiscount && (
         <div className="absolute top-2 left-2 bg-pills-pink text-white text-[11px] font-bold px-1.5 py-0.5 rounded-md sm:top-3 sm:left-3 sm:text-xs sm:px-2 sm:py-1">
@@ -137,7 +146,7 @@ const ProductCard = ({
       <p className="truncate text-[11px] font-medium text-gray-500 sm:text-xs mb-1">
         {product.brand}
       </p>
-      <h3 className="text-sm font-semibold text-gray-900 line-clamp-2 mb-1.5 min-h-[2.35rem] hover:text-brand sm:mb-2 sm:min-h-[2.5rem]">
+      <h3 className="text-sm font-semibold text-gray-900 line-clamp-2 mb-1.5 min-h-[2.35rem] hover:text-brand group-active:text-brand sm:mb-2 sm:min-h-[2.5rem]">
         {product.name}
       </h3>
 
@@ -271,6 +280,7 @@ const ProductCard = ({
       initial={animated ? { opacity: 0, y: 10 } : undefined}
       animate={animated ? { opacity: 1, y: 0 } : undefined}
       whileHover={{ y: -6 }}
+      whileTap={{ y: -6 }}
       transition={{ type: 'spring', stiffness: 400, damping: 22 }}
 
       // initial={animated ? { opacity: 0, y: 15 } : undefined}

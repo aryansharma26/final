@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { motion } from 'framer-motion';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { getPageState, setPageState } from '../utils/pageCache.js';
 import { ArrowLeft, BadgeCheck, Building2, Send, CheckCircle, Handshake, Loader2, Package, Percent, Phone, Mail, ShoppingCart, ChevronRight, Search, Warehouse, X } from 'lucide-react';
@@ -17,6 +18,7 @@ const B2BEnquiry = () => {
   const cacheKey = location.pathname + location.search;
   const cachedStateRef = useRef(getPageState(cacheKey));
   const cachedState = cachedStateRef.current;
+  const tapTimeoutRef = useRef(null);
 
   const [products, setProducts] = useState(() => cachedState?.products || []);
   const [productsLoading, setProductsLoading] = useState(() => (cachedState ? false : true));
@@ -61,6 +63,27 @@ const B2BEnquiry = () => {
       setPageState(cacheKey, { products });
     }
   }, [products, cacheKey, productsLoading]);
+
+  useEffect(() => {
+    return () => {
+      if (tapTimeoutRef.current) clearTimeout(tapTimeoutRef.current);
+    };
+  }, []);
+
+  const openB2BProduct = (product) => {
+    const target = `/b2b-product/${product.slug}`;
+    const options = {
+      state: { from: { pathname: location.pathname, search: location.search } },
+    };
+
+    if (typeof window !== 'undefined' && window.matchMedia('(hover: none)').matches) {
+      if (tapTimeoutRef.current) clearTimeout(tapTimeoutRef.current);
+      tapTimeoutRef.current = setTimeout(() => navigate(target, options), 120);
+      return;
+    }
+
+    navigate(target, options);
+  };
 
   const loadProducts = async (searchQuery = '') => {
     try {
@@ -267,19 +290,20 @@ const B2BEnquiry = () => {
           ) : (
             <div className="grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-5">
               {products.map((product) => (
-                <div
+                <motion.div
                   key={product._id}
-                  onClick={() => navigate(`/b2b-product/${product.slug}`, {
-                    state: { from: { pathname: location.pathname, search: location.search } },
-                  })}
-                  className="group cursor-pointer overflow-hidden rounded-2xl border border-gray-100 bg-white transition-shadow hover:shadow-lg"
+                  onClick={() => openB2BProduct(product)}
+                  whileHover={{ y: -6 }}
+                  whileTap={{ y: -6 }}
+                  transition={{ type: 'spring', stiffness: 400, damping: 22 }}
+                  className="group cursor-pointer overflow-hidden rounded-2xl border border-gray-100 bg-white transition-shadow hover:shadow-lg active:shadow-lg"
                 >
                   <div className="relative aspect-square overflow-hidden bg-gray-50">
                     <img
                       src={getB2BImage(product) || 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400&h=400&fit=crop'}
                       alt={product.name}
                       loading="lazy"
-                      className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                      className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105 group-active:scale-105"
                     />
                   </div>
                   <div className="p-2.5 sm:p-4">
@@ -287,7 +311,7 @@ const B2BEnquiry = () => {
                       <p className="truncate text-[11px] font-bold uppercase tracking-wide text-gray-400">{product.brand || 'Healthcare'}</p>
                       <Package className="h-4 w-4 shrink-0 text-brand/60" />
                     </div>
-                    <h3 className="line-clamp-2 min-h-[2.5rem] text-sm font-bold leading-5 text-gray-950 transition-colors group-hover:text-brand">
+                    <h3 className="line-clamp-2 min-h-[2.5rem] text-sm font-bold leading-5 text-gray-950 transition-colors group-hover:text-brand group-active:text-brand">
                       {product.name}
                     </h3>
 
@@ -305,7 +329,7 @@ const B2BEnquiry = () => {
                       </button>
                     </div>
                   </div>
-                </div>
+                </motion.div>
               ))}
             </div>
           )}

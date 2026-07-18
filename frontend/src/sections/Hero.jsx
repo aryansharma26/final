@@ -216,7 +216,7 @@ const Hero = () => {
               >
                 <div className="relative flex items-start gap-2">
                   <span className="mt-0.5 inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-700 shadow-sm ring-1 ring-slate-200">
-                    <Pill className="h-4 w-4 rotate-[-24deg] animate-float" />
+                    <Pill className="h-4 w-4 rotate-[-24deg]" />
                   </span>
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center justify-between gap-2">

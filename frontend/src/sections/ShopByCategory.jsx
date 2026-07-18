@@ -1,7 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { ArrowRight, Sparkles } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { categoryAPI } from "../api/index.js";
 
 const MotionLink = motion(Link);
@@ -54,14 +54,14 @@ const FALLBACK_STYLE = {
   bg: "bg-brand/5 border-brand/10",
 };
 
-const CategoryIllustration = ({ categoryName }) => {
+const CategoryIllustration = ({ categoryName, active = false }) => {
   const style = CATEGORY_STYLES[categoryName] || FALLBACK_STYLE;
 
   return (
     <div
       className={`relative flex h-14 w-14 items-center justify-center rounded-2xl border transition-all duration-300 ${style.bg}`}
     >
-      <span className="text-2xl leading-none transition-transform duration-300 group-hover:scale-110 select-none">
+      <span className={`select-none text-2xl leading-none transition-transform duration-300 group-hover:scale-110 ${active ? "scale-110" : ""}`}>
         {style.emoji}
       </span>
     </div>
@@ -72,9 +72,19 @@ const ShopByCategory = () => {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [pressedCategoryId, setPressedCategoryId] = useState(null);
+  const navigate = useNavigate();
+  const tapTimeoutRef = useRef(null);
 
   useEffect(() => {
     loadCategories();
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (tapTimeoutRef.current) clearTimeout(tapTimeoutRef.current);
+      setPressedCategoryId(null);
+    };
   }, []);
 
   const loadCategories = async () => {
@@ -96,6 +106,17 @@ const ShopByCategory = () => {
       setCategories([]);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleCategoryClick = (e, categoryId) => {
+    if (typeof window !== "undefined" && window.matchMedia("(hover: none)").matches) {
+      e.preventDefault();
+      if (tapTimeoutRef.current) clearTimeout(tapTimeoutRef.current);
+      setPressedCategoryId(categoryId);
+      tapTimeoutRef.current = setTimeout(() => {
+        navigate(`/medicines?category=${categoryId}`);
+      }, 320);
     }
   };
 
@@ -174,11 +195,13 @@ const ShopByCategory = () => {
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
           {categories.map((category, index) => {
             const count = category.productCount || 0;
+            const isPressed = pressedCategoryId === category._id;
 
             return (
               <MotionLink
                 key={category._id}
                 to={`/medicines?category=${category._id}`}
+                onClick={(e) => handleCategoryClick(e, category._id)}
                 initial={{ opacity: 0, y: 15 }}
                 whileInView={{
                   opacity: 1,
@@ -199,12 +222,37 @@ const ShopByCategory = () => {
                     damping: 10,
                   },
                 }}
-                className="group relative overflow-hidden rounded-2xl border border-gray-100 bg-white p-3 text-left shadow-sm focus:outline-none focus:ring-2 focus:ring-brand/30 sm:p-4 hover:border-brand/25 hover:shadow-lg transition-colors"
+                animate={
+                  isPressed
+                    ? {
+                        opacity: 1,
+                        y: -6,
+                        scale: 1.02,
+                        transition: {
+                          type: "spring",
+                          stiffness: 500,
+                          damping: 10,
+                        },
+                      }
+                    : undefined
+                }
+                whileTap={{
+                  y: -6,
+                  scale: 1.02,
+                  transition: {
+                    type: "spring",
+                    stiffness: 500,
+                    damping: 10,
+                  },
+                }}
+                className={`group relative overflow-hidden rounded-2xl border border-gray-100 bg-white p-3 text-left shadow-sm transition-colors hover:border-brand/25 hover:shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-brand/30 sm:p-4 ${
+                  isPressed ? "shadow-lg" : ""
+                }`}
               >
-                <div className="absolute inset-x-0 top-0 h-1 bg-pills-pink/60 opacity-0 transition-opacity group-hover:opacity-100" />
+                <div className="absolute inset-x-0 top-0 h-1 bg-pills-pink/60 opacity-0 transition-opacity sm:group-hover:opacity-100" />
                 <div className="mb-3 flex items-start justify-between gap-3 sm:mb-4">
-                  <CategoryIllustration categoryName={category.name} />
-                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gray-50 text-gray-400 transition-colors group-hover:bg-brand group-hover:text-white">
+                  <CategoryIllustration categoryName={category.name} active={isPressed} />
+                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gray-50 text-gray-400 transition-colors sm:group-hover:bg-brand sm:group-hover:text-white">
                     <ArrowRight className="h-4 w-4" />
                   </span>
                 </div>
