@@ -666,17 +666,38 @@ export const updateOrderStatus = async (req, res, next) => {
     }
 
     const shouldRestoreStock = status === 'cancelled' && order.status !== 'cancelled';
+    const shouldDeductStock = status !== 'cancelled' && order.status === 'cancelled';
+
+    if (shouldDeductStock) {
+      // Validate that all items have enough stock first
+      for (const item of order.orderItems) {
+        if (!item.product) continue;
+        const Model = item.isB2B ? B2BProduct : Product;
+        const product = await Model.findById(item.product);
+        if (!product || product.stock < item.quantity) {
+          return res.status(400).json({
+            success: false,
+            message: `Insufficient stock for ${product?.name || 'product'} to re-activate this order. Only ${product?.stock || 0} available.`,
+          });
+        }
+      }
+
+      // Deduct stock
+      for (const item of order.orderItems) {
+        if (!item.product) continue;
+        const Model = item.isB2B ? B2BProduct : Product;
+        await Model.findByIdAndUpdate(item.product, { $inc: { stock: -item.quantity } });
+      }
+    }
+
     order.status = status;
     if (trackingNumber) order.trackingNumber = trackingNumber;
     if (notes) order.notes = notes;
     if (shouldRestoreStock) {
       for (const item of order.orderItems) {
         if (!item.product) continue;
-        if (item.isB2B) {
-          await B2BProduct.findByIdAndUpdate(item.product, { $inc: { stock: item.quantity } });
-        } else {
-          await Product.findByIdAndUpdate(item.product, { $inc: { stock: item.quantity } });
-        }
+        const Model = item.isB2B ? B2BProduct : Product;
+        await Model.findByIdAndUpdate(item.product, { $inc: { stock: item.quantity } });
       }
     }
     if (status === 'delivered') {

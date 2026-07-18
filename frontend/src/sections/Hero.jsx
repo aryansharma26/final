@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
 import {
   BadgeCheck,
   CheckCircle,
@@ -149,21 +150,36 @@ const Hero = () => {
       <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(15,23,42,0.05)_1px,transparent_1px),linear-gradient(180deg,rgba(15,23,42,0.05)_1px,transparent_1px)] bg-[size:52px_52px]" />{" "}
       <div className="container-custom relative">
         <div className="mx-auto max-w-4xl text-center">
-          <div className="mb-2 inline-flex items-center gap-1.5 rounded-full border border-emerald-100 bg-white/85 px-3 py-1.5 text-xs font-semibold text-emerald-700 shadow-sm">
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, ease: "easeOut" }}
+            className="mb-2 inline-flex items-center gap-1.5 rounded-full border border-emerald-100 bg-white/85 px-3 py-1.5 text-xs font-semibold text-emerald-700 shadow-sm"
+          >
             <BadgeCheck className="h-3.5 w-3.5" />
             Trusted healthcare at your doorstep
-          </div>
+          </motion.div>
 
-          <h1 className="mx-auto max-w-4xl text-4xl font-extrabold leading-[1.04] tracking-tight text-gray-950 sm:text-5xl lg:text-[56px]">
+          <motion.h1
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.1, ease: "easeOut" }}
+            className="mx-auto max-w-4xl text-4xl font-extrabold leading-[1.04] tracking-tight text-gray-950 sm:text-5xl lg:text-[56px]"
+          >
             Your Health, Delivered to Your Doorstep
-          </h1>
+          </motion.h1>
 
           {/* <p className="mx-auto mt-4 max-w-2xl text-base leading-7 text-gray-600 sm:text-lg">
             Genuine medicines and healthcare products. Upload prescriptions and
             track your wellness - all in one place.
           </p> */}
 
-          <div className="mx-auto mt-5 max-w-3xl">
+          <motion.div
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2, ease: "easeOut" }}
+            className="mx-auto mt-5 max-w-3xl"
+          >
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <Link
                 to="/prescriptions"
@@ -223,9 +239,15 @@ const Hero = () => {
                 </div>
               </Link>
             </div>
-          </div>
+          </motion.div>
 
-          <div className="mx-auto mt-7 max-w-2xl" data-hero-search="true">
+          <motion.div
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.3, ease: "easeOut" }}
+            className="mx-auto mt-7 max-w-2xl"
+            data-hero-search="true"
+          >
             <form
               autoComplete="off"
               onSubmit={(e) => {
@@ -386,7 +408,7 @@ const Hero = () => {
                 </div>
               </div>
             )}
-          </div>
+          </motion.div>
 
           <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
             <Link

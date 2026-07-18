@@ -535,11 +535,20 @@ const Navbar = () => {
               className="relative rounded-full border border-gray-100 bg-white p-2 shadow-sm transition-all hover:-translate-y-0.5 hover:bg-gray-50"
             >
               <ShoppingCart className="w-5 h-5 text-gray-600" />
-              {itemCount > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 bg-pills-pink text-white text-[10px] font-bold rounded-full flex items-center justify-center leading-none">
-                  {itemCount > 99 ? "99+" : itemCount}
-                </span>
-              )}
+              <AnimatePresence>
+                {itemCount > 0 && (
+                  <motion.span
+                    key={itemCount}
+                    initial={{ scale: 0.6, opacity: 0 }}
+                    animate={{ scale: [1, 1.35, 0.95, 1], opacity: 1 }}
+                    exit={{ scale: 0.6, opacity: 0 }}
+                    transition={{ type: "spring", stiffness: 300, damping: 15 }}
+                    className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 bg-pills-pink text-white text-[10px] font-bold rounded-full flex items-center justify-center leading-none"
+                  >
+                    {itemCount > 99 ? "99+" : itemCount}
+                  </motion.span>
+                )}
+              </AnimatePresence>
             </Link>
 
             {isAuthenticated ? (

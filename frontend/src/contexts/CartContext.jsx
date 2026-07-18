@@ -118,14 +118,12 @@ export const CartProvider = ({ children }) => {
 
     if (!productId) {
       console.error('addToCart: productId is undefined');
-      showToast('Failed to add: Invalid product', 'error');
       return { success: false, message: 'Invalid product' };
     }
 
     if (!isAuthenticated) {
       if (productData?.isPrescriptionRequired) {
         const errMsg = 'Please log in and upload a prescription before adding this product.';
-        showToast(errMsg, 'error');
         return {
           success: false,
           message: errMsg,
@@ -134,10 +132,19 @@ export const CartProvider = ({ children }) => {
       }
       const localCart = getGuestCart();
       const existingIndex = localCart.items.findIndex((i) => getProductId(i) === productId);
+      const currentQty = existingIndex !== -1 ? localCart.items[existingIndex].quantity : 0;
+      const totalQty = currentQty + quantity;
+      const productStock = productData?.stock ?? Infinity;
+
+      if (productStock < totalQty) {
+        const cleanMsg = `Only ${productStock} available.`;
+        return { success: false, message: cleanMsg };
+      }
+
       let newCart;
       if (existingIndex !== -1) {
         const newItems = [...localCart.items];
-        newItems[existingIndex] = { ...newItems[existingIndex], quantity: newItems[existingIndex].quantity + quantity };
+        newItems[existingIndex] = { ...newItems[existingIndex], quantity: totalQty };
         newCart = { ...localCart, items: newItems };
       } else {
         const productToStore = productData
@@ -152,6 +159,7 @@ export const CartProvider = ({ children }) => {
               isPrescriptionRequired: productData.isPrescriptionRequired,
               taxRate: productData.taxRate,
               bulkPricing: productData.bulkPricing,
+              stock: productData.stock,
             }
           : { _id: productId };
         const price = productData?.discountPrice > 0 ? productData.discountPrice : productData?.price || 0;
@@ -160,19 +168,16 @@ export const CartProvider = ({ children }) => {
       const { cart: recalcCart, changed, message } = recalculateGuestCoupon(newCart);
       setGuestCart(recalcCart);
       setCart(recalcCart);
-      showToast('Added to cart successfully!', 'success');
       return { success: true, message };
     }
     try {
       const { data } = await cartAPI.addToCart({ productId, quantity });
       setCart(data.cart);
-      showToast(data.message || 'Added to cart successfully!', 'success');
       return { success: true, message: data.message };
     } catch (err) {
       const errMsg = err?.response?.data?.message || err.message || 'Failed to add to cart';
       const cleanMsg = cleanCartErrorMessage(errMsg);
       console.error('Add to cart failed:', errMsg);
-      showToast(cleanMsg, 'error');
       return { success: false, message: cleanMsg, requiresPrescription: err?.response?.data?.requiresPrescription };
     }
   };
@@ -187,6 +192,13 @@ export const CartProvider = ({ children }) => {
         const newItems = [...localCart.items];
         const itemIndex = newItems.findIndex((i) => getProductId(i) === productId);
         if (itemIndex !== -1) {
+          const item = newItems[itemIndex];
+          const productStock = item.product?.stock ?? Infinity;
+          if (productStock < quantity) {
+            const cleanMsg = `Only ${productStock} available.`;
+            showToast(cleanMsg, 'error');
+            return { success: false, message: cleanMsg };
+          }
           newItems[itemIndex] = { ...newItems[itemIndex], quantity };
         }
         newCart = { ...localCart, items: newItems };

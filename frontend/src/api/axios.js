@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { clearAllPageStates } from '../utils/pageCache.js';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
@@ -15,7 +16,17 @@ const API = axios.create({
 });
 
 API.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    const method = response.config.method?.toLowerCase();
+    if (['post', 'put', 'delete', 'patch'].includes(method)) {
+      const url = response.config.url;
+      const isReadPost = ['/coupons/validate', '/b2b-coupons/validate', '/auth/login', '/auth/logout', '/admin/login', '/admin/logout', '/auth/refresh'].some(p => url?.startsWith(p));
+      if (!isReadPost) {
+        clearAllPageStates();
+      }
+    }
+    return response;
+  },
   async (error) => {
     const originalRequest = error.config;
     const isAuthEndpoint = ['/auth/login', '/auth/register', '/auth/refresh'].some((path) => originalRequest?.url?.startsWith(path));

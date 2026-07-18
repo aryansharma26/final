@@ -1,66 +1,70 @@
 import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
 import {
-  Activity,
   ArrowRight,
-  Bone,
-  Dumbbell,
-  HeartPulse,
-  PawPrint,
-  Pill,
-  ShieldPlus,
   Sparkles,
-  Syringe,
-  UserRound,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { categoryAPI } from "../api/index.js";
 
+const MotionLink = motion(Link);
+
 const CATEGORY_STYLES = {
   "Cancer Care": {
-    icon: ShieldPlus,
+    emoji: "🎗️",
+    bg: "bg-indigo-50 border-indigo-100/50",
   },
   "Skin Care": {
-    icon: Sparkles,
+    emoji: "🧴",
+    bg: "bg-pink-50 border-pink-100/50",
   },
   "Dental Care": {
-    icon: Bone,
+    emoji: "🦷",
+    bg: "bg-sky-50 border-sky-100/50",
   },
   Wellness: {
-    icon: UserRound,
+    emoji: "🌿",
+    bg: "bg-teal-50 border-teal-100/50",
   },
   "Reproductive Care": {
-    icon: Activity,
+    emoji: "🌸",
+    bg: "bg-rose-50 border-rose-100/50",
   },
   "Heart Care": {
-    icon: HeartPulse,
+    emoji: "❤️",
+    bg: "bg-red-50 border-red-100/50",
   },
   Nutrition: {
-    icon: Pill,
+    emoji: "🍎",
+    bg: "bg-amber-50 border-amber-100/50",
   },
   Fitness: {
-    icon: Dumbbell,
+    emoji: "💪",
+    bg: "bg-slate-50 border-slate-100/50",
   },
   Diabetes: {
-    icon: Syringe,
+    emoji: "💉",
+    bg: "bg-emerald-50 border-emerald-100/50",
   },
   "Pet Care": {
-    icon: PawPrint,
+    emoji: "🐶",
+    bg: "bg-orange-50 border-orange-100/50",
   },
 };
 
 const FALLBACK_STYLE = {
-  icon: ShieldPlus,
+  emoji: "📦",
+  bg: "bg-brand/5 border-brand/10",
 };
 
 const CategoryIllustration = ({ categoryName }) => {
   const style = CATEGORY_STYLES[categoryName] || FALLBACK_STYLE;
-  const Icon = style.icon;
 
   return (
-    <div className="relative flex h-16 w-16 items-center justify-center rounded-2xl bg-pills-pink/10 ring-1 ring-pills-pink/20">
-      <span className="absolute right-2 top-2 h-2.5 w-2.5 rounded-full bg-gray-950" />
-      <span className="absolute bottom-2 left-2 h-2 w-2 rounded-full bg-white shadow-sm" />
-      <Icon className="h-8 w-8 text-gray-950" strokeWidth={1.9} />
+    <div className={`relative flex h-14 w-14 items-center justify-center rounded-2xl border transition-all duration-300 ${style.bg}`}>
+      <span className="text-2xl leading-none transition-transform duration-300 group-hover:scale-110 select-none">
+        {style.emoji}
+      </span>
     </div>
   );
 };
@@ -170,14 +174,18 @@ const ShopByCategory = () => {
         </div>
 
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
-          {categories.map((category) => {
+          {categories.map((category, index) => {
             const count = category.productCount || 0;
 
             return (
-              <Link
+              <MotionLink
                 key={category._id}
                 to={`/medicines?category=${category._id}`}
-                className="group relative overflow-hidden rounded-2xl border border-gray-100 bg-white p-3 text-left shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-brand/25 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-brand/30 sm:p-4"
+                initial={{ opacity: 0, y: 15 }}
+                whileInView={{ opacity: 1, y: 0, transition: { duration: 0.35, delay: index * 0.05, ease: "easeOut" } }}
+                viewport={{ once: true }}
+                whileHover={{ y: -6, scale: 1.015, transition: { duration: 0.2, ease: "easeInOut" } }}
+                className="group relative overflow-hidden rounded-2xl border border-gray-100 bg-white p-3 text-left shadow-sm focus:outline-none focus:ring-2 focus:ring-brand/30 sm:p-4 hover:border-brand/25 hover:shadow-lg transition-colors"
               >
                 <div className="absolute inset-x-0 top-0 h-1 bg-pills-pink/60 opacity-0 transition-opacity group-hover:opacity-100" />
                 <div className="mb-3 flex items-start justify-between gap-3 sm:mb-4">
@@ -192,7 +200,7 @@ const ShopByCategory = () => {
                 <p className="mt-1 text-xs font-medium text-gray-500">
                   {count} {count === 1 ? "Product" : "Products"}
                 </p>
-              </Link>
+              </MotionLink>
             );
           })}
         </div>

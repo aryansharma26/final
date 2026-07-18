@@ -120,19 +120,31 @@ const Doctors = () => {
       .catch(() => setCities([]));
   }, [provinceFilter]);
 
+  const lastLoadedKeyRef = useRef(cachedState ? cacheKey : null);
+
   useEffect(() => {
-    if (isFirstRender.current) {
-      isFirstRender.current = false;
-      if (cachedState) {
-        return;
-      }
+    // If the cacheKey is the one we already have loaded in state, do nothing!
+    if (lastLoadedKeyRef.current === cacheKey) {
+      return;
     }
+    
+    lastLoadedKeyRef.current = cacheKey;
+    
+    // If we have a cached state for this new cacheKey, restore it instead of fetching page 1!
+    const state = getPageState(cacheKey);
+    if (state) {
+      setDoctors(state.doctors);
+      setPagination(state.pagination);
+      setLoading(false);
+      return;
+    }
+
     loadDoctors(1, false);
-  }, [loadDoctors, cachedState]);
+  }, [loadDoctors, cacheKey]);
 
   // Keep page cache in sync
   useEffect(() => {
-    if (!loading) {
+    if (!loading && doctors.length > 0) {
       setPageState(cacheKey, { doctors, pagination });
     }
   }, [doctors, pagination, cacheKey, loading]);

@@ -150,24 +150,37 @@ const Medicines = () => {
     }
   }, []);
 
+  const lastLoadedKeyRef = useRef(cachedState ? cacheKey : null);
+
   // Reset and load products when search or category changes
   useEffect(() => {
-    if (isFirstRender.current) {
-      isFirstRender.current = false;
-      if (cachedState) {
-        return;
-      }
+    // If the cacheKey is the one we already have loaded in state, do nothing!
+    if (lastLoadedKeyRef.current === cacheKey) {
+      return;
     }
+    
+    lastLoadedKeyRef.current = cacheKey;
+    
+    // If we have a cached state for this new cacheKey, restore it instead of fetching page 1!
+    const state = getPageState(cacheKey);
+    if (state) {
+      setProducts(state.products);
+      setPage(state.page);
+      setHasMore(state.hasMore);
+      setInitialLoading(false);
+      return;
+    }
+
     setPage(1);
     setHasMore(true);
     setProducts([]);
     setInitialLoading(true);
     loadData(1, false, selectedCategory, search);
-  }, [search, selectedCategory, loadData, cachedState]);
+  }, [search, selectedCategory, loadData, cacheKey]);
 
   // Keep page cache in sync
   useEffect(() => {
-    if (!initialLoading) {
+    if (!initialLoading && products.length > 0) {
       setPageState(cacheKey, { products, page, hasMore });
     }
   }, [products, page, hasMore, cacheKey, initialLoading]);

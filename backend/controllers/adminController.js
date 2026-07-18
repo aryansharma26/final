@@ -72,7 +72,7 @@ export const getDashboardStats = async (req, res, next) => {
       Product.countDocuments({ stock: 0 }),
       Product.countDocuments(),
       Order.countDocuments(),
-      Order.aggregate([{ $match: { isPaid: true } }, { $group: { _id: null, total: { $sum: '$totalPrice' } } }]),
+      Order.aggregate([{ $match: { isPaid: true, status: { $ne: 'cancelled' } } }, { $group: { _id: null, total: { $sum: '$totalPrice' } } }]),
       Order.countDocuments({ status: 'pending' }),
       Order.find()
         .populate('user', 'name email')
@@ -92,7 +92,7 @@ export const getDashboardStats = async (req, res, next) => {
       User.find().select('name email createdAt').sort({ createdAt: -1 }).limit(5),
       Order.aggregate([{ $group: { _id: '$status', count: { $sum: 1 } } }]),
       Order.aggregate([
-        { $match: { isPaid: true } },
+        { $match: { isPaid: true, status: { $ne: 'cancelled' } } },
         { $group: { _id: { year: { $year: '$createdAt' }, month: { $month: '$createdAt' } }, total: { $sum: '$totalPrice' } } },
         { $sort: { '_id.year': -1, '_id.month': -1 } },
         { $limit: 6 },
@@ -102,9 +102,9 @@ export const getDashboardStats = async (req, res, next) => {
           $group: {
             _id: '$isB2B',
             totalOrders: { $sum: 1 },
-            paidOrders: { $sum: { $cond: ['$isPaid', 1, 0] } },
-            unpaidOrders: { $sum: { $cond: ['$isPaid', 0, 1] } },
-            paidRevenue: { $sum: { $cond: ['$isPaid', '$totalPrice', 0] } },
+            paidOrders: { $sum: { $cond: [{ $and: [{ $eq: ['$isPaid', true] }, { $ne: ['$status', 'cancelled'] }] }, 1, 0] } },
+            unpaidOrders: { $sum: { $cond: [{ $or: [{ $eq: ['$isPaid', false] }, { $eq: ['$status', 'cancelled'] }] }, 1, 0] } },
+            paidRevenue: { $sum: { $cond: [{ $and: [{ $eq: ['$isPaid', true] }, { $ne: ['$status', 'cancelled'] }] }, '$totalPrice', 0] } },
             totalOrderValue: { $sum: '$totalPrice' },
             pending: { $sum: { $cond: [{ $eq: ['$status', 'pending'] }, 1, 0] } },
             confirmed: { $sum: { $cond: [{ $eq: ['$status', 'confirmed'] }, 1, 0] } },

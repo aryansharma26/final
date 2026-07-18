@@ -110,12 +110,14 @@ const ProductCard = ({
         </div>
       )}
       {showHeart && (
-        <button
+        <motion.button
           onClick={handleHeartClick}
+          whileHover={{ scale: 1.12 }}
+          whileTap={{ scale: 0.88 }}
           className="absolute top-2 right-2 w-8 h-8 bg-white/90 rounded-full flex items-center justify-center opacity-100 transition-opacity hover:bg-red-50 sm:top-3 sm:right-3 sm:opacity-0 sm:group-hover:opacity-100"
         >
           <Heart className="w-4 h-4 text-gray-600 hover:text-red-500" />
-        </button>
+        </motion.button>
       )}
     </div>
   );
@@ -154,13 +156,15 @@ const ProductCard = ({
             <span className="text-[10px] text-gray-400 block font-normal w-full">Inclusive of Tax</span>
           </div>
           <div className="flex items-center gap-2">
-            <button
+            <motion.button
               onClick={handleActionClick}
+              whileHover={{ scale: 1.025 }}
+              whileTap={{ scale: 0.97 }}
               className="flex-1 py-2 bg-brand/10 hover:bg-brand text-brand hover:text-white text-sm font-medium rounded-lg transition-colors flex items-center justify-center gap-2"
             >
               {actionIcon || <ShoppingCart className="w-4 h-4" />}
               {actionLabel}
-            </button>
+            </motion.button>
             {showRemoveButton && onRemoveClick && (
               <button
                 onClick={handleRemoveClick}
@@ -190,13 +194,15 @@ const ProductCard = ({
 
           {onActionClick ? (
             <div className="flex items-center gap-2 flex-1 ml-3">
-              <button
+              <motion.button
                 onClick={handleActionClick}
+                whileHover={{ scale: 1.025 }}
+                whileTap={{ scale: 0.97 }}
                 className="flex-1 py-2 bg-brand/10 hover:bg-brand text-brand hover:text-white text-sm font-medium rounded-lg transition-colors flex items-center justify-center gap-2"
               >
                 {actionIcon || <ShoppingCart className="w-4 h-4" />}
                 {actionLabel}
-              </button>
+              </motion.button>
               {showRemoveButton && onRemoveClick && (
                 <button
                   onClick={handleRemoveClick}
@@ -207,13 +213,15 @@ const ProductCard = ({
               )}
             </div>
           ) : onCartClick ? (
-            <button
+            <motion.button
               onClick={handleCartClick}
+              whileHover={{ scale: 1.12 }}
+              whileTap={{ scale: 0.88 }}
               className="w-7 h-7 rounded-full flex items-center justify-center transition-colors bg-brand/10 hover:bg-brand text-brand hover:text-white sm:h-8 sm:w-8"
               title="Add to Cart"
             >
               <ShoppingCart className="w-4 h-4" />
-            </button>
+            </motion.button>
           ) : null}
         </div>
       )}
@@ -233,6 +241,7 @@ const ProductCard = ({
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
+      whileHover={{ y: -6 }}
       transition={{ duration: 0.2 }}
       {...cardProps}
     >

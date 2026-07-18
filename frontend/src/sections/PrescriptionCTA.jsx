@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Upload, ArrowRight, FileText, Shield, X, ClipboardCheck, Truck } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -37,6 +37,17 @@ const steps = [
 const PrescriptionCTA = () => {
   const navigate = useNavigate();
   const [showHowItWorksModal, setShowHowItWorksModal] = useState(false);
+
+  useEffect(() => {
+    if (showHowItWorksModal) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [showHowItWorksModal]);
 
   const handleUpload = () => {
     navigate('/prescriptions');

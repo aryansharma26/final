@@ -80,6 +80,17 @@ const Prescriptions = () => {
   const [previewItem, setPreviewItem] = useState(null);
   const [previewUrl, setPreviewUrl] = useState('');
 
+  useEffect(() => {
+    if (showAddressModal || previewItem) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [showAddressModal, previewItem]);
+
   const uploading = Boolean(uploadingSource);
 
   const loadAddresses = async () => {

@@ -153,6 +153,17 @@ export const updateCartItem = async (req, res, next) => {
     if (quantity <= 0) {
       cart.items.splice(itemIndex, 1);
     } else {
+      const product = await Product.findById(productId);
+      if (!product || product.status !== 'active') {
+        return res.status(404).json({ success: false, message: 'Product not found or unavailable' });
+      }
+      const MAX_QTY_PER_ITEM = 10;
+      if (Number(quantity) > MAX_QTY_PER_ITEM) {
+        return res.status(400).json({ success: false, message: `Maximum ${MAX_QTY_PER_ITEM} per item allowed.` });
+      }
+      if (product.stock < Number(quantity)) {
+        return res.status(400).json({ success: false, message: `Only ${product.stock} available.` });
+      }
       cart.items[itemIndex].quantity = Number(quantity);
     }
     await updateCartItemPrices(cart);
