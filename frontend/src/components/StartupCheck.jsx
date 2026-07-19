@@ -10,7 +10,7 @@ export default function StartupCheck({ children }) {
   useEffect(() => {
     let active = true;
     const startTime = Date.now();
-    const MIN_SPLASH_TIME =20; // Enforce minimum 5s splash animation to avoid visual flicker
+    const MIN_SPLASH_TIME =20// Enforce minimum 5s splash animation to avoid visual flicker
 
     const checkHealth = async () => {
       try {
@@ -177,12 +177,13 @@ export default function StartupCheck({ children }) {
           >
             {/* Left EKG Line */}
             <div
-              className={`absolute left-0 right-[50%] mr-8 top-1/2 -translate-y-1/2 h-[100px] pointer-events-none select-none ${
+              className={`absolute right-[50%] mr-8 w-[110px] md:left-0 md:w-auto top-1/2 -translate-y-1/2 h-[100px] pointer-events-none select-none ${
                 backendReady ? 'exit-ecg-left-active' : ''
               }`}
             >
+              {/* Desktop SVG */}
               <svg
-                className="w-full h-full"
+                className="hidden md:block w-full h-full"
                 viewBox="0 0 500 100"
                 preserveAspectRatio="none"
               >
@@ -217,6 +218,43 @@ export default function StartupCheck({ children }) {
                   className="animate-ecg-left"
                 />
               </svg>
+              {/* Mobile SVG */}
+              <svg
+                className="block md:hidden w-full h-full"
+                viewBox="0 0 110 100"
+                preserveAspectRatio="none"
+              >
+                <defs>
+                  <filter id="glow-left-mobile" x="-20%" y="-20%" width="140%" height="140%">
+                    <feGaussianBlur stdDeviation="2.5" result="blur" />
+                    <feMerge>
+                      <feMergeNode in="blur" />
+                      <feMergeNode in="SourceGraphic" />
+                    </feMerge>
+                  </filter>
+                </defs>
+                {/* Background trace line */}
+                <path
+                  d="M 0 50 L 50 50 L 60 50 L 65 55 L 70 40 L 75 80 L 82 10 L 89 90 L 94 50 L 110 50"
+                  fill="none"
+                  stroke="rgb(24, 83, 164)"
+                  strokeOpacity="0.12"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                {/* Moving pulse line */}
+                <path
+                  d="M 0 50 L 50 50 L 60 50 L 65 55 L 70 40 L 75 80 L 82 10 L 89 90 L 94 50 L 110 50"
+                  fill="none"
+                  stroke="rgb(24, 83, 164)"
+                  strokeWidth="2.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  filter="url(#glow-left-mobile)"
+                  className="animate-ecg-left"
+                />
+              </svg>
             </div>
 
             {/* Center Box with EKG Logo (Aligned exactly at vertical center of EKG line) */}
@@ -238,12 +276,13 @@ export default function StartupCheck({ children }) {
 
             {/* Right EKG Line */}
             <div
-              className={`absolute right-0 left-[50%] ml-8 top-1/2 -translate-y-1/2 h-[100px] pointer-events-none select-none ${
+              className={`absolute left-[50%] ml-8 w-[110px] md:right-0 md:w-auto top-1/2 -translate-y-1/2 h-[100px] pointer-events-none select-none ${
                 backendReady ? 'exit-ecg-right-active' : ''
               }`}
             >
+              {/* Desktop SVG */}
               <svg
-                className="w-full h-full"
+                className="hidden md:block w-full h-full"
                 viewBox="0 0 500 100"
                 preserveAspectRatio="none"
               >
@@ -275,6 +314,43 @@ export default function StartupCheck({ children }) {
                   strokeLinecap="round"
                   strokeLinejoin="round"
                   filter="url(#glow-right)"
+                  className="animate-ecg-right"
+                />
+              </svg>
+              {/* Mobile SVG */}
+              <svg
+                className="block md:hidden w-full h-full"
+                viewBox="0 0 110 100"
+                preserveAspectRatio="none"
+              >
+                <defs>
+                  <filter id="glow-right-mobile" x="-20%" y="-20%" width="140%" height="140%">
+                    <feGaussianBlur stdDeviation="2.5" result="blur" />
+                    <feMerge>
+                      <feMergeNode in="blur" />
+                      <feMergeNode in="SourceGraphic" />
+                    </feMerge>
+                  </filter>
+                </defs>
+                {/* Background trace line */}
+                <path
+                  d="M 0 50 L 16 50 L 21 55 L 26 40 L 31 80 L 38 10 L 45 90 L 50 50 L 110 50"
+                  fill="none"
+                  stroke="rgb(24, 83, 164)"
+                  strokeOpacity="0.12"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                {/* Moving pulse line */}
+                <path
+                  d="M 0 50 L 16 50 L 21 55 L 26 40 L 31 80 L 38 10 L 45 90 L 50 50 L 110 50"
+                  fill="none"
+                  stroke="rgb(24, 83, 164)"
+                  strokeWidth="2.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  filter="url(#glow-right-mobile)"
                   className="animate-ecg-right"
                 />
               </svg>
