@@ -76,12 +76,32 @@ const LabTests = () => {
           <div className="w-10 h-10 bg-brand/10 rounded-full flex items-center justify-center mb-3">
             <FlaskConical className="w-5 h-5 text-brand" />
           </div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3">Lab Tests at Home</h1>
+          <div className="flex flex-wrap items-center gap-3 mb-3">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Lab Tests at Home</h1>
+            <span className="inline-flex items-center rounded-full bg-brand/10 px-3 py-1 text-xs font-bold uppercase tracking-wide text-brand">
+              Coming Soon
+            </span>
+          </div>
           <p className="text-sm sm:text-base text-gray-600 leading-relaxed">
             Skip the long lines at the laboratory. With Capsandpills, you can book essential
             diagnostic tests and have samples collected right at your doorstep — processed by
             licensed laboratories, reviewed by medical technologists, and delivered to you securely.
           </p>
+          <div className="mt-4 border border-brand/20 bg-brand/5 rounded-xl p-4 flex items-start gap-3">
+            <Info className="w-5 h-5 text-brand shrink-0 mt-0.5" />
+            <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">
+              <span className="font-semibold text-gray-900">This service is not live yet.</span>{' '}
+              We're launching lab test bookings soon — the tests, prices, and process below are a
+              preview of what's coming. To get notified when booking opens, email{' '}
+              <a
+                href="mailto:support@capsandpills.com"
+                className="pressable text-brand hover:text-brand-dark transition-colors"
+              >
+                support@capsandpills.com
+              </a>
+              .
+            </p>
+          </div>
         </div>
 
         {/* Test catalog */}

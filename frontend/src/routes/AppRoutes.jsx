@@ -1,5 +1,6 @@
 import { lazy, Suspense } from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import MainLayout from '../layouts/MainLayout';
 import Home from '../pages/Home';
 import Medicines from '../pages/Medicines';
@@ -59,8 +60,16 @@ const RedirectWithQuery = () => {
 };
 
 const AppRoutes = () => {
+  const location = useLocation();
+
   return (
-    <Routes>
+    <motion.div
+      key={location.pathname}
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.25, ease: 'easeOut' }}
+    >
+    <Routes location={location}>
       <Route element={<MainLayout />}>
         <Route path="/" element={<Home />} />
         <Route path="/medicines" element={<Medicines />} />
@@ -135,6 +144,7 @@ const AppRoutes = () => {
       } />
       <Route path="*" element={<NotFound />} />
     </Routes>
+    </motion.div>
   );
 };
 
