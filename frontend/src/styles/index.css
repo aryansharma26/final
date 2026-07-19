@@ -80,6 +80,18 @@
     transition: background-color 120ms ease, color 120ms ease, border-color 120ms ease;
   }
 
+  .hero-search-submit:not(:disabled):not([aria-disabled="true"]):active {
+    transform: translateY(-50%) scale(0.9);
+    transition: background-color 240ms ease, box-shadow 240ms ease, transform 240ms ease;
+  }
+
+  @media (hover: none) {
+    .hero-search-submit:not(:disabled):not([aria-disabled="true"]):active {
+      transform: translateY(-50%) scale(0.86);
+      transition-duration: 320ms;
+    }
+  }
+
   .container-custom {
     @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
   }

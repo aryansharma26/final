@@ -6,32 +6,32 @@ const Footer = () => {
   const getLinkRoute = (link) => {
     const routeMap = {
       'About Us': '/about',
-      'Careers': '/about',
-      'Blog': '/about',
-      'Press': '/about',
-      'Partners': '/about',
-      'Contact Us': '/about',
-      'FAQs': '/about',
+      'Credits': '/credits',
+      'Careers': '/careers',
+      'Blog': '/blog',
+      'Partners': '/partners',
+      'Contact Us': '/contact',
+      'Help Center': '/faq',
       'Shipping Info': '/shipping-policy',
       'Returns': '/refund-policy',
       'Order Tracking': '/orders',
       'Privacy Policy': '/privacy',
       'Terms of Service': '/terms',
-      'Cookie Policy': '/privacy',
+      'Cookie Policy': '/cookie-policy',
       'Refund Policy': '/refund-policy',
-      'Disclaimer': '/terms',
-      'Doctor Consultation': '/doctors',
-      'Lab Tests': '/about',
-      'Health Articles': '/about',
-      'Insurance': '/about',
-      'Corporate Wellness': '/about',
+      'Disclaimer': '/disclaimer',
+      'Doctor Consultation': '/doctor-consultation',
+      'Lab Tests': '/lab-tests',
+      'Health Articles': '/health-articles',
+      'Insurance': '/insurance',
+      'Corporate Wellness': '/corporate-wellness',
     };
     return routeMap[link] || '/';
   };
 
   const footerLinks = {
-    'Company': ['About Us', 'Careers', 'Blog', 'Press', 'Partners'],
-    'Support': ['Contact Us', 'FAQs', 'Shipping Info', 'Returns', 'Order Tracking'],
+    'Company': ['About Us', 'Careers', 'Blog', 'Credits', 'Partners'],
+    'Support': ['Contact Us', 'Help Center', 'Shipping Info', 'Returns', 'Order Tracking'],
     'Policies': ['Privacy Policy', 'Terms of Service', 'Cookie Policy', 'Refund Policy', 'Disclaimer'],
     'Services': ['Doctor Consultation', 'Lab Tests', 'Health Articles', 'Insurance', 'Corporate Wellness'],
   };

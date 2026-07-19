@@ -21,13 +21,31 @@ import B2BProductDetail from '../pages/B2BProductDetail';
 import NotFound from '../pages/NotFound';
 import Doctors from '../pages/Doctors';
 import DoctorDetail from '../pages/DoctorDetail';
-import ComingSoon from '../pages/ComingSoon';
 import FAQ from '../pages/FAQ';
 import ProtectedRoute from '../components/ProtectedRoute';
 
 const AdminLogin = lazy(() => import('../pages/AdminLogin'));
 const AdminDashboard = lazy(() => import('../pages/AdminDashboard'));
 const AdminProtectedRoute = lazy(() => import('../components/AdminProtectedRoute'));
+
+// Lazy-loaded content pages
+const About = lazy(() => import('../pages/About'));
+const PrivacyPolicy = lazy(() => import('../pages/PrivacyPolicy'));
+const Terms = lazy(() => import('../pages/Terms'));
+const RefundPolicy = lazy(() => import('../pages/RefundPolicy'));
+const ShippingPolicy = lazy(() => import('../pages/ShippingPolicy'));
+const Credits = lazy(() => import('../pages/Credits'));
+const Careers = lazy(() => import('../pages/Careers'));
+const Blog = lazy(() => import('../pages/Blog'));
+const Partners = lazy(() => import('../pages/Partners'));
+const ContactUs = lazy(() => import('../pages/ContactUs'));
+const LabTests = lazy(() => import('../pages/LabTests'));
+const HealthArticles = lazy(() => import('../pages/HealthArticles'));
+const Insurance = lazy(() => import('../pages/Insurance'));
+const CorporateWellness = lazy(() => import('../pages/CorporateWellness'));
+const CookiePolicy = lazy(() => import('../pages/CookiePolicy'));
+const Disclaimer = lazy(() => import('../pages/Disclaimer'));
+const DoctorConsultation = lazy(() => import('../pages/DoctorConsultation'));
 
 const RouteLoader = () => (
   <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -47,11 +65,23 @@ const AppRoutes = () => {
         <Route path="/" element={<Home />} />
         <Route path="/medicines" element={<Medicines />} />
         <Route path="/healthcare" element={<RedirectWithQuery />} />
-        <Route path="/about" element={<ComingSoon />} />
-        <Route path="/privacy" element={<ComingSoon />} />
-        <Route path="/terms" element={<ComingSoon />} />
-        <Route path="/refund-policy" element={<ComingSoon />} />
-        <Route path="/shipping-policy" element={<ComingSoon />} />
+        <Route path="/about" element={<Suspense fallback={<RouteLoader />}><About /></Suspense>} />
+        <Route path="/privacy" element={<Suspense fallback={<RouteLoader />}><PrivacyPolicy /></Suspense>} />
+        <Route path="/terms" element={<Suspense fallback={<RouteLoader />}><Terms /></Suspense>} />
+        <Route path="/refund-policy" element={<Suspense fallback={<RouteLoader />}><RefundPolicy /></Suspense>} />
+        <Route path="/shipping-policy" element={<Suspense fallback={<RouteLoader />}><ShippingPolicy /></Suspense>} />
+        <Route path="/credits" element={<Suspense fallback={<RouteLoader />}><Credits /></Suspense>} />
+        <Route path="/careers" element={<Suspense fallback={<RouteLoader />}><Careers /></Suspense>} />
+        <Route path="/blog" element={<Suspense fallback={<RouteLoader />}><Blog /></Suspense>} />
+        <Route path="/partners" element={<Suspense fallback={<RouteLoader />}><Partners /></Suspense>} />
+        <Route path="/contact" element={<Suspense fallback={<RouteLoader />}><ContactUs /></Suspense>} />
+        <Route path="/lab-tests" element={<Suspense fallback={<RouteLoader />}><LabTests /></Suspense>} />
+        <Route path="/health-articles" element={<Suspense fallback={<RouteLoader />}><HealthArticles /></Suspense>} />
+        <Route path="/insurance" element={<Suspense fallback={<RouteLoader />}><Insurance /></Suspense>} />
+        <Route path="/corporate-wellness" element={<Suspense fallback={<RouteLoader />}><CorporateWellness /></Suspense>} />
+        <Route path="/cookie-policy" element={<Suspense fallback={<RouteLoader />}><CookiePolicy /></Suspense>} />
+        <Route path="/disclaimer" element={<Suspense fallback={<RouteLoader />}><Disclaimer /></Suspense>} />
+        <Route path="/doctor-consultation" element={<Suspense fallback={<RouteLoader />}><DoctorConsultation /></Suspense>} />
         <Route path="/offers" element={<Offers />} />
         <Route path="/faq" element={<FAQ />} />
         <Route path="/doctors" element={<Doctors />} />

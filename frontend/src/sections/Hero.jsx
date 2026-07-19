@@ -225,7 +225,7 @@ const Hero = () => {
               >
                 <div className="relative flex items-start gap-2">
                   <span className="mt-0.5 inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-700 shadow-sm ring-1 ring-slate-200">
-                    <Pill className="h-4 w-4 rotate-[-24deg]" />
+                    <Pill className="h-4 w-4" />
                   </span>
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center justify-between gap-2">
@@ -291,7 +291,7 @@ const Hero = () => {
               />
               <button
                 type="submit"
-                className="no-press-animation absolute right-2 top-1/2 -translate-y-1/2 rounded-full bg-gray-950 px-5 py-2 text-sm font-semibold text-white shadow-md shadow-gray-950/20 transition-all duration-200 hover:-translate-y-[52%] hover:bg-gray-800 sm:px-6 sm:py-2.5"
+                className="no-press-animation hero-search-submit absolute right-2 top-1/2 -translate-y-1/2 rounded-full bg-gray-950 px-5 py-2 text-sm font-semibold text-white shadow-md shadow-gray-950/20 transition-all duration-200 hover:-translate-y-[52%] hover:bg-gray-800 sm:px-6 sm:py-2.5"
               >
                 Search
               </button>
@@ -422,10 +422,10 @@ const Hero = () => {
           <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
             <Link
               to="/faq"
-              className="pressable inline-flex items-center gap-1.5 rounded-full bg-white/80 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide text-gray-500 ring-1 ring-gray-100 transition-colors hover:text-brand"
+              className="pressable route-pressable inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold text-gray-600 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-brand/30 hover:text-brand hover:shadow-md"
             >
               <HelpCircle className="h-3.5 w-3.5 text-brand" />
-              FAQ
+              Help Center
             </Link>
             {FAQ_LINKS.map((item) => (
               <Link
