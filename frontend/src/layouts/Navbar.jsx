@@ -545,7 +545,7 @@ const Navbar = () => {
                     animate={{ scale: [1, 1.35, 0.95, 1], opacity: 1 }}
                     exit={{ scale: 0.6, opacity: 0 }}
                     transition={{ type: "spring", stiffness: 300, damping: 15 }}
-                    className="nav-badge absolute -top-0.5 -right-0.5 z-20 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-pills-pink px-1 text-[10px] font-bold leading-none text-white"
+                    className="nav-badge absolute -top-0.5 -right-0.5 z-20 flex h-3.5 min-w-3.5 items-center justify-center rounded-full bg-pills-pink px-0.5 text-[8px] font-bold leading-none text-white"
                   >
                     {itemCount > 99 ? "99+" : itemCount}
                   </motion.span>

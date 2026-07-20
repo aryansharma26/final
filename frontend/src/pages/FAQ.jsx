@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Building2, Check, ChevronDown, ClipboardCheck, Copy, CreditCard, FileText, Mail, MessageCircle, Package, PackageCheck, Phone, RotateCcw, ShieldCheck, Stethoscope, Tag, Truck, UserCircle, X } from 'lucide-react';
+import { ArrowLeft, Building2, Check, ClipboardCheck, Copy, CreditCard, FileText, Mail, MessageCircle, Package, PackageCheck, Phone, RotateCcw, ShieldCheck, Stethoscope, Tag, Truck, UserCircle, X } from 'lucide-react';
 
 const sections = [
   {
@@ -488,7 +488,6 @@ const sections = [
 
 const FAQ = () => {
   const { hash } = useLocation();
-  const [openIds, setOpenIds] = useState({});
   const [showEmailPopup, setShowEmailPopup] = useState(false);
   const [emailCopied, setEmailCopied] = useState(false);
 
@@ -502,13 +501,6 @@ const FAQ = () => {
     } catch {
       window.prompt('Copy our support email:', supportEmail);
     }
-  };
-
-  const toggleQuestion = (id) => {
-    setOpenIds((prev) => ({
-      ...prev,
-      [id]: !prev[id],
-    }));
   };
 
   useEffect(() => {
@@ -565,41 +557,16 @@ const FAQ = () => {
             </div>
 
             <div className="grid gap-3 lg:grid-cols-2">
-              {questions.map(({ id: questionId, question, answer }) => {
-                const isOpen = Boolean(openIds[questionId]);
-                return (
-                  <article
-                    key={questionId}
-                    id={questionId}
-                    className="scroll-mt-24 rounded-xl border border-gray-100 bg-gray-50 p-4 transition-colors hover:bg-gray-100/50"
-                  >
-                    <button
-                      type="button"
-                      onClick={() => toggleQuestion(questionId)}
-                      className="flex w-full items-center justify-between gap-3 text-left font-bold text-gray-950 focus:outline-none"
-                    >
-                      <span className="text-sm">{question}</span>
-                      <ChevronDown
-                        className={`h-4 w-4 shrink-0 text-gray-400 transition-transform duration-200 ${
-                          isOpen ? 'rotate-180 text-brand' : ''
-                        }`}
-                      />
-                    </button>
-                    <motion.div
-                      initial={false}
-                      animate={{
-                        height: isOpen ? 'auto' : 0,
-                        opacity: isOpen ? 1 : 0,
-                        marginTop: isOpen ? 8 : 0,
-                      }}
-                      transition={{ duration: 0.25, ease: 'easeInOut' }}
-                      className="overflow-hidden"
-                    >
-                      <p className="text-sm leading-6 text-gray-600">{answer}</p>
-                    </motion.div>
-                  </article>
-                );
-              })}
+              {questions.map(({ id: questionId, question, answer }) => (
+                <article
+                  key={questionId}
+                  id={questionId}
+                  className="scroll-mt-24 rounded-xl border border-gray-100 bg-gray-50 p-4 transition-colors hover:bg-gray-100/50"
+                >
+                  <h3 className="text-sm font-bold text-gray-950">{question}</h3>
+                  <p className="mt-2 text-sm leading-6 text-gray-600">{answer}</p>
+                </article>
+              ))}
             </div>
           </section>
         ))}
