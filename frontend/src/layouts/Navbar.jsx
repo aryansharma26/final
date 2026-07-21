@@ -545,7 +545,7 @@ const Navbar = () => {
                     animate={{ scale: [1, 1.35, 0.95, 1], opacity: 1 }}
                     exit={{ scale: 0.6, opacity: 0 }}
                     transition={{ type: "spring", stiffness: 300, damping: 15 }}
-                    className="nav-badge absolute -top-0.5 -right-0.5 z-20 flex h-3.5 min-w-3.5 items-center justify-center rounded-full bg-pills-pink px-0.5 text-[8px] font-bold leading-none text-white"
+                    className="nav-badge absolute top-0 right-0 translate-x-1/3 -translate-y-1/3 z-20 flex h-4 min-w-4 items-center justify-center rounded-full bg-pills-pink px-1 text-[9px] font-bold leading-none text-white ring-2 ring-white"
                   >
                     {itemCount > 99 ? "99+" : itemCount}
                   </motion.span>
@@ -616,7 +616,7 @@ const Navbar = () => {
               </div>
             ) : (
               <Link
-                to="/login"
+                to="/register"
                 className="pressable nav-pressable rounded-full border border-gray-100 bg-white p-2 shadow-sm transition-all"
               >
                 <User className="w-5 h-5 text-gray-600" />
@@ -869,8 +869,8 @@ const Navbar = () => {
                   </>
                 ) : (
                   <motion.div {...mobileItemMotion} transition={{ duration: 0.18, delay: 0.05 }}>
-                    <Link to="/login" className="pressable nav-pressable flex w-full items-center gap-2 rounded-2xl bg-white px-4 py-3 text-sm font-medium text-gray-700 shadow-sm transition-colors hover:bg-gray-50">
-                      <User className="w-4 h-4" /> Sign In
+                    <Link to="/register" className="pressable nav-pressable flex w-full items-center gap-2 rounded-2xl bg-white px-4 py-3 text-sm font-medium text-gray-700 shadow-sm transition-colors hover:bg-gray-50">
+                      <User className="w-4 h-4" /> Sign Up / Sign In
                     </Link>
                   </motion.div>
                 )}
@@ -944,7 +944,7 @@ const Navbar = () => {
         .nav-pressable {
           -webkit-tap-highlight-color: transparent;
           position: relative;
-          overflow: hidden;
+          overflow: visible;
           outline: none;
           touch-action: manipulation;
           transform: translateZ(0);

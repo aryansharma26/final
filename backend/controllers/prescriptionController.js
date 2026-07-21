@@ -381,84 +381,10 @@ export const updatePrescriptionQuote = async (req, res, next) => {
 };
 
 export const createOrderFromPrescriptionQuote = async (req, res, next) => {
-  const session = await mongoose.startSession();
-  session.startTransaction();
-  try {
-    const prescription = await Prescription.findOne({ _id: req.params.id, user: req.user._id }).session(session);
-    if (!prescription) {
-      await session.abortTransaction();
-      return res.status(404).json({ success: false, message: 'Prescription not found' });
-    }
-    if (prescription.quoteStatus !== 'sent' || !prescription.quoteItems?.length) {
-      await session.abortTransaction();
-      return res.status(400).json({ success: false, message: 'No active quote available for this prescription' });
-    }
-
-    const orderItems = [];
-    let itemsPrice = 0;
-    let taxPrice = 0;
-
-    for (const item of prescription.quoteItems) {
-      const product = await Product.findById(item.product).session(session);
-      if (!product || product.status !== 'active') {
-        await session.abortTransaction();
-        return res.status(400).json({ success: false, message: `${item.name || 'A quoted product'} is no longer available` });
-      }
-      if (product.stock < item.quantity) {
-        await session.abortTransaction();
-        return res.status(400).json({ success: false, message: `Only ${product.stock} available for ${product.name}` });
-      }
-      await Product.findOneAndUpdate(
-        { _id: product._id, stock: { $gte: item.quantity } },
-        { $inc: { stock: -item.quantity } },
-        { session }
-      );
-
-      const price = Number(item.price || 0);
-      const quantity = Number(item.quantity || 1);
-      const lineTotal = price * quantity;
-      const rate = product.taxRate !== undefined ? product.taxRate : 12;
-      taxPrice += lineTotal * (rate / (100 + rate));
-      orderItems.push({
-        product: product._id,
-        name: product.name,
-        image: item.image || product.images?.[0]?.url || (typeof product.images?.[0] === 'string' ? product.images[0] : '') || '',
-        productSlug: product.slug,
-        price,
-        originalPrice: price,
-        quantity,
-      });
-      itemsPrice += lineTotal;
-    }
-
-    const shippingPrice = itemsPrice >= 2000 ? 0 : 50;
-    const totalPrice = itemsPrice + shippingPrice;
-    const [order] = await Order.create([{
-      user: req.user._id,
-      orderItems,
-      isPrescriptionOrder: true,
-      prescription: prescription._id,
-      shippingAddress: prescription.deliveryAddress,
-      paymentMethod: 'cod',
-      itemsPrice,
-      taxPrice: Number(taxPrice.toFixed(2)),
-      shippingPrice,
-      totalPrice,
-      status: 'pending',
-    }], { session });
-
-    prescription.quoteStatus = 'accepted';
-    prescription.orderedAt = new Date();
-    await prescription.save({ session });
-
-    await session.commitTransaction();
-    res.status(201).json({ success: true, message: 'Prescription order placed successfully', order });
-  } catch (error) {
-    await session.abortTransaction();
-    next(error);
-  } finally {
-    session.endSession();
-  }
+  return res.status(400).json({
+    success: false,
+    message: 'Please place prescription quote orders through checkout.',
+  });
 };
 
 export const getPrescriptionStatus = async (req, res, next) => {

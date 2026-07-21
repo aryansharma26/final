@@ -6,6 +6,7 @@ import Product from '../models/Product.js';
 import Order from '../models/Order.js';
 import Review from '../models/Review.js';
 import Contact from '../models/Contact.js';
+import B2BProduct from '../models/B2BProduct.js';
 import { generateAdminToken } from '../utils/generateToken.js';
 
 const ADMIN_TOKEN_MAX_AGE = 30 * 24 * 60 * 60 * 1000;
@@ -55,7 +56,8 @@ export const getDashboardStats = async (req, res, next) => {
       totalUsers,
       lowStock,
       outOfStock,
-      totalProducts,
+      b2cProductsCount,
+      b2bProductsCount,
       totalOrders,
       totalRevenue,
       pendingOrders,
@@ -71,6 +73,7 @@ export const getDashboardStats = async (req, res, next) => {
       Product.find({ stock: { $lt: 10, $gt: 0 } }).sort({ stock: 1 }).limit(5).select('name stock sku'),
       Product.countDocuments({ stock: 0 }),
       Product.countDocuments(),
+      B2BProduct.countDocuments(),
       Order.countDocuments(),
       Order.aggregate([{ $match: { isPaid: true, status: { $ne: 'cancelled' } } }, { $group: { _id: null, total: { $sum: '$totalPrice' } } }]),
       Order.countDocuments({ status: 'pending' }),
@@ -143,7 +146,9 @@ export const getDashboardStats = async (req, res, next) => {
       success: true,
       stats: {
         totalUsers,
-        totalProducts,
+        totalProducts: b2cProductsCount + b2bProductsCount,
+        b2cProductsCount,
+        b2bProductsCount,
         totalOrders,
         totalRevenue: totalRevenue[0]?.total || 0,
         pendingOrders,

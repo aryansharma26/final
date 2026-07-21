@@ -154,7 +154,7 @@ const PrescriptionsModule = () => {
 
   const loadQuoteProducts = async () => {
     if (quoteProducts.length > 0) return quoteProducts;
-    const { data } = await adminAPI.getAllProducts({ limit: 10000, status: 'active' });
+    const { data } = await adminAPI.getAllProducts({ limit: 10000, status: 'all', export: 'true' });
     const products = data.products || [];
     setQuoteProducts(products);
     return products;

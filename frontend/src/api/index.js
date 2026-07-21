@@ -37,6 +37,14 @@ export const categoryAPI = {
   deleteCategory: (id) => API.delete(`/categories/${id}`, { _admin: true }),
 };
 
+export const b2bCategoryAPI = {
+  getCategories: () => API.get('/b2b-categories'),
+  getAllCategoriesAdmin: () => API.get('/b2b-categories/admin/all', { _admin: true }),
+  createCategory: (data) => API.post('/b2b-categories', data, { _admin: true }),
+  updateCategory: (id, data) => API.put(`/b2b-categories/${id}`, data, { _admin: true }),
+  deleteCategory: (id) => API.delete(`/b2b-categories/${id}`, { _admin: true }),
+};
+
 export const cartAPI = {
   getCart: () => API.get('/cart'),
   addToCart: (data) => API.post('/cart/add', data),

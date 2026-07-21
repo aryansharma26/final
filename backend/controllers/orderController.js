@@ -63,7 +63,7 @@ export const createOrder = async (req, res, next) => {
   const session = await mongoose.startSession();
   session.startTransaction();
   try {
-    const { shippingAddress, paymentMethod, couponCode, isB2B, b2bItem, isSeniorCitizen, seniorCitizenIdDoc, isBuyNow, buyNowItem } = req.body;
+    const { shippingAddress, paymentMethod, couponCode, isB2B, b2bItem, isSeniorCitizen, seniorCitizenIdDoc, isBuyNow, buyNowItem, isPrescriptionQuote, prescriptionQuote } = req.body;
 
     if (isB2B && b2bItem?.productId) {
       const quantity = Math.max(1, Number(b2bItem.quantity || 1));
@@ -147,6 +147,114 @@ export const createOrder = async (req, res, next) => {
           message: 'Stock changed during checkout. Please try again.',
         });
       }
+
+      await session.commitTransaction();
+
+      try {
+        await sendEmail({
+          to: req.user.email,
+          subject: `Order Confirmed - ${order._id}`,
+          html: getOrderConfirmationTemplate(order),
+        });
+      } catch (emailError) {
+        console.error('[Order] Confirmation email failed:', emailError.message);
+      }
+
+      return res.status(201).json({ success: true, message: 'Order placed successfully', order });
+    }
+
+    if (isPrescriptionQuote && prescriptionQuote?.prescriptionId) {
+      const prescription = await Prescription.findOne({
+        _id: prescriptionQuote.prescriptionId,
+        user: req.user._id,
+      }).session(session);
+
+      if (!prescription) {
+        await session.abortTransaction();
+        return res.status(404).json({ success: false, message: 'Prescription quote not found' });
+      }
+      if (prescription.quoteStatus !== 'sent' || !prescription.quoteItems?.length) {
+        await session.abortTransaction();
+        return res.status(400).json({ success: false, message: 'No active quote available for this prescription' });
+      }
+
+      const orderItems = [];
+      let itemsPrice = 0;
+      let calculatedTax = 0;
+
+      for (const item of prescription.quoteItems) {
+        const quantity = Math.max(1, Number(item.quantity || 1));
+        const product = await Product.findById(item.product).session(session);
+        if (!product || product.status !== 'active') {
+          await session.abortTransaction();
+          return res.status(400).json({ success: false, message: `${item.name || 'A quoted product'} is no longer available` });
+        }
+        if (product.stock < quantity) {
+          await session.abortTransaction();
+          return res.status(400).json({ success: false, message: `Only ${product.stock} available for ${product.name}` });
+        }
+
+        const price = Number(item.price || 0);
+        const lineTotal = price * quantity;
+        const rate = product.taxRate !== undefined ? product.taxRate : 12;
+        calculatedTax += lineTotal * (rate / (100 + rate));
+        itemsPrice += lineTotal;
+
+        orderItems.push({
+          product: product._id,
+          name: product.name,
+          image: item.image || product.images?.[0]?.url || (typeof product.images?.[0] === 'string' ? product.images[0] : '') || '',
+          productSlug: product.slug,
+          price,
+          originalPrice: price,
+          quantity,
+        });
+      }
+
+      const shippingPrice = itemsPrice >= SHIPPING_THRESHOLD ? 0 : SHIPPING_COST;
+      const totalPrice = itemsPrice + shippingPrice;
+      const [order] = await Order.create(
+        [{
+          user: req.user._id,
+          orderItems,
+          isPrescriptionOrder: true,
+          prescription: prescription._id,
+          shippingAddress,
+          paymentMethod,
+          itemsPrice,
+          taxPrice: Number(calculatedTax.toFixed(2)),
+          shippingPrice,
+          couponDiscount: 0,
+          seniorDiscount: 0,
+          checkoutOfferDiscount: 0,
+          isSeniorCitizen: false,
+          seniorCitizenIdDoc: '',
+          seniorCitizenStatus: 'none',
+          totalPrice,
+          coupon: null,
+          couponModel: 'Coupon',
+        }],
+        { session }
+      );
+
+      for (const item of prescription.quoteItems) {
+        const updated = await Product.findOneAndUpdate(
+          { _id: item.product, stock: { $gte: Number(item.quantity || 1) } },
+          { $inc: { stock: -Number(item.quantity || 1) } },
+          { session }
+        );
+        if (!updated) {
+          await session.abortTransaction();
+          return res.status(400).json({
+            success: false,
+            message: 'Stock changed during checkout. Please try again.',
+          });
+        }
+      }
+
+      prescription.quoteStatus = 'accepted';
+      prescription.orderedAt = new Date();
+      await prescription.save({ session });
 
       await session.commitTransaction();
 

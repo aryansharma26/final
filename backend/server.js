@@ -25,6 +25,7 @@ import adminRoutes from './routes/admin.js';
 import doctorRoutes from './routes/doctor.js';
 import b2bProductRoutes from './routes/b2bProduct.js';
 import b2bCouponRoutes from './routes/b2bCoupon.js';
+import b2bCategoryRoutes from './routes/b2bCategory.js';
 import settingRoutes from './routes/setting.js';
 
 validateRuntimeEnv();
@@ -122,6 +123,7 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/doctors', doctorRoutes);
 app.use('/api/b2b-products', b2bProductRoutes);
 app.use('/api/b2b-coupons', b2bCouponRoutes);
+app.use('/api/b2b-categories', b2bCategoryRoutes);
 app.use('/api/settings', settingRoutes);
 
 // Health check with DB dependency

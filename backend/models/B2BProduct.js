@@ -4,7 +4,7 @@ const b2bProductSchema = new mongoose.Schema({
   name: { type: String, required: [true, 'Product name is required'], trim: true, maxlength: [200, 'Name cannot exceed 200 characters'] },
   slug: { type: String, required: true, unique: true, lowercase: true },
   description: { type: String, default: '', trim: true },
-  category: { type: String, trim: true },
+  category: { type: mongoose.Schema.Types.ObjectId, ref: 'B2BCategory' },
   brand: { type: String, required: true, trim: true },
   images: [{ url: String, public_id: String }],
   // Bulk pricing tiers - main feature
@@ -33,9 +33,10 @@ const b2bProductSchema = new mongoose.Schema({
   taxRate: { type: Number, default: 12, min: 0 },
   // Tags for filtering
   tags: [{ type: String }],
+  searchKeywords: [{ type: String }],
 }, { timestamps: true });
 
-b2bProductSchema.index({ name: 'text', description: 'text', brand: 'text', tags: 'text' });
+b2bProductSchema.index({ name: 'text', description: 'text', brand: 'text', tags: 'text', searchKeywords: 'text' });
 b2bProductSchema.index({ category: 1, status: 1 });
 b2bProductSchema.index({ featured: 1 });
 

@@ -10,16 +10,16 @@ const escapeRegex = (string) => String(string).replace(/[.*+?^${}()|[\]\\]/g, '\
 const getSearchTokens = (search) => String(search || '').trim().split(/\s+/).filter(Boolean).slice(0, 6);
 const activeStatusQuery = { $or: [{ status: 'active' }, { status: { $exists: false } }] };
 const getSearchFields = (token) => {
-  const fields = ['name', 'brand', 'tags', 'sku'];
+  const fields = ['name', 'brand', 'tags', 'sku', 'searchKeywords'];
   if (String(token).length >= 4) {
     fields.push('description', 'composition');
   }
   return fields;
 };
-const getSuggestionSearchFields = () => ['name', 'brand', 'tags', 'sku'];
+const getSuggestionSearchFields = () => ['name', 'brand', 'tags', 'sku', 'searchKeywords'];
 const getWordStartRegex = (token) => new RegExp(`(^|[\\s\\-/])${escapeRegex(token)}`, 'i');
 const uniqueObjectIds = (ids) => [...new Set(ids.filter(Boolean).map((id) => String(id)))];
-const arrayFields = ['benefits', 'keyIngredients', 'otherIngredients', 'safetyInfo', 'quickTips', 'tags'];
+const arrayFields = ['benefits', 'keyIngredients', 'otherIngredients', 'safetyInfo', 'quickTips', 'tags', 'searchKeywords'];
 const categoryPopulate = {
   path: 'category',
   select: 'name slug parent',
@@ -178,7 +178,7 @@ export const getProducts = async (req, res, next) => {
     }
 
     const isExport = req.query.export === 'true';
-    const limitNum = isExport ? 10000 : Math.max(1, Math.min(100, Number(limit) || 12));
+    const limitNum = isExport ? 10000 : Math.max(1, Math.min(10000, Number(limit) || 12));
     const pageNum = Math.max(1, Number(page) || 1);
     const skip = isExport ? 0 : (pageNum - 1) * limitNum;
     const products = await Product.find(query)

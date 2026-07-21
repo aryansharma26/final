@@ -90,10 +90,7 @@ export default function Register() {
       setError("Password must be at least 6 characters");
       return;
     }
-    if (!agreed) {
-      setError("Please agree to the Terms and Privacy Policy");
-      return;
-    }
+
     setLoading(true);
     try {
       const result = await register({
@@ -316,31 +313,7 @@ export default function Register() {
                   </div>
                 </div>
 
-                <label className="flex cursor-pointer items-start gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2.5">
-                  <input
-                    type="checkbox"
-                    checked={agreed}
-                    onChange={(e) => setAgreed(e.target.checked)}
-                    className="mt-0.5 h-4 w-4 rounded border-slate-300 text-pills-pink focus:ring-pills-pink"
-                  />
-                  <span className="text-sm leading-5 text-slate-600">
-                    I agree to the{" "}
-                    <Link
-                      to="/terms"
-                      className="pressable font-semibold text-pills-pink hover:text-pills-pink-dark"
-                    >
-                      Terms
-                    </Link>{" "}
-                    and{" "}
-                    <Link
-                      to="/privacy"
-                      className="pressable font-semibold text-pills-pink hover:text-pills-pink-dark"
-                    >
-                      Privacy Policy
-                    </Link>
-                    .
-                  </span>
-                </label>
+
 
                 <button
                   type="submit"

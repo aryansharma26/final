@@ -56,7 +56,7 @@ API.interceptors.response.use(
           const isAdminPath = currentPath.startsWith('/admin');
           const isProtectedRoute = ['/profile', '/orders', '/checkout', '/wishlist'].some((p) => currentPath.startsWith(p));
           if (isProtectedRoute && !isAuthPage && !isAdminPath) {
-            window.location.replace('/login');
+            window.location.replace('/register');
           }
         }
       }

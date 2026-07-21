@@ -18,7 +18,7 @@ export default function FloatingWhatsApp() {
       onClick={handleClick}
       target="_blank"
       rel="noopener noreferrer"
-      className="group fixed bottom-36 right-5 z-50 flex items-center gap-0 transition-all duration-300 hover:gap-2 lg:bottom-40 lg:right-6"
+      className="group fixed bottom-[13.5rem] right-5 z-50 flex items-center gap-0 transition-all duration-300 hover:gap-2 lg:bottom-[10rem] lg:right-6"
       aria-label="Chat on WhatsApp"
     >
       <span className="hidden group-hover:inline-block whitespace-nowrap bg-[#25D366] text-white text-sm font-medium px-3 py-2 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-2 group-hover:translate-x-0">

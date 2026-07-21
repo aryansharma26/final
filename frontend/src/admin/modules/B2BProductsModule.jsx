@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Search, Plus, Edit2, Trash2, Upload, Loader2, Package, X } from 'lucide-react';
-import { b2bProductAPI } from '../../api/index.js';
+import { b2bProductAPI, b2bCategoryAPI } from '../../api/index.js';
 import { Badge, Button, Input, Textarea, Modal, ConfirmDialog, EmptyState, SkeletonRow } from '../components/AdminUI.jsx';
 import { useInfiniteScroll } from '../hooks/useInfiniteScroll.js';
 
@@ -21,6 +21,8 @@ const defaultForm = {
   featured: false,
   bulkPricing: [],
   taxRate: 12,
+  category: '',
+  searchKeywords: '',
 };
 
 const B2BProductsModule = () => {
@@ -40,8 +42,18 @@ const B2BProductsModule = () => {
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [formError, setFormError] = useState('');
+  const [categories, setCategories] = useState([]);
 
   const totalRef = useRef(0);
+
+  const loadCategories = async () => {
+    try {
+      const { data } = await b2bCategoryAPI.getAllCategoriesAdmin();
+      setCategories(data.categories || []);
+    } catch (err) {
+      console.error('Failed to load B2B categories:', err);
+    }
+  };
 
   const loadProducts = useCallback(async (pageNum = 1, append = false) => {
     try {
@@ -85,6 +97,10 @@ const B2BProductsModule = () => {
   });
 
   useEffect(() => {
+    loadCategories();
+  }, []);
+
+  useEffect(() => {
     setPage(1);
     loadProducts(1, false);
   }, [search, statusFilter]);
@@ -110,6 +126,8 @@ const B2BProductsModule = () => {
       featured: product.featured || false,
       bulkPricing: product.bulkPricing || [],
       taxRate: product.taxRate !== undefined ? product.taxRate : 12,
+      category: product.category?._id || product.category || '',
+      searchKeywords: (product.searchKeywords || []).join(', ') || '',
     });
     setImagePreview(product.images || []);
     setImageFiles([]);
@@ -165,7 +183,7 @@ const B2BProductsModule = () => {
       const fd = new FormData();
       Object.entries(formData).forEach(([key, value]) => {
         if (key === 'bulkPricing') return;
-        const shouldSendEmpty = editingProduct && ['name', 'description', 'brand', 'stock', 'sku', 'status'].includes(key);
+        const shouldSendEmpty = editingProduct && ['name', 'description', 'brand', 'stock', 'sku', 'status', 'category', 'searchKeywords'].includes(key);
         if (value !== undefined && value !== null && (value !== '' || shouldSendEmpty)) {
           fd.append(key, value);
         }
@@ -269,6 +287,7 @@ const B2BProductsModule = () => {
             <thead className="bg-gray-50 border-b border-gray-100">
               <tr>
                 <th className="px-4 py-3 text-left font-medium text-gray-600">Product</th>
+                <th className="px-4 py-3 text-left font-medium text-gray-600">Category</th>
                 <th className="px-4 py-3 text-left font-medium text-gray-600">Stock</th>
                 <th className="px-4 py-3 text-left font-medium text-gray-600">Status</th>
                 <th className="px-4 py-3 text-left font-medium text-gray-600">Bulk Tiers</th>
@@ -279,7 +298,7 @@ const B2BProductsModule = () => {
               {loading ? (
                 <SkeletonRow cols={6} />
               ) : products.length === 0 ? (
-                <tr><td colSpan={5}><EmptyState icon={Package} title="No B2B products found" subtitle="Add B2B products with bulk pricing tiers" /></td></tr>
+                <tr><td colSpan={6}><EmptyState icon={Package} title="No B2B products found" subtitle="Add B2B products with bulk pricing tiers" /></td></tr>
               ) : (
                 products.map((p) => (
                   <tr
@@ -305,6 +324,11 @@ const B2BProductsModule = () => {
                           </div>
                         </div>
                       </div>
+                    </td>
+                    <td className="px-4 py-3">
+                      <span className="text-xs font-semibold text-gray-600 bg-gray-50 border border-gray-100 px-2.5 py-1 rounded-md">
+                        {p.category?.name || 'Uncategorized'}
+                      </span>
                     </td>
                     <td className="px-4 py-3">
                       <span className={`font-medium ${p.stock < 10 ? 'text-red-600' : 'text-gray-900'}`}>{p.stock}</span>
@@ -351,16 +375,38 @@ const B2BProductsModule = () => {
           <Input label="Stock" type="number" value={formData.stock} onChange={(e) => setFormData({ ...formData, stock: e.target.value })} />
           <Input label="SKU" value={formData.sku} onChange={(e) => setFormData({ ...formData, sku: e.target.value })} />
           <Input label="Tax Rate (%)" type="number" value={formData.taxRate} onChange={(e) => setFormData({ ...formData, taxRate: e.target.value })} />
-          <select
-            value={formData.status}
-            onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-            className="px-3 py-2 border border-gray-200 rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
-          >
-            <option value="active">Active</option>
-            <option value="inactive">Inactive</option>
-            <option value="out_of_stock">Out of Stock</option>
-          </select>
+          <div className="flex flex-col">
+            <label className="text-xs font-bold text-gray-500 uppercase mb-1">Status</label>
+            <select
+              value={formData.status}
+              onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+              className="px-3 py-2 border border-gray-200 rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand h-[42px]"
+            >
+              <option value="active">Active</option>
+              <option value="inactive">Inactive</option>
+              <option value="out_of_stock">Out of Stock</option>
+            </select>
+          </div>
+          <div className="flex flex-col">
+            <label className="text-xs font-bold text-gray-500 uppercase mb-1">Category</label>
+            <select
+              value={formData.category}
+              onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+              className="px-3 py-2 border border-gray-200 rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand h-[42px]"
+            >
+              <option value="">Select Category</option>
+              {categories.map((cat) => {
+                const parentText = cat.parent?.name ? `${cat.parent.name} > ` : (typeof cat.parent === 'string' ? `${cat.parent} > ` : '');
+                return (
+                  <option key={cat._id} value={cat._id}>
+                    {parentText}{cat.name}
+                  </option>
+                );
+              })}
+            </select>
+          </div>
           <Textarea label="Description" value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} className="sm:col-span-2" />
+          <Textarea label="Search Keywords / Aliases (synonyms, common mistypes, comma separated)" value={formData.searchKeywords} onChange={(e) => setFormData({ ...formData, searchKeywords: e.target.value })} className="sm:col-span-2" />
 
           <div className="sm:col-span-2 flex items-center gap-4">
             <label className="flex items-center gap-2 text-sm text-gray-700">

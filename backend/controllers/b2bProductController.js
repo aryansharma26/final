@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import B2BProduct from '../models/B2BProduct.js';
+import B2BCategory from '../models/B2BCategory.js';
 import { body, validationResult } from 'express-validator';
 import cloudinary, { isCloudinaryConfigured } from '../config/cloudinary.js';
 
@@ -18,20 +19,39 @@ export const getAllB2BProducts = async (req, res, next) => {
     const query = {};
     if (search) {
       const searchRegex = { $regex: search, $options: 'i' };
+      
+      const matchingCategories = await B2BCategory.find({
+        name: searchRegex,
+        isActive: { $ne: false }
+      }).select('_id');
+      const categoryIds = matchingCategories.map((c) => c._id);
+
       query.$or = [
         { name: searchRegex },
         { brand: searchRegex },
         { description: searchRegex },
         { sku: searchRegex },
-        { tags: searchRegex }
+        { tags: searchRegex },
+        { searchKeywords: searchRegex },
+        ...(categoryIds.length > 0 ? [{ category: { $in: categoryIds } }] : [])
       ];
     }
-    if (category) query.category = category;
+    if (category) {
+      const catDoc = await B2BCategory.findById(category);
+      if (catDoc && !catDoc.parent) {
+        const subcats = await B2BCategory.find({ parent: category }).select('_id');
+        const catIds = [category, ...subcats.map((c) => c._id.toString())];
+        query.category = { $in: catIds };
+      } else {
+        query.category = category;
+      }
+    }
     if (status) query.status = status;
     if (featured === 'true') query.featured = true;
 
     const skip = (Number(page) - 1) * Number(limit);
     const products = await B2BProduct.find(query)
+      .populate('category', 'name slug parent')
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(Number(limit));
@@ -50,7 +70,7 @@ export const getAllB2BProducts = async (req, res, next) => {
 export const getB2BProductBySlug = async (req, res, next) => {
   try {
     res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
-    const product = await B2BProduct.findOne({ slug: req.params.slug });
+    const product = await B2BProduct.findOne({ slug: req.params.slug }).populate('category', 'name slug parent');
     if (!product) {
       return res.status(404).json({ success: false, message: 'B2B Product not found' });
     }
@@ -69,6 +89,10 @@ export const createB2BProduct = async (req, res, next) => {
 
     const productData = { ...req.body };
 
+    if (productData.category === '' || productData.category === 'null' || !productData.category) {
+      delete productData.category;
+    }
+
     // Auto-generate slug if not provided
     if (!productData.slug && productData.name) {
       productData.slug = productData.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
@@ -77,6 +101,14 @@ export const createB2BProduct = async (req, res, next) => {
     // Parse bulkPricing if sent as JSON string
     if (typeof productData.bulkPricing === 'string') {
       productData.bulkPricing = JSON.parse(productData.bulkPricing);
+    }
+
+    if (typeof productData.searchKeywords === 'string') {
+      try {
+        productData.searchKeywords = JSON.parse(productData.searchKeywords);
+      } catch {
+        productData.searchKeywords = productData.searchKeywords.split(',').map((s) => s.trim()).filter(Boolean);
+      }
     }
 
     // Handle images - Cloudinary upload
@@ -112,9 +144,21 @@ export const updateB2BProduct = async (req, res, next) => {
 
     const productData = { ...req.body };
 
+    if (productData.category === '' || productData.category === 'null' || !productData.category) {
+      productData.category = null;
+    }
+
     // Parse bulkPricing if sent as JSON string
     if (typeof productData.bulkPricing === 'string') {
       productData.bulkPricing = JSON.parse(productData.bulkPricing);
+    }
+
+    if (typeof productData.searchKeywords === 'string') {
+      try {
+        productData.searchKeywords = JSON.parse(productData.searchKeywords);
+      } catch {
+        productData.searchKeywords = productData.searchKeywords.split(',').map((s) => s.trim()).filter(Boolean);
+      }
     }
 
     // Handle images - Cloudinary upload

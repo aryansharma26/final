@@ -10,7 +10,7 @@ export default function FloatingMessenger() {
       href={messengerUrl}
       target="_blank"
       rel="noopener noreferrer"
-      className="group fixed bottom-[10rem] right-5 z-50 flex items-center gap-0 transition-all duration-300 hover:gap-2 lg:bottom-24 lg:right-6"
+      className="group fixed bottom-[9.75rem] right-5 z-50 flex items-center gap-0 transition-all duration-300 hover:gap-2 lg:bottom-[5.75rem] lg:right-6"
       aria-label="Chat on Messenger"
     >
       <span className="hidden group-hover:inline-block whitespace-nowrap bg-[#0084FF] text-white text-sm font-medium px-3 py-2 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-2 group-hover:translate-x-0">

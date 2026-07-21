@@ -50,6 +50,14 @@ const Checkout = () => {
       return null;
     }
   });
+  const [prescriptionQuote] = useState(() => {
+    if (location.state?.prescriptionQuote) return location.state.prescriptionQuote;
+    try {
+      return JSON.parse(sessionStorage.getItem('pendingPrescriptionQuoteCheckout') || 'null');
+    } catch {
+      return null;
+    }
+  });
   const [addresses, setAddresses] = useState([]);
   const [selectedAddress, setSelectedAddress] = useState(null);
   const [paymentMethod, setPaymentMethod] = useState('cod');
@@ -218,13 +226,17 @@ const Checkout = () => {
 
   const { checkoutDiscount } = useSettings();
   const isBuyNow = Boolean(buyNowItem);
+  const isPrescriptionQuote = Boolean(prescriptionQuote?.prescriptionId && prescriptionQuote?.items?.length);
+  const prescriptionQuoteItems = prescriptionQuote?.items || [];
   const checkoutSubtotal = b2bItem 
     ? b2bItem.totalPrice 
+    : isPrescriptionQuote
+      ? prescriptionQuoteItems.reduce((sum, item) => sum + Number(item.price || 0) * Number(item.quantity || 1), 0)
     : isBuyNow 
       ? buyNowItem.price * buyNowItem.quantity 
       : subtotal;
 
-  const shipping = (b2bItem || isBuyNow) 
+  const shipping = (b2bItem || isBuyNow || isPrescriptionQuote) 
     ? (checkoutSubtotal >= 2000 ? 0 : 50) 
     : (subtotal >= 2000 ? 0 : 50);
 
@@ -234,11 +246,13 @@ const Checkout = () => {
       ? buyNowItem.taxRate 
       : 12;
 
-  const seniorDiscountActive = !b2bItem && isSenior && seniorDocUrl;
+  const seniorDiscountActive = !b2bItem && !isPrescriptionQuote && isSenior && seniorDocUrl;
   const getSeniorPrice = (price) => seniorDiscountActive ? Number((Number(price || 0) * 0.80).toFixed(2)) : Number(price || 0);
 
   const tax = b2bItem
     ? Number((checkoutSubtotal * (itemTaxRate / (100 + itemTaxRate))).toFixed(2))
+    : isPrescriptionQuote
+      ? Number((checkoutSubtotal * (12 / (100 + 12))).toFixed(2))
     : isBuyNow
       ? Number((getSeniorPrice(buyNowItem.price) * buyNowItem.quantity * (itemTaxRate / (100 + itemTaxRate))).toFixed(2))
       : Number(
@@ -250,6 +264,8 @@ const Checkout = () => {
 
   const discount = b2bItem 
     ? b2bCouponDiscount 
+    : isPrescriptionQuote
+      ? 0
     : isBuyNow 
       ? couponDiscount 
       : (cart.couponDiscount || 0);
@@ -257,7 +273,7 @@ const Checkout = () => {
   const seniorDiscount = seniorDiscountActive ? Number((checkoutSubtotal * 0.20).toFixed(2)) : 0;
 
   let checkoutOfferDiscount = 0;
-  if (!b2bItem && checkoutDiscount?.enabled && checkoutSubtotal >= checkoutDiscount.minOrderAmount) {
+  if (!b2bItem && !isPrescriptionQuote && checkoutDiscount?.enabled && checkoutSubtotal >= checkoutDiscount.minOrderAmount) {
     checkoutOfferDiscount = Number((checkoutSubtotal * (checkoutDiscount.discountPercentage / 100)).toFixed(2));
   }
 
@@ -318,7 +334,7 @@ const Checkout = () => {
         setLoading(false);
         return;
       }
-      if (isSenior && !seniorDocUrl) {
+      if (!isPrescriptionQuote && isSenior && !seniorDocUrl) {
         setError('Please upload your Senior Citizen Card/ID document to claim the 20% discount.');
         setLoading(false);
         return;
@@ -339,6 +355,15 @@ const Checkout = () => {
             },
             b2bCouponCode: b2bCoupon?.code,
           }
+        : isPrescriptionQuote
+          ? {
+              shippingAddress: address,
+              paymentMethod,
+              isPrescriptionQuote: true,
+              prescriptionQuote: {
+                prescriptionId: prescriptionQuote.prescriptionId,
+              },
+            }
         : isBuyNow
           ? {
               shippingAddress: address,
@@ -362,6 +387,8 @@ const Checkout = () => {
       const { data: res } = await orderAPI.createOrder(orderData);
       if (b2bItem) {
         sessionStorage.removeItem('pendingB2BCheckout');
+      } else if (isPrescriptionQuote) {
+        sessionStorage.removeItem('pendingPrescriptionQuoteCheckout');
       } else if (isBuyNow) {
         sessionStorage.removeItem('pendingBuyNowCheckout');
       } else {
@@ -380,8 +407,8 @@ const Checkout = () => {
 
   return (
     <div className="container-custom py-4 lg:py-8">
-      <button onClick={() => (b2bItem || isBuyNow ? navigate(-1) : navigate('/cart', { replace: true }))} className="pressable inline-flex items-center gap-2 text-gray-600 hover:text-brand mb-6 transition-colors">
-        <ArrowLeft className="w-4 h-4" /> {b2bItem || isBuyNow ? 'Back' : 'Back to Cart'}
+      <button onClick={() => (b2bItem || isBuyNow || isPrescriptionQuote ? navigate(-1) : navigate('/cart', { replace: true }))} className="pressable inline-flex items-center gap-2 text-gray-600 hover:text-brand mb-6 transition-colors">
+        <ArrowLeft className="w-4 h-4" /> {b2bItem || isBuyNow || isPrescriptionQuote ? 'Back' : 'Back to Cart'}
       </button>
 
       <h1 className="mb-4 text-2xl font-bold text-gray-900 lg:mb-6">Checkout</h1>
@@ -405,7 +432,7 @@ const Checkout = () => {
       <form onSubmit={handleSubmit} className="grid gap-5 lg:grid-cols-3 lg:gap-8">
         <div className="space-y-5 lg:col-span-2 lg:space-y-6">
           {/* Senior Citizen Discount */}
-          {!b2bItem && (
+          {!b2bItem && !isPrescriptionQuote && (
             <div className="rounded-2xl border border-gray-100 bg-white p-4 sm:p-6">
               <div className="flex items-center gap-2 mb-4">
                 <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-brand text-white font-bold text-xs">S</span>
@@ -685,13 +712,18 @@ const Checkout = () => {
           <div className="rounded-2xl border border-gray-100 bg-white p-4 sm:p-6 lg:sticky lg:top-32">
             <h2 className="text-lg font-bold text-gray-900 mb-4">Order Summary</h2>
             <div className="space-y-2 text-sm mb-4">
-              {(b2bItem ? [b2bItem] : isBuyNow ? [buyNowItem] : cart.items || []).map((item) => {
+              {(b2bItem ? [b2bItem] : isPrescriptionQuote ? prescriptionQuoteItems : isBuyNow ? [buyNowItem] : cart.items || []).map((item) => {
                 const quantity = Number(item.quantity || 0);
                 const originalLineTotal = Number(item.price || 0) * quantity;
-                const discountedLineTotal = (b2bItem ? Number(item.price || 0) : getSeniorPrice(item.price)) * quantity;
+                const discountedLineTotal = (b2bItem || isPrescriptionQuote ? Number(item.price || 0) : getSeniorPrice(item.price)) * quantity;
+                const itemLabel = b2bItem
+                  ? `${item.name} (${item.tierLabel})`
+                  : isPrescriptionQuote || isBuyNow
+                    ? item.name
+                    : item.product?.name;
                 return (
-                  <div key={item.product?._id || item.productId || 'buynow-item'} className="flex justify-between gap-3 text-gray-600">
-                    <span className="line-clamp-1">{b2bItem ? `${item.name} (${item.tierLabel})` : isBuyNow ? item.name : item.product?.name} x{item.quantity}</span>
+                  <div key={item.product?._id || item.productId || item.name || 'checkout-item'} className="flex justify-between gap-3 text-gray-600">
+                    <span className="line-clamp-1">{itemLabel} x{item.quantity}</span>
                     <div className="text-right">
                       {seniorDiscountActive && originalLineTotal !== discountedLineTotal && (
                         <span className="block text-[10px] text-gray-400 line-through">₱{originalLineTotal.toFixed(0)}</span>

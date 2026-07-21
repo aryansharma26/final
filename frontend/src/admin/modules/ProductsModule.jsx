@@ -35,6 +35,7 @@ const defaultProductForm = {
   status: 'active',
   bulkPricing: [],
   taxRate: 12,
+  searchKeywords: '',
 };
 
 const toLines = (value) => (value || []).join('\n');
@@ -299,6 +300,7 @@ const ProductsModule = () => {
       status: product.status || 'active',
       bulkPricing: product.bulkPricing || [],
       taxRate: product.taxRate !== undefined ? product.taxRate : 12,
+      searchKeywords: toLines(product.searchKeywords),
     });
     setImagePreview(product.images || []);
     setImageFiles([]);
@@ -361,7 +363,7 @@ const ProductsModule = () => {
       setSubmitting(true);
       setFormError('');
       const fd = new FormData();
-      const multilineFields = ['benefits', 'keyIngredients', 'otherIngredients', 'safetyInfo', 'quickTips'];
+      const multilineFields = ['benefits', 'keyIngredients', 'otherIngredients', 'safetyInfo', 'quickTips', 'searchKeywords'];
       Object.entries(formData).forEach(([key, value]) => {
         if (key === 'category') return;
         if (multilineFields.includes(key) || key === 'faqs' || key === 'bulkPricing') return;
@@ -673,6 +675,7 @@ const ProductsModule = () => {
           <Textarea label="Safety Information (one per line)" value={formData.safetyInfo} onChange={(e) => setFormData({ ...formData, safetyInfo: e.target.value })} />
           <Textarea label="Quick Tips (one per line)" value={formData.quickTips} onChange={(e) => setFormData({ ...formData, quickTips: e.target.value })} />
           <Textarea label="FAQs (Question | Answer, one per line)" value={formData.faqs} onChange={(e) => setFormData({ ...formData, faqs: e.target.value })} className="sm:col-span-2" />
+          <Textarea label="Search Keywords / Aliases (synonyms, common mistypes, comma separated)" value={formData.searchKeywords} onChange={(e) => setFormData({ ...formData, searchKeywords: e.target.value })} className="sm:col-span-2" />
           <Input label="Dosage" value={formData.dosage} onChange={(e) => setFormData({ ...formData, dosage: e.target.value })} />
           <Input label="Composition" value={formData.composition} onChange={(e) => setFormData({ ...formData, composition: e.target.value })} />
           <div className="sm:col-span-2 flex flex-wrap items-center gap-6 p-4 bg-gray-50 rounded-xl">

@@ -342,10 +342,20 @@ const Prescriptions = () => {
     try {
       setOrderingId(item._id);
       setMessage('');
-      const { data } = await prescriptionAPI.createOrderFromQuote(item._id);
-      navigate(`/orders/${data.order._id}?success=true`, { replace: true });
+      const prescriptionQuote = {
+        prescriptionId: item._id,
+        items: (item.quoteItems || []).map((quoteItem) => ({
+          productId: quoteItem.product?._id || quoteItem.product,
+          name: quoteItem.name,
+          image: quoteItem.image || quoteItem.product?.images?.[0]?.url || quoteItem.product?.images?.[0] || '',
+          price: Number(quoteItem.price || 0),
+          quantity: Number(quoteItem.quantity || 1),
+        })),
+      };
+      sessionStorage.setItem('pendingPrescriptionQuoteCheckout', JSON.stringify(prescriptionQuote));
+      navigate('/checkout', { state: { prescriptionQuote } });
     } catch (err) {
-      setMessage(err.response?.data?.message || 'Failed to place prescription order');
+      setMessage(err.response?.data?.message || 'Failed to open prescription quote checkout');
     } finally {
       setOrderingId('');
     }

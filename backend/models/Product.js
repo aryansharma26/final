@@ -38,6 +38,7 @@ const productSchema = new mongoose.Schema({
     label: { type: String, trim: true },
   }],
   tags: [{ type: String }],
+  searchKeywords: [{ type: String }],
   featured: { type: Boolean, default: false },
   showInOffers: { type: Boolean, default: false },
   isPopular: { type: Boolean, default: false },
@@ -62,7 +63,7 @@ productSchema.set('toJSON', {
   },
 });
 
-productSchema.index({ name: 'text', description: 'text', brand: 'text', tags: 'text' });
+productSchema.index({ name: 'text', description: 'text', brand: 'text', tags: 'text', searchKeywords: 'text' });
 productSchema.index({ category: 1, status: 1 });
 productSchema.index({ featured: 1 });
 productSchema.index({ priority: -1, createdAt: -1 });

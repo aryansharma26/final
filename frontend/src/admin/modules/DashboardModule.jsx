@@ -98,11 +98,12 @@ const BusinessCard = ({ title, subtitle, prefix, data = {}, orders = [], icon: I
         </button>
       </div>
 
-      <div className="mt-5 grid grid-cols-2 gap-3 lg:grid-cols-4">
+      <div className="mt-5 grid grid-cols-2 gap-3 lg:grid-cols-5">
         {[
+          ['Catalog Items', data.catalogItems || 0],
           ['Revenue', formatMoney(data.paidRevenue)],
           ['Orders', data.totalOrders || 0],
-          ['Delivered Orders', data.delivered || 0],
+          ['Delivered', data.delivered || 0],
           ['AOV', formatMoney(data.averageOrderValue)],
         ].map(([label, value]) => (
           <div key={label} className="rounded-xl bg-gray-50 p-3">
@@ -164,8 +165,8 @@ const DashboardModule = ({ stats, loading, setActiveTab }) => {
   const axisTicks = [1, 0.75, 0.5, 0.25, 0];
   const hasRevenueData = points.some((item) => item.total > 0);
   const averageOrderValue = stats?.totalOrders > 0 ? (stats.totalRevenue / stats.totalOrders) : 0;
-  const b2cStats = stats?.businessBreakdown?.b2c || {};
-  const b2bStats = stats?.businessBreakdown?.b2b || {};
+  const b2cStats = { ...(stats?.businessBreakdown?.b2c || {}), catalogItems: stats?.b2cProductsCount ?? stats?.totalProducts ?? 0 };
+  const b2bStats = { ...(stats?.businessBreakdown?.b2b || {}), catalogItems: stats?.b2bProductsCount ?? 0 };
 
   // SVG Chart Calculations
   const width = 600;
@@ -208,7 +209,14 @@ const DashboardModule = ({ stats, loading, setActiveTab }) => {
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
             {[
               { label: 'Total Customers', value: stats.totalUsers, icon: Users, color: 'blue', desc: 'Registered accounts' },
-              { label: 'Products Catalog', value: stats.totalProducts, icon: Package, color: 'purple', desc: 'Items in inventory' },
+              { 
+                label: 'Products Catalog', 
+                value: stats.totalProducts, 
+                subText: `(B2C: ${stats.b2cProductsCount ?? stats.totalProducts} | B2B: ${stats.b2bProductsCount ?? 0})`, 
+                icon: Package, 
+                color: 'purple', 
+                desc: 'Items in inventory' 
+              },
               { label: 'Processed Orders', value: stats.totalOrders, icon: ShoppingCart, color: 'orange', desc: 'Total checkout count' },
               { label: 'Gross Revenue', value: formatMoney(stats.totalRevenue), icon: DollarSign, color: 'green', desc: 'Earnings history total' },
               { label: 'Average Order Value', value: formatMoney(averageOrderValue), icon: DollarSign, color: 'blue', desc: 'AOV per checkout' },
@@ -224,7 +232,10 @@ const DashboardModule = ({ stats, loading, setActiveTab }) => {
                     Current
                   </div>
                 </div>
-                <p className="text-2xl font-extrabold text-gray-900 tracking-tight relative z-10">{s.value}</p>
+                <div className="flex items-baseline gap-1.5 relative z-10 flex-wrap">
+                  <p className="text-2xl font-extrabold text-gray-900 tracking-tight">{s.value}</p>
+                  {s.subText && <span className="text-xs font-bold text-purple-600 bg-purple-50 px-2 py-0.5 rounded-md border border-purple-100">{s.subText}</span>}
+                </div>
                 <p className="text-sm font-bold text-gray-800 mt-1 relative z-10">{s.label}</p>
                 <p className="text-xs text-gray-400 mt-0.5 relative z-10">{s.desc}</p>
               </div>

@@ -14,6 +14,7 @@ const ReviewsModule = lazy(() => import('../admin/modules/ReviewsModule.jsx'));
 const ContactsModule = lazy(() => import('../admin/modules/ContactsModule.jsx'));
 const DoctorsModule = lazy(() => import('../admin/modules/DoctorsModule.jsx'));
 const CategoriesModule = lazy(() => import('../admin/modules/CategoriesModule.jsx'));
+const B2BCategoriesModule = lazy(() => import('../admin/modules/B2BCategoriesModule.jsx'));
 const PrescriptionsModule = lazy(() => import('../admin/modules/PrescriptionsModule.jsx'));
 const B2BModule = lazy(() => import('../admin/modules/B2BModule.jsx'));
 const B2BProductsModule = lazy(() => import('../admin/modules/B2BProductsModule.jsx'));
@@ -75,6 +76,7 @@ const AdminDashboard = () => {
     { id: 'reviews', label: 'Reviews', icon: Star },
     { id: 'doctors', label: 'Doctors', icon: Stethoscope },
     { id: 'b2b-products', label: 'B2B Products', icon: Package },
+    { id: 'b2b-categories', label: 'B2B Categories', icon: FolderTree },
     { id: 'b2b', label: 'B2B Enquiries', icon: Building2 },
     { id: 'contacts', label: 'Contacts', icon: MessageSquare },
   ];
@@ -93,6 +95,7 @@ const AdminDashboard = () => {
       case 'reviews': return <ReviewsModule />;
       case 'doctors': return <DoctorsModule />;
       case 'b2b-products': return <B2BProductsModule />;
+      case 'b2b-categories': return <B2BCategoriesModule />;
       case 'b2b': return <B2BModule />;
       case 'contacts': return <ContactsModule />;
       case 'settings': return <SettingsModule />;

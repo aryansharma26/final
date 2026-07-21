@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { getPageState, setPageState } from '../utils/pageCache.js';
-import { ArrowLeft, BadgeCheck, Building2, Send, CheckCircle, Handshake, Loader2, Package, Percent, Phone, Mail, ShoppingCart, ChevronRight, Search, Warehouse, X } from 'lucide-react';
+import { ArrowLeft, Building2, CheckCircle, ChevronRight, Loader2, Mail, Package, Phone, Search, Send, ShoppingCart, X } from 'lucide-react';
 import { contactAPI, b2bProductAPI } from '../api/index.js';
 import B2BCoupons from '../sections/B2BCoupons.jsx';
 
@@ -161,13 +161,13 @@ const B2BEnquiry = () => {
             <CheckCircle className="w-10 h-10 text-green-600" />
           </div>
           <h1 className="text-2xl font-bold text-gray-900 mb-3">Enquiry Submitted!</h1>
-          <p className="text-gray-600 mb-2">Thank you for your interest in our B2B services.</p>
+          <p className="text-gray-600 mb-2 font-medium">Thank you for your interest in our B2B services.</p>
           <p className="text-gray-500 text-sm mb-8">Our team will review your enquiry and get back to you within 24 hours.</p>
           <button
             onClick={() => navigate('/')}
-            className="inline-flex items-center gap-2 px-6 py-3 bg-brand hover:bg-brand-dark text-white font-semibold rounded-xl transition-colors"
+            className="pressable inline-flex items-center gap-2 px-6 py-3 bg-brand hover:bg-brand-dark text-white font-bold rounded-xl transition-all shadow-md active:scale-95"
           >
-            Back to Home
+            <ArrowLeft className="w-4 h-4" /> Back to Home
           </button>
         </div>
       </div>
@@ -175,337 +175,335 @@ const B2BEnquiry = () => {
   }
 
   return (
-    <div className="container-custom py-5 sm:py-8">
-      <button
-        onClick={() => navigate('/')}
-        className="mb-4 inline-flex items-center gap-1.5 rounded-full bg-white px-3.5 py-2 text-sm font-medium text-gray-500 transition-colors hover:text-brand sm:mb-6"
-      >
-        <ArrowLeft className="w-4 h-4" /> Back
-      </button>
+    <div className="min-h-screen bg-gray-50/50 py-6 sm:py-10">
+      <div className="container-custom">
+        <button
+          onClick={() => navigate('/')}
+          className="mb-4 inline-flex items-center gap-1.5 rounded-full bg-white px-3.5 py-2 text-sm font-medium text-gray-500 transition-colors hover:text-brand sm:mb-6"
+        >
+          <ArrowLeft className="w-4 h-4" /> Back
+        </button>
 
-      <div className="max-w-6xl mx-auto">
-        {/* Header */}
-        <div className="mb-5 overflow-hidden rounded-[26px] border border-slate-200 bg-white shadow-[0_18px_55px_rgba(15,23,42,0.08)] sm:mb-6">
-          <div className="grid gap-4 p-4 sm:p-6 lg:grid-cols-[1.35fr_0.85fr] lg:gap-6 lg:p-7">
-            <div className="min-w-0">
-              <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-brand/15 bg-brand-light/70 px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-wide text-brand sm:mb-4">
-                <Building2 className="h-3.5 w-3.5" />
-                Bulk Orders & Business Partnerships
-              </div>
-
-              <h1 className="max-w-3xl text-2xl font-extrabold leading-tight text-gray-950 sm:text-4xl">
-                Wholesale medicines and healthcare stock for your business.
+        <div className="max-w-6xl mx-auto space-y-8">
+          {/* Header Title block without boilerplate */}
+          <div className="text-center md:text-left">
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+              className="space-y-2"
+            >
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-brand/10 px-3 py-1 text-xs font-bold uppercase tracking-wider text-brand">
+                <Building2 className="w-3.5 h-3.5" /> B2B Portal
+              </span>
+              <h1 className="text-3xl sm:text-4xl font-black text-gray-950 tracking-tight leading-none">
+                Bulk Purchase & Wholesale Sourcing
               </h1>
-              <p className="mt-2 max-w-2xl text-sm leading-5 text-gray-600 sm:mt-3 sm:text-base sm:leading-6">
-                Browse the bulk catalog, shortlist products, and submit one clear enquiry for pricing, stock availability, and delivery coordination.
+              <p className="text-sm sm:text-base text-gray-500 max-w-xl">
+                Browse our catalog, search products, and submit an enquiry for pricing and custom wholesale logistics.
               </p>
-
-              <div className="-mx-1 mt-4 flex gap-2 overflow-x-auto px-1 pb-1 no-scrollbar sm:flex-wrap sm:overflow-visible sm:pb-0">
-                {[
-                  { icon: Warehouse, title: 'Bulk stock' },
-                  { icon: Percent, title: 'Business rates' },
-                  { icon: Handshake, title: 'Direct support' },
-                ].map(({ icon: Icon, title }) => (
-                  <div key={title} className="flex shrink-0 items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-bold text-gray-700">
-                    <Icon className="h-3.5 w-3.5 text-brand" />
-                    {title}
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="rounded-2xl border border-slate-100 bg-slate-50/80 p-3 sm:p-4 lg:self-stretch">
-              <div className="mb-3 flex items-center gap-2.5">
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-white text-brand shadow-sm">
-                  <Package className="h-4.5 w-4.5" />
-                </div>
-                <div className="min-w-0">
-                  <p className="text-sm font-extrabold text-gray-950">Business ordering</p>
-                  <p className="text-xs font-medium text-gray-500">Simple 3-step flow</p>
-                </div>
-              </div>
-
-              <div className="grid gap-2 sm:grid-cols-3 lg:grid-cols-1">
-                {[
-                  { step: '1', title: 'Browse stock', desc: 'Open bulk rates' },
-                  { step: '2', title: 'Shortlist items', desc: 'Pick quantities' },
-                  { step: '3', title: 'Send enquiry', desc: 'Get support' },
-                ].map((item) => (
-                  <div key={item.step} className="flex items-center gap-2 rounded-xl bg-white p-2.5 shadow-sm">
-                    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-brand text-xs font-extrabold text-white">
-                      {item.step}
-                    </span>
-                    <span className="min-w-0">
-                      <span className="block text-xs font-extrabold text-gray-900">{item.title}</span>
-                      <span className="block truncate text-[11px] font-medium text-gray-500">{item.desc}</span>
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
+            </motion.div>
           </div>
-        </div>
 
-        {/* Benefits */}
-        <B2BCoupons />
-
-        {/* Products Grid */}
-        <div className="mb-6 rounded-2xl border border-gray-100 bg-white p-3 shadow-sm sm:mb-10 sm:p-5">
-          <div className="mb-4 space-y-3 sm:mb-5 sm:space-y-4">
-            <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-wide text-brand">Wholesale Catalog</p>
-                <h2 className="text-xl font-bold text-gray-950">Wholesale Products</h2>
-              </div>
-              <p className="text-sm text-gray-500">Tap a product for rates and enquiry options.</p>
+          {/* Standalone High-visibility Search Section */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: 0.05 }}
+            className="relative max-w-2xl mx-auto"
+          >
+            <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
+              {productsLoading && products.length === 0 ? (
+                <Loader2 className="h-5 w-5 animate-spin text-brand" />
+              ) : (
+                <Search className="h-5 w-5 text-gray-400" />
+              )}
             </div>
-            
-            {/* Search Input */}
-            <div className="relative w-full">
-              <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                {productsLoading && products.length === 0 ? (
-                  <Loader2 className="w-4 h-4 text-gray-400 animate-spin" />
-                ) : (
-                  <Search className="w-4 h-4 text-gray-400" />
-                )}
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Search products by brand, generic name, or SKU..."
+              className="w-full rounded-2xl border-2 border-brand/20 bg-white py-4 pl-12 pr-12 text-sm sm:text-base text-gray-900 placeholder-gray-400 font-medium transition-all focus:border-brand focus:outline-none focus:ring-4 focus:ring-brand/10 shadow-[0_8px_30px_rgba(24,83,164,0.04)]"
+            />
+            {searchTerm && (
+              <button
+                onClick={() => setSearchTerm('')}
+                aria-label="Clear search"
+                className="absolute inset-y-0 right-2 my-1.5 flex items-center rounded-full px-3 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            )}
+          </motion.div>
+
+          {/* Coupons section */}
+          <B2BCoupons />
+
+          {/* Catalog grid */}
+          <motion.section
+            initial={{ opacity: 0, y: 14 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.35, delay: 0.08 }}
+            className="rounded-3xl border border-gray-100 bg-white p-5 sm:p-8 shadow-[0_15px_50px_-15px_rgba(15,23,42,0.03)]"
+          >
+            <div className="mb-6 border-b border-gray-100 pb-4">
+              <h2 className="text-xl font-extrabold text-gray-950">Wholesale Products</h2>
+              {debouncedSearch && !productsLoading && products.length > 0 && (
+                <p className="text-xs sm:text-sm text-gray-400 font-medium mt-1">
+                  Found {products.length} wholesale {products.length === 1 ? 'item' : 'items'} matching &quot;{debouncedSearch}&quot;
+                </p>
+              )}
+            </div>
+
+            {productsLoading && products.length === 0 ? (
+              <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+                {[1, 2, 3, 4].map((i) => (
+                  <div key={i} className="rounded-2xl border border-gray-100 bg-white p-4 animate-pulse">
+                    <div className="aspect-square bg-gray-50 rounded-xl mb-4" />
+                    <div className="h-4 bg-gray-50 rounded w-2/3 mb-2" />
+                    <div className="h-3 bg-gray-50 rounded w-1/2" />
+                  </div>
+                ))}
               </div>
-              <input
-                type="text"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Search wholesale products by name, brand, SKU, or tags..."
-                className="w-full pl-10 pr-10 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand transition-all bg-gray-50 sm:py-3.5"
-              />
-              {searchTerm && (
+            ) : products.length === 0 ? (
+              <div className="rounded-2xl border border-dashed border-gray-200 bg-gray-50/50 py-12 text-center">
+                <Package className="h-8 w-8 text-gray-300 mx-auto mb-3" />
+                <p className="text-gray-900 font-bold mb-1">No products found</p>
+                <p className="text-gray-500 text-sm mb-4">We couldn&apos;t find any wholesale items matching &quot;{debouncedSearch}&quot;.</p>
                 <button
                   onClick={() => setSearchTerm('')}
-                  className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-gray-400 hover:text-gray-600"
+                  className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-4 py-2 text-xs font-semibold text-gray-600 shadow-sm transition-colors hover:border-brand hover:text-brand"
                 >
-                  <X className="w-4 h-4" />
+                  Clear Search
                 </button>
-              )}
-            </div>
-          </div>
-
-          {productsLoading && products.length === 0 ? (
-            <div className="grid grid-cols-2 gap-3 lg:grid-cols-3 lg:gap-5">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="rounded-2xl border border-gray-100 bg-white p-3 animate-pulse sm:p-4">
-                  <div className="aspect-square bg-gray-200 rounded-xl mb-3" />
-                  <div className="h-4 bg-gray-200 rounded w-3/4 mb-2" />
-                  <div className="h-3 bg-gray-200 rounded w-1/2" />
-                </div>
-              ))}
-            </div>
-          ) : products.length === 0 ? (
-            <div className="text-center py-8 rounded-2xl border border-gray-100 bg-white sm:py-12">
-              <Package className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-              {debouncedSearch ? (
-                <>
-                  <p className="text-gray-900 font-semibold mb-1">No products found</p>
-                  <p className="text-gray-500 text-sm mb-4">We couldn&apos;t find any wholesale products matching &quot;{debouncedSearch}&quot;.</p>
-                  <button
-                    onClick={() => setSearchTerm('')}
-                    className="inline-flex items-center gap-1.5 px-4 py-2 border border-gray-200 text-gray-600 hover:text-brand hover:border-brand/30 text-xs font-semibold rounded-xl transition-colors bg-white shadow-sm"
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+                {products.map((product) => (
+                  <motion.div
+                    key={product._id}
+                    onClick={() => openB2BProduct(product)}
+                    whileHover={{ y: -6 }}
+                    whileTap={{ y: -6 }}
+                    transition={{ type: 'spring', stiffness: 400, damping: 22 }}
+                    className="pressable group cursor-pointer overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm hover:shadow-xl transition-shadow flex flex-col"
                   >
-                    Clear Search
-                  </button>
-                </>
-              ) : (
-                <p className="text-gray-500">No wholesale products available yet.</p>
-              )}
-            </div>
-          ) : (
-            <div className="grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-5">
-              {products.map((product) => (
-                <motion.div
-                  key={product._id}
-                  onClick={() => openB2BProduct(product)}
-                  whileHover={{ y: -6 }}
-                  whileTap={{ y: -6 }}
-                  transition={{ type: 'spring', stiffness: 400, damping: 22 }}
-                  className="pressable group cursor-pointer overflow-hidden rounded-2xl border border-gray-100 bg-white transition-shadow hover:shadow-lg active:shadow-lg"
-                >
-                  <div className="relative aspect-square overflow-hidden bg-gray-50">
-                    <img
-                      src={getB2BImage(product) || 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400&h=400&fit=crop'}
-                      alt={product.name}
-                      loading="lazy"
-                      className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105 group-active:scale-105"
-                    />
-                  </div>
-                  <div className="p-2.5 sm:p-4">
-                    <div className="mb-2 flex items-center justify-between gap-2">
-                      <p className="truncate text-[11px] font-bold uppercase tracking-wide text-gray-400">{product.brand || 'Healthcare'}</p>
-                      <Package className="h-4 w-4 shrink-0 text-brand/60" />
+                    <div className="relative aspect-square overflow-hidden bg-gray-50">
+                      <img
+                        src={getB2BImage(product) || 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400&h=400&fit=crop'}
+                        alt={product.name}
+                        loading="lazy"
+                        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      />
+                      <span className="absolute left-2.5 top-2.5 rounded-full bg-white px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-brand shadow-sm border border-brand/5">
+                        Wholesale
+                      </span>
                     </div>
-                    <h3 className="line-clamp-2 min-h-[2.5rem] text-sm font-bold leading-5 text-gray-950 transition-colors group-hover:text-brand group-active:text-brand">
-                      {product.name}
-                    </h3>
-
-                    <p className="mt-2 hidden min-h-[2.5rem] text-xs leading-5 text-gray-500 line-clamp-2 sm:block">
-                      {product.description || 'View product details, wholesale options, and availability.'}
-                    </p>
-
-                    <div className="mt-3 flex items-center justify-between gap-2 rounded-xl bg-gray-50 p-2 sm:mt-4">
-                      <div className="min-w-0">
-                        <p className="text-[11px] font-bold text-gray-900 sm:text-xs">View rates & stock</p>
-                        <p className="hidden truncate text-[10px] text-gray-400 sm:block">Business pricing on detail page</p>
+                    <div className="p-4 flex-1 flex flex-col justify-between">
+                      <div>
+                        <div className="mb-1 flex items-center justify-between gap-2">
+                          <p className="truncate text-[10px] font-extrabold uppercase tracking-widest text-gray-400">{product.brand || 'Healthcare'}</p>
+                          <Package className="h-3.5 w-3.5 shrink-0 text-brand/50" />
+                        </div>
+                        <h3 className="line-clamp-2 min-h-[2.5rem] text-sm font-bold leading-5 text-gray-900 group-hover:text-brand transition-colors">
+                          {product.name}
+                        </h3>
                       </div>
-                      <button className="pressable flex shrink-0 items-center gap-1 rounded-lg bg-white px-2.5 py-2 text-xs font-bold text-brand shadow-sm transition-colors group-hover:bg-brand group-hover:text-white sm:px-3">
-                        <ShoppingCart className="hidden h-3 w-3 sm:block" /> Details <ChevronRight className="h-3 w-3" />
-                      </button>
+                      <div className="mt-4 flex items-center justify-between gap-2 border-t border-gray-50 pt-3">
+                        <div className="min-w-0">
+                          <p className="text-[10px] sm:text-xs font-bold text-gray-900 leading-tight">View Bulk Pricing</p>
+                          <p className="hidden truncate text-[10px] text-gray-400 sm:block">Volume details inside</p>
+                        </div>
+                        <button className="pressable flex shrink-0 items-center gap-1 rounded-lg bg-brand px-3 py-1.5 text-xs font-bold text-white shadow-sm transition-colors group-hover:bg-brand-dark">
+                          Details <ChevronRight className="h-3 w-3" />
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Enquiry Form */}
-        <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
-          <div className="grid lg:grid-cols-[320px_minmax(0,1fr)]">
-            <div className="bg-brand p-4 text-white sm:p-6 lg:p-8">
-              <p className="text-xs font-semibold uppercase tracking-wide text-white/70">Custom Request</p>
-              <h2 className="mt-2 text-2xl font-bold">Submit B2B Enquiry</h2>
-              <p className="mt-2 text-sm leading-6 text-white/75">Share business details, quantity, and delivery needs. Our team will reply with next steps.</p>
-              <div className="mt-4 grid gap-2 sm:mt-6 sm:gap-3">
-                {['Company profile', 'Product requirements', 'Quantity and delivery plan'].map((item) => (
-                  <div key={item} className="flex items-center gap-2 rounded-xl bg-white/10 px-3 py-2 text-sm font-semibold">
-                    <CheckCircle className="h-4 w-4" />
-                    {item}
-                  </div>
+                  </motion.div>
                 ))}
               </div>
-            </div>
-
-          <form onSubmit={handleSubmit} className="space-y-4 p-4 sm:space-y-5 sm:p-6 lg:p-8">
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Contact Name *</label>
-                <input
-                  name="name"
-                  value={form.name}
-                  onChange={handleChange}
-                  placeholder="Your full name"
-                  className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand transition-all"
-                />
-                {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Company / Business Name *</label>
-                <input
-                  name="companyName"
-                  value={form.companyName}
-                  onChange={handleChange}
-                  placeholder="Business name"
-                  className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand transition-all"
-                />
-                {errors.companyName && <p className="text-red-500 text-xs mt-1">{errors.companyName}</p>}
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Email *</label>
-                <input
-                  name="email"
-                  type="email"
-                  value={form.email}
-                  onChange={handleChange}
-                  placeholder="business@company.com"
-                  className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand transition-all"
-                />
-                {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Phone *</label>
-                <input
-                  name="phone"
-                  value={form.phone}
-                  onChange={handleChange}
-                  placeholder="+63 9XX XXX XXXX"
-                  className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand transition-all"
-                />
-                {errors.phone && <p className="text-red-500 text-xs mt-1">{errors.phone}</p>}
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Business Type *</label>
-                <select
-                  name="businessType"
-                  value={form.businessType}
-                  onChange={handleChange}
-                  className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand transition-all bg-white"
-                >
-                  <option value="">Select business type</option>
-                  {businessTypes.map((t) => (
-                    <option key={t} value={t}>{t}</option>
-                  ))}
-                </select>
-                {errors.businessType && <p className="text-red-500 text-xs mt-1">{errors.businessType}</p>}
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Estimated Quantity</label>
-                <input
-                  name="quantity"
-                  value={form.quantity}
-                  onChange={handleChange}
-                  placeholder="e.g., 500 units per month"
-                  className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand transition-all"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Requirements / Message *</label>
-              <textarea
-                name="message"
-                value={form.message}
-                onChange={handleChange}
-                rows={4}
-                placeholder="Tell us about your requirements, preferred products, delivery schedule, etc."
-                className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand transition-all resize-none"
-              />
-              {errors.message && <p className="text-red-500 text-xs mt-1">{errors.message}</p>}
-            </div>
-
-            {errors.submit && (
-              <div className="p-3 rounded-xl bg-red-50 text-red-600 text-sm">{errors.submit}</div>
             )}
+          </motion.section>
 
-            <button
-              type="submit"
-              disabled={submitting}
-              className="pressable w-full py-3.5 bg-brand hover:bg-brand-dark text-white font-semibold rounded-xl transition-colors flex items-center justify-center gap-2 shadow-lg shadow-brand/20 disabled:opacity-70"
-            >
-              {submitting ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" /> Submitting...
-                </>
-              ) : (
-                <>
-                  <Send className="w-4 h-4" /> Submit Enquiry
-                </>
-              )}
-            </button>
-          </form>
-          </div>
-        </div>
+          {/* Enquiry form with sidebar */}
+          <motion.section
+            initial={{ opacity: 0, y: 14 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.35, delay: 0.1 }}
+            className="overflow-hidden rounded-3xl border border-gray-100 bg-white shadow-[0_15px_50px_-15px_rgba(15,23,42,0.03)]"
+          >
+            <div className="grid lg:grid-cols-[360px_minmax(0,1fr)]">
+              {/* Sidebar */}
+              <div className="relative border-b border-gray-100 bg-gradient-to-b from-brand/90 to-brand-dark/95 p-6 sm:p-8 lg:border-b-0 lg:border-r text-white flex flex-col justify-between overflow-hidden">
+                <div className="absolute -top-16 -left-16 w-32 h-32 bg-white/5 rounded-full blur-2xl pointer-events-none" />
+                <div className="absolute -bottom-16 -right-16 w-32 h-32 bg-white/5 rounded-full blur-2xl pointer-events-none" />
 
-        {/* Contact Info */}
-        <div className="mt-8 text-center">
-          <p className="text-sm text-gray-500 mb-3">Prefer to reach out directly?</p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <a href="mailto:b2b@capsandpills.com" className="inline-flex items-center gap-2 text-sm text-brand hover:text-brand-dark font-medium">
-              <Mail className="w-4 h-4" /> b2b@capsandpills.com
-            </a>
-            <a href="tel:+639123456789" className="inline-flex items-center gap-2 text-sm text-brand hover:text-brand-dark font-medium">
-              <Phone className="w-4 h-4" /> +63 912 345 6789
-            </a>
+                <div className="relative space-y-6">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10 border border-white/20 text-white backdrop-blur">
+                    <Building2 className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-extrabold tracking-tight">Submit B2B Enquiry</h2>
+                    <p className="mt-2 text-sm leading-relaxed text-white/85">
+                      Tell us what products and quantities you need. Our team will prepare a custom wholesale quotation for you.
+                    </p>
+                  </div>
+
+                  <div className="space-y-4 pt-2">
+                    {[
+                      { text: 'FDA-Compliant Sourcing', desc: 'Expiry and batch tracking guaranteed' },
+                      { text: 'Wholesale Rates', desc: 'Tiered volume discount schedules' },
+                      { text: 'Logistics coordination', desc: 'Secure direct supply delivery' }
+                    ].map((item) => (
+                      <div key={item.text} className="flex gap-3 items-start">
+                        <div className="mt-1 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-white/10 text-white">
+                          <CheckCircle className="h-3 w-3" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-bold text-white leading-tight">{item.text}</p>
+                          <p className="text-xs text-white/60 mt-0.5">{item.desc}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Form */}
+              <form onSubmit={handleSubmit} className="space-y-5 p-6 sm:p-8 lg:p-10">
+                <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1.5">Contact Name *</label>
+                    <input
+                      name="name"
+                      value={form.name}
+                      onChange={handleChange}
+                      placeholder="Your full name"
+                      className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-4 focus:ring-brand/10 focus:border-brand transition-all bg-gray-50/50 focus:bg-white"
+                    />
+                    {errors.name && <p className="text-red-500 text-xs mt-1 font-semibold">{errors.name}</p>}
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1.5">Company / Business Name *</label>
+                    <input
+                      name="companyName"
+                      value={form.companyName}
+                      onChange={handleChange}
+                      placeholder="Registered business name"
+                      className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-4 focus:ring-brand/10 focus:border-brand transition-all bg-gray-50/50 focus:bg-white"
+                    />
+                    {errors.companyName && <p className="text-red-500 text-xs mt-1 font-semibold">{errors.companyName}</p>}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1.5">Business Email *</label>
+                    <input
+                      name="email"
+                      type="email"
+                      value={form.email}
+                      onChange={handleChange}
+                      placeholder="corp@yourcompany.com"
+                      className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-4 focus:ring-brand/10 focus:border-brand transition-all bg-gray-50/50 focus:bg-white"
+                    />
+                    {errors.email && <p className="text-red-500 text-xs mt-1 font-semibold">{errors.email}</p>}
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1.5">Contact Phone *</label>
+                    <input
+                      name="phone"
+                      value={form.phone}
+                      onChange={handleChange}
+                      placeholder="+63 9XX XXX XXXX"
+                      className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-4 focus:ring-brand/10 focus:border-brand transition-all bg-gray-50/50 focus:bg-white"
+                    />
+                    {errors.phone && <p className="text-red-500 text-xs mt-1 font-semibold">{errors.phone}</p>}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1.5">Business Type *</label>
+                    <select
+                      name="businessType"
+                      value={form.businessType}
+                      onChange={handleChange}
+                      className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-4 focus:ring-brand/10 focus:border-brand transition-all bg-gray-50/50 focus:bg-white"
+                    >
+                      <option value="">Select business type</option>
+                      {businessTypes.map((t) => (
+                        <option key={t} value={t}>{t}</option>
+                      ))}
+                    </select>
+                    {errors.businessType && <p className="text-red-500 text-xs mt-1 font-semibold">{errors.businessType}</p>}
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1.5">Estimated Volume Required</label>
+                    <input
+                      name="quantity"
+                      value={form.quantity}
+                      onChange={handleChange}
+                      placeholder="e.g., 500 units per month"
+                      className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-4 focus:ring-brand/10 focus:border-brand transition-all bg-gray-50/50 focus:bg-white"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1.5">Requirements / Message *</label>
+                  <textarea
+                    name="message"
+                    value={form.message}
+                    onChange={handleChange}
+                    rows={4}
+                    placeholder="List down the products, quantities, delivery schedule, etc."
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-4 focus:ring-brand/10 focus:border-brand transition-all resize-none bg-gray-50/50 focus:bg-white"
+                  />
+                  {errors.message && <p className="text-red-500 text-xs mt-1 font-semibold">{errors.message}</p>}
+                </div>
+
+                {errors.submit && (
+                  <div className="p-3 rounded-xl bg-red-50 text-red-600 text-sm font-semibold">{errors.submit}</div>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="pressable w-full py-4 bg-brand hover:bg-brand-dark text-white font-bold rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-brand/20 disabled:opacity-70 active:scale-98"
+                >
+                  {submitting ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" /> Submitting...
+                    </>
+                  ) : (
+                    <>
+                      <Send className="w-4 h-4" /> Submit Sourcing Request
+                    </>
+                  )}
+                </button>
+              </form>
+            </div>
+          </motion.section>
+
+          {/* Quick contact footer */}
+          <div className="rounded-3xl border border-gray-100 bg-white p-6 text-center shadow-[0_15px_50px_-15px_rgba(15,23,42,0.03)]">
+            <p className="text-xs sm:text-sm font-semibold text-gray-400 uppercase tracking-widest">Or Contact Us Directly</p>
+            <div className="mt-4 flex flex-col items-center justify-center gap-3 sm:flex-row">
+              <a
+                href="mailto:b2b@capsandpills.com"
+                className="pressable inline-flex items-center gap-2.5 rounded-full border border-gray-200 bg-gray-50/50 hover:bg-brand/5 px-6 py-3 text-sm font-bold text-gray-700 hover:text-brand hover:border-brand/35 transition-all"
+              >
+                <Mail className="w-4 h-4 text-brand" /> b2b@capsandpills.com
+              </a>
+              <a
+                href="tel:+639123456789"
+                className="pressable inline-flex items-center gap-2.5 rounded-full border border-gray-200 bg-gray-50/50 hover:bg-brand/5 px-6 py-3 text-sm font-bold text-gray-700 hover:text-brand hover:border-brand/35 transition-all"
+              >
+                <Phone className="w-4 h-4 text-brand" /> +63 912 345 6789
+              </a>
+            </div>
           </div>
         </div>
       </div>
