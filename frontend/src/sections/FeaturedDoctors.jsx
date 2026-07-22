@@ -3,9 +3,28 @@ import { Link } from 'react-router-dom';
 import { Stethoscope, Star, ChevronRight, User } from 'lucide-react';
 import { doctorAPI } from '../api/index.js';
 
+const DOCTORS_CACHE_KEY = 'featured-doctors-cache';
+
+const getCachedDoctors = () => {
+  if (typeof window === 'undefined') return [];
+  try {
+    const cached = JSON.parse(sessionStorage.getItem(DOCTORS_CACHE_KEY) || '[]');
+    return Array.isArray(cached) ? cached : [];
+  } catch {
+    return [];
+  }
+};
+
+const setCachedDoctors = (docs) => {
+  if (typeof window === 'undefined') return;
+  try {
+    sessionStorage.setItem(DOCTORS_CACHE_KEY, JSON.stringify(docs));
+  } catch {}
+};
+
 const FeaturedDoctors = () => {
-  const [doctors, setDoctors] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [doctors, setDoctors] = useState(getCachedDoctors);
+  const [loading, setLoading] = useState(getCachedDoctors().length === 0);
 
   useEffect(() => {
     loadDoctors();
@@ -13,9 +32,11 @@ const FeaturedDoctors = () => {
 
   const loadDoctors = async () => {
     try {
-      setLoading(true);
+      if (doctors.length === 0) setLoading(true);
       const { data } = await doctorAPI.getFeaturedDoctors();
-      setDoctors(data.doctors || []);
+      const docs = data.doctors || [];
+      setDoctors(docs);
+      setCachedDoctors(docs);
     } catch (err) {
       console.error('Failed to load featured doctors:', err);
     } finally {

@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { ArrowRight, Sparkles } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useNavigationType } from "react-router-dom";
 import { categoryAPI } from "../api/index.js";
 import useSessionOnce from "../hooks/useSessionOnce.js";
 
@@ -69,13 +69,48 @@ const CategoryIllustration = ({ categoryName, active = false }) => {
   );
 };
 
+const CATEGORY_CACHE_KEY = "shop-by-category-cache";
+const CATEGORY_RESTORE_KEY = "shop-by-category-restore";
+
+const getCachedCategories = () => {
+  if (typeof window === "undefined") return [];
+  try {
+    const cached = JSON.parse(sessionStorage.getItem(CATEGORY_CACHE_KEY) || "[]");
+    return Array.isArray(cached) ? cached : [];
+  } catch {
+    return [];
+  }
+};
+
+const setCachedCategories = (categories) => {
+  if (typeof window === "undefined") return;
+  try {
+    sessionStorage.setItem(CATEGORY_CACHE_KEY, JSON.stringify(categories));
+  } catch {}
+};
+
+const saveCategoryRestoreTarget = (categoryId, element) => {
+  if (typeof window === "undefined" || !element) return;
+  try {
+    const rect = element.getBoundingClientRect();
+    sessionStorage.setItem(
+      CATEGORY_RESTORE_KEY,
+      JSON.stringify({
+        categoryId,
+        viewportTop: rect.top,
+      })
+    );
+  } catch {}
+};
+
 const ShopByCategory = () => {
   const shouldAnimate = useSessionOnce("homeAnimationsSeen");
-  const [categories, setCategories] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [categories, setCategories] = useState(getCachedCategories);
+  const [loading, setLoading] = useState(getCachedCategories().length === 0);
   const [error, setError] = useState(null);
   const [pressedCategoryId, setPressedCategoryId] = useState(null);
   const navigate = useNavigate();
+  const navigationType = useNavigationType();
   const tapTimeoutRef = useRef(null);
 
   useEffect(() => {
@@ -89,29 +124,65 @@ const ShopByCategory = () => {
     };
   }, []);
 
+  // Element Target Anchoring for Back Navigation Restoration
+  useEffect(() => {
+    if (navigationType !== "POP" || categories.length === 0) return;
+
+    const restoreCategoryPosition = () => {
+      try {
+        const targetData = JSON.parse(sessionStorage.getItem(CATEGORY_RESTORE_KEY) || "null");
+        if (!targetData || !targetData.categoryId) return;
+
+        const element = document.querySelector(`[data-category-id="${targetData.categoryId}"]`);
+        if (element) {
+          const currentRect = element.getBoundingClientRect();
+          const targetTop = Number(targetData.viewportTop ?? 180);
+          const diff = currentRect.top - targetTop;
+          if (Math.abs(diff) > 2) {
+            window.scrollBy(0, diff);
+          }
+          sessionStorage.removeItem(CATEGORY_RESTORE_KEY);
+        }
+      } catch {}
+    };
+
+    requestAnimationFrame(restoreCategoryPosition);
+    const timer1 = setTimeout(restoreCategoryPosition, 50);
+    const timer2 = setTimeout(restoreCategoryPosition, 180);
+
+    return () => {
+      clearTimeout(timer1);
+      clearTimeout(timer2);
+    };
+  }, [navigationType, categories.length]);
+
   const loadCategories = async () => {
     try {
-      setLoading(true);
+      if (categories.length === 0) setLoading(true);
       setError(null);
       const { data } = await categoryAPI.getCategories();
       const allCats = data?.categories || [];
       // Only parent categories (no parent field -> null or missing)
       const parentCats = allCats.filter((c) => !c.parent);
       setCategories(parentCats);
+      setCachedCategories(parentCats);
     } catch (err) {
       console.error("[ShopByCategory] Failed to load:", err);
-      setError(
-        err?.response?.data?.message ||
-          err.message ||
-          "Failed to load categories",
-      );
-      setCategories([]);
+      if (categories.length === 0) {
+        setError(
+          err?.response?.data?.message ||
+            err.message ||
+            "Failed to load categories",
+        );
+        setCategories([]);
+      }
     } finally {
       setLoading(false);
     }
   };
 
   const handleCategoryClick = (e, categoryId) => {
+    saveCategoryRestoreTarget(categoryId, e.currentTarget);
     if (typeof window !== "undefined" && window.matchMedia("(hover: none)").matches) {
       e.preventDefault();
       if (tapTimeoutRef.current) clearTimeout(tapTimeoutRef.current);
@@ -202,6 +273,7 @@ const ShopByCategory = () => {
             return (
               <MotionLink
                 key={category._id}
+                data-category-id={category._id}
                 to={`/medicines?category=${category._id}`}
                 onClick={(e) => handleCategoryClick(e, category._id)}
                 initial={shouldAnimate ? { opacity: 0, y: 15 } : false}

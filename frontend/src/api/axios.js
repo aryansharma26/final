@@ -29,7 +29,7 @@ API.interceptors.response.use(
   },
   async (error) => {
     const originalRequest = error.config;
-    const isAuthEndpoint = ['/auth/login', '/auth/register', '/auth/refresh'].some((path) => originalRequest?.url?.startsWith(path));
+    const isAuthEndpoint = ['/auth/login', '/auth/register', '/auth/refresh', '/auth/me'].some((path) => originalRequest?.url?.startsWith(path));
     if (isAuthEndpoint) {
       return Promise.reject(error);
     }

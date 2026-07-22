@@ -3,9 +3,28 @@ import { Link } from 'react-router-dom';
 import { Siren, Star, Phone, ChevronRight, MapPin } from 'lucide-react';
 import { doctorAPI } from '../api/index.js';
 
+const EMERGENCY_CACHE_KEY = 'emergency-doctors-cache';
+
+const getCachedEmergencyDoctors = () => {
+  if (typeof window === 'undefined') return [];
+  try {
+    const cached = JSON.parse(sessionStorage.getItem(EMERGENCY_CACHE_KEY) || '[]');
+    return Array.isArray(cached) ? cached : [];
+  } catch {
+    return [];
+  }
+};
+
+const setCachedEmergencyDoctors = (docs) => {
+  if (typeof window === 'undefined') return;
+  try {
+    sessionStorage.setItem(EMERGENCY_CACHE_KEY, JSON.stringify(docs));
+  } catch {}
+};
+
 const EmergencyDoctors = () => {
-  const [doctors, setDoctors] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [doctors, setDoctors] = useState(getCachedEmergencyDoctors);
+  const [loading, setLoading] = useState(getCachedEmergencyDoctors().length === 0);
 
   useEffect(() => {
     loadDoctors();
@@ -13,9 +32,11 @@ const EmergencyDoctors = () => {
 
   const loadDoctors = async () => {
     try {
-      setLoading(true);
+      if (doctors.length === 0) setLoading(true);
       const { data } = await doctorAPI.getEmergencyDoctors();
-      setDoctors(data.doctors || []);
+      const docs = data.doctors || [];
+      setDoctors(docs);
+      setCachedEmergencyDoctors(docs);
     } catch (err) {
       console.error('Failed to load emergency doctors:', err);
     } finally {

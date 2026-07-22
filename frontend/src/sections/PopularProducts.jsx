@@ -5,9 +5,28 @@ import { productAPI } from '../api/index.js';
 import { useCart } from '../contexts/CartContext.jsx';
 import ProductCard from '../components/ProductCard.jsx';
 
+const POPULAR_CACHE_KEY = 'popular-products-cache';
+
+const getCachedPopularProducts = () => {
+  if (typeof window === 'undefined') return [];
+  try {
+    const cached = JSON.parse(sessionStorage.getItem(POPULAR_CACHE_KEY) || '[]');
+    return Array.isArray(cached) ? cached : [];
+  } catch {
+    return [];
+  }
+};
+
+const setCachedPopularProducts = (prods) => {
+  if (typeof window === 'undefined') return;
+  try {
+    sessionStorage.setItem(POPULAR_CACHE_KEY, JSON.stringify(prods));
+  } catch {}
+};
+
 const PopularProducts = () => {
-  const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [products, setProducts] = useState(getCachedPopularProducts);
+  const [loading, setLoading] = useState(getCachedPopularProducts().length === 0);
   const [error, setError] = useState(null);
   const { addToCart } = useCart();
   const navigate = useNavigate();
@@ -19,15 +38,18 @@ const PopularProducts = () => {
 
   const loadProducts = async () => {
     try {
-      setLoading(true);
+      if (products.length === 0) setLoading(true);
       setError(null);
       const { data } = await productAPI.getProducts({ popular: true, limit: 16 });
       const prods = data?.products || [];
       setProducts(prods);
+      setCachedPopularProducts(prods);
     } catch (err) {
       console.error('[PopularProducts] Failed to load products:', err);
-      setError(err?.response?.data?.message || err.message || 'Failed to load products');
-      setProducts([]);
+      if (products.length === 0) {
+        setError(err?.response?.data?.message || err.message || 'Failed to load products');
+        setProducts([]);
+      }
     } finally {
       setLoading(false);
     }
@@ -99,7 +121,7 @@ const PopularProducts = () => {
               })}
               onCartClick={() => addToCart(product, 1)}
               showHeart={true}
-              animated={false}
+              animated={true}
             />
           ))}
         </div>

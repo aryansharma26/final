@@ -13,16 +13,8 @@ export const AuthProvider = ({ children }) => {
     try {
       const { data } = await authAPI.getMe();
       setUser(data.user);
-    } catch (err) {
-      if (err.response?.status === 401) {
-        try {
-          await authAPI.refresh();
-          const { data } = await authAPI.getMe();
-          setUser(data.user);
-        } catch {
-          setUser(null);
-        }
-      }
+    } catch {
+      setUser(null);
     } finally {
       setLoading(false);
     }
