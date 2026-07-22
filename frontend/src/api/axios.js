@@ -50,15 +50,7 @@ API.interceptors.response.use(
         await API.post('/auth/refresh');
         return API(originalRequest);
       } catch (refreshError) {
-        if (refreshError.response?.status === 401 || refreshError.response?.status === 403) {
-          const currentPath = window.location.pathname;
-          const isAuthPage = ['/login', '/register', '/forgot-password', '/reset-password'].some((p) => currentPath.startsWith(p));
-          const isAdminPath = currentPath.startsWith('/admin');
-          const isProtectedRoute = ['/profile', '/orders', '/checkout', '/wishlist'].some((p) => currentPath.startsWith(p));
-          if (isProtectedRoute && !isAuthPage && !isAdminPath) {
-            window.location.replace('/register');
-          }
-        }
+        // Handled gracefully by React Router / ProtectedRoute components
       }
     }
     return Promise.reject(error);

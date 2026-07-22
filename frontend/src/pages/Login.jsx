@@ -37,16 +37,32 @@ export default function Login() {
       ? rawRedirect
       : "/";
 
+  useEffect(() => {
+    const handlePopState = () => {
+      const fromPath = location.state?.from?.pathname || searchParams.get("redirect") || "";
+      const isProtected = ['/checkout', '/orders', '/profile', '/wishlist'].some((p) => fromPath.startsWith(p));
+      if (isProtected) {
+        if (fromPath.startsWith('/checkout')) {
+          navigate('/cart', { replace: true });
+        } else {
+          navigate('/', { replace: true });
+        }
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [location.state, searchParams, navigate]);
+
   const handleClose = () => {
     const isProtected = (path) => {
-      return ['/checkout', '/orders', '/profile', '/wishlist'].some(p => path.startsWith(p));
+      return ['/checkout', '/orders', '/profile', '/wishlist'].some((p) => path.startsWith(p));
     };
     const fromPath = location.state?.from?.pathname || searchParams.get("redirect") || "/";
-    const isBuyNow = location.state?.from?.state?.fromBuyNow;
 
-    if (isBuyNow) {
-      if (window.history.length > 1) {
-        navigate(-1);
+    if (isProtected(fromPath)) {
+      if (fromPath.startsWith('/checkout')) {
+        navigate('/cart', { replace: true });
       } else {
         navigate('/', { replace: true });
       }
@@ -54,14 +70,12 @@ export default function Login() {
     }
 
     if (fromPath !== '/' && !isProtected(fromPath)) {
-      navigate(fromPath);
-    } else if (fromPath.startsWith('/checkout')) {
-      navigate('/cart');
+      navigate(fromPath, { replace: true });
     } else {
       if (window.history.length > 1 && location.key !== 'default') {
         navigate(-1);
       } else {
-        navigate('/');
+        navigate('/', { replace: true });
       }
     }
   };

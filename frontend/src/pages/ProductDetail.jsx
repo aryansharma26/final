@@ -7,19 +7,37 @@ import { useAuth } from '../contexts/AuthContext.jsx';
 import ProductCard from '../components/ProductCard.jsx';
 import { compressPrescriptionFile } from '../utils/prescriptionFiles.js';
 
+const getCachedProduct = (slugKey) => {
+  if (typeof window === 'undefined' || !slugKey) return null;
+  try {
+    return JSON.parse(sessionStorage.getItem(`pd-cache-${slugKey}`) || 'null');
+  } catch {
+    return null;
+  }
+};
+
+const setCachedProduct = (slugKey, prod) => {
+  if (typeof window === 'undefined' || !slugKey || !prod) return;
+  try {
+    sessionStorage.setItem(`pd-cache-${slugKey}`, JSON.stringify(prod));
+  } catch {}
+};
+
 const ProductDetail = () => {
   const { slug } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
   const { addToCart } = useCart();
   const { isAuthenticated } = useAuth();
-  const [product, setProduct] = useState(null);
+  
+  const initialProd = location.state?.product || getCachedProduct(slug);
+  const [product, setProduct] = useState(() => initialProd || null);
   const [reviews, setReviews] = useState([]);
   const [similarProducts, setSimilarProducts] = useState([]);
   const [reviewsLoading, setReviewsLoading] = useState(false);
   const [reviewsError, setReviewsError] = useState(null);
   const [quantity, setQuantity] = useState(1);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(() => !initialProd);
   const [added, setAdded] = useState(false);
   const [buyingNow, setBuyingNow] = useState(false);
   const [addError, setAddError] = useState('');
@@ -59,11 +77,14 @@ const ProductDetail = () => {
 
   const loadProduct = async () => {
     try {
-      setLoading(true);
+      if (!product) setLoading(true);
       const { data } = await productAPI.getProductBySlug(slug);
-      setProduct(data.product);
-      setSimilarProducts(data.similarProducts || []);
-      if (data.product) {
+      if (data?.product) {
+        setProduct(data.product);
+        setCachedProduct(slug, data.product);
+      }
+      setSimilarProducts(data?.similarProducts || []);
+      if (data?.product) {
         loadReviews(data.product._id);
       }
     } catch (err) {
@@ -291,20 +312,8 @@ const ProductDetail = () => {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="container-custom py-4">
-        <div className="animate-pulse grid grid-cols-12 gap-6">
-          <div className="col-span-12 lg:col-span-5 aspect-[4/3] bg-gray-200 rounded-xl" />
-          <div className="col-span-12 lg:col-span-7 space-y-3">
-            <div className="h-6 bg-gray-200 rounded w-3/4" />
-            <div className="h-4 bg-gray-200 rounded w-1/2" />
-            <div className="h-12 bg-gray-200 rounded w-1/3" />
-            <div className="h-16 bg-gray-200 rounded" />
-          </div>
-        </div>
-      </div>
-    );
+  if (loading && !product) {
+    return <div className="min-h-[75vh] bg-white" />;
   }
 
   if (!product) {
