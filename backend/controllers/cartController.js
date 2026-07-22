@@ -1,22 +1,7 @@
 import Cart from '../models/Cart.js';
 import Product from '../models/Product.js';
-import Prescription from '../models/Prescription.js';
-
-const hasAcceptedPrescriptionForProduct = async (userId, productId) => {
-  const prescription = await Prescription.findOne({
-    user: userId,
-    requestedProduct: productId,
-  }).sort({ uploadedAt: -1 });
-  return ['pending', 'approved'].includes(prescription?.status);
-};
-
-const getPerUserLimit = (coupon) => coupon.perUserLimit ?? coupon.usageLimit ?? null;
-
-const getUserCouponUsage = (coupon, userId) => {
-  const usage = coupon.usageByUser?.find((entry) => entry.user?.equals(userId));
-  if (usage) return usage.count || 0;
-  return coupon.usedBy?.some((id) => id.equals(userId)) ? 1 : 0;
-};
+import { hasAcceptedPrescriptionForProduct } from '../services/orderService.js';
+import { getCouponPerUserLimit as getPerUserLimit, getUserCouponUsage } from '../services/couponService.js';
 
 const updateCartItemPrices = async (cart) => {
   for (let item of cart.items) {

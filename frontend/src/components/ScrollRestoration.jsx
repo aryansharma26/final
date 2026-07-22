@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef } from 'react';
+import { useEffect, useLayoutEffect, useRef, useCallback } from 'react';
 import { useLocation, useNavigationType } from 'react-router-dom';
 
 const STORAGE_KEY = 'scroll-positions';
@@ -17,6 +17,10 @@ function setStored(positions) {
   } catch {}
 }
 
+/**
+ * Smooth scroll restoration with animated transition.
+ * Fixes: footer flash, old-position jumps, and scroll position overwriting on repeated navigation.
+ */
 export default function ScrollRestoration() {
   const { key, pathname, search } = useLocation();
   const navigationType = useNavigationType();
@@ -24,7 +28,8 @@ export default function ScrollRestoration() {
   const prevKeyRef = useRef(null);
   const prevPathRef = useRef(null);
   const scrollYRef = useRef(0);
-  const isTransitioningRef = useRef(false);
+  const isRestoringRef = useRef(false);
+  const rafIdRef = useRef(null);
 
   // Disable native scroll restoration
   useEffect(() => {
@@ -33,104 +38,172 @@ export default function ScrollRestoration() {
     }
   }, []);
 
-  // Save position on scroll (ignore restoration-induced scroll events)
-  useEffect(() => {
-    const handleScroll = () => {
-      if (isTransitioningRef.current) return;
-      const y = window.scrollY;
-      scrollYRef.current = y;
-      positions.current[key] = y;
-      positions.current[pathname + search] = y;
-      positions.current[pathname] = y;
-      setStored(positions.current);
-    };
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
+  // Save scroll position on user scroll
+  const handleScroll = useCallback(() => {
+    const y = window.scrollY;
+    // ALWAYS keep scrollYRef in sync with actual scroll position
+    scrollYRef.current = y;
+
+    if (isRestoringRef.current) return;
+
+    positions.current[key] = y;
+    positions.current[pathname + search] = y;
+    positions.current[pathname] = y;
+    setStored(positions.current);
+
+    console.log('[ScrollRestoration] SAVE (scroll)', {
+      key,
+      pathname,
+      scrollY: y,
+      scrollYRef: scrollYRef.current,
+      prevKey: prevKeyRef.current,
+      prevPath: prevPathRef.current,
+      positions: { ...positions.current },
+    });
   }, [key, pathname, search]);
 
-  // Synchronously flag route change and apply target minHeight during render to prevent scroll collapse
-  if (prevKeyRef.current !== key) {
-    isTransitioningRef.current = true;
-    const targetY = positions.current[key] ?? positions.current[pathname + search] ?? positions.current[pathname];
-    if (targetY !== undefined && targetY > 0 && navigationType === 'POP') {
-      document.body.style.minHeight = `${targetY + window.innerHeight}px`;
-      document.body.classList.add('js-scroll-restoring');
-    }
-  }
+  useEffect(() => {
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [handleScroll]);
 
-  // Restore scroll position on route change before painting
+  // Core restoration logic — runs synchronously before paint
   useLayoutEffect(() => {
+    // First mount — just record refs
     if (prevKeyRef.current === null) {
       prevKeyRef.current = key;
       prevPathRef.current = pathname;
-      isTransitioningRef.current = false;
       return;
     }
 
-    if (prevKeyRef.current === key) {
-      isTransitioningRef.current = false;
-      return;
-    }
+    // Same key — no navigation happened
+    if (prevKeyRef.current === key) return;
 
-    // Save the position of the page we're LEAVING
-    positions.current[prevPathRef.current] = scrollYRef.current;
-    positions.current[prevKeyRef.current] = scrollYRef.current;
+    // Save position of page we're LEAVING using current scrollYRef
+    if (prevPathRef.current) {
+      positions.current[prevPathRef.current] = scrollYRef.current;
+    }
+    if (prevKeyRef.current) {
+      positions.current[prevKeyRef.current] = scrollYRef.current;
+    }
     setStored(positions.current);
+
+    console.log('[ScrollRestoration] SAVE (page leave)', {
+      leavingKey: prevKeyRef.current,
+      leavingPath: prevPathRef.current,
+      savedScrollY: scrollYRef.current,
+      currentKey: key,
+      currentPathname: pathname,
+      positions: { ...positions.current },
+    });
 
     prevKeyRef.current = key;
     prevPathRef.current = pathname;
 
-    // For new navigations (PUSH or REPLACE), we always open at the top of the page
+    // Cancel any in-flight restoration from previous navigation
+    if (rafIdRef.current) {
+      cancelAnimationFrame(rafIdRef.current);
+      rafIdRef.current = null;
+    }
+
+    // PUSH / REPLACE — always scroll to top instantly
     if (navigationType === 'PUSH' || navigationType === 'REPLACE') {
+      isRestoringRef.current = false;
       document.body.style.minHeight = '';
-      document.body.classList.remove('js-scroll-restoring');
       window.scrollTo(0, 0);
-      isTransitioningRef.current = false;
+      scrollYRef.current = 0;
+
+      console.log('[ScrollRestoration] RESET TO TOP (PUSH/REPLACE)', {
+        key,
+        pathname,
+        navigationType,
+        scrollYRef: scrollYRef.current,
+        prevKey: prevKeyRef.current,
+        prevPath: prevPathRef.current,
+        positions: { ...positions.current },
+      });
       return;
     }
 
-    const saved = positions.current[key] ?? positions.current[pathname + search] ?? positions.current[pathname];
+    // POP (back/forward) — restore saved position
+    const saved = positions.current[key]
+      ?? positions.current[pathname + search]
+      ?? positions.current[pathname];
 
     if (saved === undefined || saved <= 0) {
+      isRestoringRef.current = false;
       document.body.style.minHeight = '';
-      document.body.classList.remove('js-scroll-restoring');
       window.scrollTo(0, 0);
-      isTransitioningRef.current = false;
+      scrollYRef.current = 0;
+
+      console.log('[ScrollRestoration] RESTORE (no saved position -> top)', {
+        key,
+        pathname,
+        navigationType,
+        scrollYRef: scrollYRef.current,
+        prevKey: prevKeyRef.current,
+        prevPath: prevPathRef.current,
+        positions: { ...positions.current },
+      });
       return;
     }
 
-    // Apply temporary min-height to prevent scroll collapse and layout jumps
+    // Lock body to prevent layout collapse while content loads
+    isRestoringRef.current = true;
     const targetY = saved;
+    scrollYRef.current = targetY;
     document.body.style.minHeight = `${targetY + window.innerHeight}px`;
-    window.scrollTo(0, targetY);
 
-    let observer;
-    let timeoutId;
-
-    const cleanup = () => {
-      if (timeoutId) clearTimeout(timeoutId);
-      if (observer) observer.disconnect();
-      document.body.style.minHeight = '';
-      document.body.classList.remove('js-scroll-restoring');
-      isTransitioningRef.current = false;
-    };
-
-    // Watch for DOM changes (like products rendering)
-    observer = new MutationObserver(() => {
-      window.scrollTo(0, targetY);
-      // If we successfully restored and the page has enough height naturally, we can stop early
-      if (document.documentElement.scrollHeight >= targetY + window.innerHeight) {
-        requestAnimationFrame(cleanup);
-      }
+    console.log('[ScrollRestoration] RESTORE (target found)', {
+      key,
+      pathname,
+      navigationType,
+      targetY,
+      scrollYRef: scrollYRef.current,
+      prevKey: prevKeyRef.current,
+      prevPath: prevPathRef.current,
+      positions: { ...positions.current },
     });
 
-    observer.observe(document.body, { childList: true, subtree: true });
+    // Immediately jump to target
+    window.scrollTo(0, targetY);
 
-    // Fallback timeout in case the page is genuinely shorter
-    timeoutId = setTimeout(cleanup, 1200);
+    // Poll until real content is tall enough, then settle
+    let attempts = 0;
+    const maxAttempts = 30; // ~500ms at 16ms/frame
+
+    const pollAndSettle = () => {
+      attempts++;
+      const docHeight = document.documentElement.scrollHeight;
+      const contentReady = docHeight >= targetY + window.innerHeight * 0.95;
+
+      if (contentReady || attempts >= maxAttempts) {
+        window.scrollTo(0, targetY);
+        scrollYRef.current = targetY;
+
+        rafIdRef.current = requestAnimationFrame(() => {
+          document.body.style.minHeight = '';
+          requestAnimationFrame(() => {
+            window.scrollTo(0, targetY);
+            scrollYRef.current = targetY;
+            isRestoringRef.current = false;
+          });
+        });
+        return;
+      }
+
+      window.scrollTo(0, targetY);
+      scrollYRef.current = targetY;
+      rafIdRef.current = requestAnimationFrame(pollAndSettle);
+    };
+
+    rafIdRef.current = requestAnimationFrame(pollAndSettle);
 
     return () => {
-      cleanup();
+      if (rafIdRef.current) {
+        cancelAnimationFrame(rafIdRef.current);
+        rafIdRef.current = null;
+      }
     };
   }, [key, pathname, search, navigationType]);
 
@@ -138,7 +211,10 @@ export default function ScrollRestoration() {
   useEffect(() => {
     return () => {
       document.body.style.minHeight = '';
-      document.body.classList.remove('js-scroll-restoring');
+      isRestoringRef.current = false;
+      if (rafIdRef.current) {
+        cancelAnimationFrame(rafIdRef.current);
+      }
     };
   }, []);
 

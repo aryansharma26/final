@@ -3,52 +3,24 @@ import Order from '../models/Order.js';
 import Cart from '../models/Cart.js';
 import Product from '../models/Product.js';
 import B2BProduct from '../models/B2BProduct.js';
-import Coupon from '../models/Coupon.js';
 import Prescription from '../models/Prescription.js';
-import Setting from '../models/Setting.js';
 import { resolveB2BCouponForOrder } from './b2bCouponController.js';
-import { sendEmail, getOrderConfirmationTemplate } from '../utils/sendEmail.js';
 import cloudinary, { isCloudinaryConfigured } from '../config/cloudinary.js';
-
-const TAX_RATE = 0.05;
-const SHIPPING_THRESHOLD = 2000;
-const SHIPPING_COST = 50;
-
-const getCouponPerUserLimit = (coupon) => coupon.perUserLimit ?? coupon.usageLimit ?? null;
-
-const getUserCouponUsage = (coupon, userId) => {
-  const usage = coupon.usageByUser?.find((entry) => entry.user?.equals(userId));
-  if (usage) return usage.count || 0;
-  return coupon.usedBy?.some((id) => id.equals(userId)) ? 1 : 0;
-};
-
-const incrementUserCouponUsage = async ({ coupon, userId, session }) => {
-  const updatedExisting = await Coupon.updateOne(
-    { _id: coupon._id, 'usageByUser.user': userId },
-    { $inc: { usageCount: 1, 'usageByUser.$.count': 1 }, $addToSet: { usedBy: userId } },
-    { session }
-  );
-
-  if (updatedExisting.matchedCount === 0) {
-    await Coupon.findByIdAndUpdate(
-      coupon._id,
-      {
-        $inc: { usageCount: 1 },
-        $addToSet: { usedBy: userId },
-        $push: { usageByUser: { user: userId, count: getUserCouponUsage(coupon, userId) + 1 } },
-      },
-      { session }
-    );
-  }
-};
-
-const hasAcceptedPrescriptionForProduct = async (userId, productId, session) => {
-  const prescription = await Prescription.findOne({
-    user: userId,
-    requestedProduct: productId,
-  }).sort({ uploadedAt: -1 }).session(session);
-  return ['pending', 'approved'].includes(prescription?.status);
-};
+import {
+  getProductImage,
+  resolveProductPrice,
+  calculateItemTax,
+  calculateShipping,
+  calculateSeniorDiscount,
+  resolveCheckoutOffer,
+  calculateTotalPrice,
+  deductStockAtomic,
+  restoreStock,
+  hasAcceptedPrescriptionForProduct,
+  sendOrderConfirmationEmail,
+  DEFAULT_TAX_RATE,
+} from '../services/orderService.js';
+import { resolveOrderCoupon } from '../services/couponService.js';
 
 const VALID_STATUS_TRANSITIONS = {
   pending: ['confirmed', 'packed', 'shipped', 'delivered', 'cancelled'],
@@ -59,533 +31,402 @@ const VALID_STATUS_TRANSITIONS = {
   cancelled: ['pending', 'confirmed', 'packed', 'shipped', 'delivered'],
 };
 
+// ─── Private Order Handlers ───
+// Each handler returns { order } on success, or { error: { status, body } } on validation failure.
+// Unexpected errors are thrown and caught by the outer createOrder try/catch.
+
+const handleB2BOrder = async (req, session) => {
+  const { shippingAddress, paymentMethod, b2bItem } = req.body;
+  const quantity = Math.max(1, Number(b2bItem.quantity || 1));
+  const requestedPrice = Number(b2bItem.price || 0);
+  const product = await B2BProduct.findById(b2bItem.productId).session(session);
+
+  if (!product || product.status !== 'active') {
+    return { error: { status: 404, body: { success: false, message: 'B2B product not found or unavailable' } } };
+  }
+  if (product.stock < quantity) {
+    return { error: { status: 400, body: { success: false, message: `Only ${product.stock} available.` } } };
+  }
+
+  const selectedTier = product.bulkPricing?.find((tier) =>
+    Number(tier.unitPrice) === requestedPrice &&
+    (!b2bItem.tierLabel || tier.label === b2bItem.tierLabel)
+  );
+  const price = Number(selectedTier?.unitPrice || requestedPrice);
+  if (!price || price <= 0) {
+    return { error: { status: 400, body: { success: false, message: 'Invalid B2B pricing option' } } };
+  }
+
+  const image = getProductImage(product.images, b2bItem.image || '');
+  const orderItems = [{
+    product: product._id,
+    name: product.name,
+    image,
+    productSlug: product.slug,
+    price,
+    quantity,
+    isB2B: true,
+    tierLabel: selectedTier?.label || b2bItem.tierLabel || 'Bulk Tier',
+  }];
+  const itemsPrice = price * quantity;
+  const itemTaxRate = product.taxRate !== undefined ? product.taxRate : DEFAULT_TAX_RATE;
+  const taxPrice = Number(calculateItemTax(itemsPrice, itemTaxRate).toFixed(2));
+  const shippingPrice = calculateShipping(itemsPrice);
+  const { couponDiscount, coupon: appliedB2BCoupon } = await resolveB2BCouponForOrder({
+    code: b2bItem.couponCode || req.body.b2bCouponCode,
+    userId: req.user._id,
+    orderAmount: itemsPrice,
+    session,
+  });
+  const totalPrice = Math.max(0, itemsPrice + shippingPrice - couponDiscount);
+
+  const [order] = await Order.create(
+    [{
+      user: req.user._id,
+      orderItems,
+      isB2B: true,
+      shippingAddress,
+      paymentMethod,
+      itemsPrice,
+      taxPrice,
+      shippingPrice,
+      couponDiscount,
+      seniorDiscount: 0,
+      checkoutOfferDiscount: 0,
+      isSeniorCitizen: false,
+      seniorCitizenIdDoc: '',
+      seniorCitizenStatus: 'none',
+      totalPrice,
+      coupon: appliedB2BCoupon?._id || null,
+      couponModel: appliedB2BCoupon ? 'B2BCoupon' : 'Coupon',
+    }],
+    { session }
+  );
+
+  const stockOk = await deductStockAtomic(product._id, quantity, B2BProduct, session);
+  if (!stockOk) {
+    return { error: { status: 400, body: { success: false, message: 'Stock changed during checkout. Please try again.' } } };
+  }
+
+  return { order };
+};
+
+const handlePrescriptionQuoteOrder = async (req, session) => {
+  const { shippingAddress, paymentMethod, prescriptionQuote } = req.body;
+  const prescription = await Prescription.findOne({
+    _id: prescriptionQuote.prescriptionId,
+    user: req.user._id,
+  }).session(session);
+
+  if (!prescription) {
+    return { error: { status: 404, body: { success: false, message: 'Prescription quote not found' } } };
+  }
+  if (prescription.quoteStatus !== 'sent' || !prescription.quoteItems?.length) {
+    return { error: { status: 400, body: { success: false, message: 'No active quote available for this prescription' } } };
+  }
+
+  const orderItems = [];
+  let itemsPrice = 0;
+  let calculatedTax = 0;
+
+  for (const item of prescription.quoteItems) {
+    const quantity = Math.max(1, Number(item.quantity || 1));
+    const product = await Product.findById(item.product).session(session);
+    if (!product || product.status !== 'active') {
+      return { error: { status: 400, body: { success: false, message: `${item.name || 'A quoted product'} is no longer available` } } };
+    }
+    if (product.stock < quantity) {
+      return { error: { status: 400, body: { success: false, message: `Only ${product.stock} available for ${product.name}` } } };
+    }
+
+    const price = Number(item.price || 0);
+    const lineTotal = price * quantity;
+    calculatedTax += calculateItemTax(lineTotal, product.taxRate);
+    itemsPrice += lineTotal;
+
+    orderItems.push({
+      product: product._id,
+      name: product.name,
+      image: item.image || getProductImage(product.images),
+      productSlug: product.slug,
+      price,
+      originalPrice: price,
+      quantity,
+    });
+  }
+
+  const shippingPrice = calculateShipping(itemsPrice);
+  const totalPrice = itemsPrice + shippingPrice;
+  const [order] = await Order.create(
+    [{
+      user: req.user._id,
+      orderItems,
+      isPrescriptionOrder: true,
+      prescription: prescription._id,
+      shippingAddress,
+      paymentMethod,
+      itemsPrice,
+      taxPrice: Number(calculatedTax.toFixed(2)),
+      shippingPrice,
+      couponDiscount: 0,
+      seniorDiscount: 0,
+      checkoutOfferDiscount: 0,
+      isSeniorCitizen: false,
+      seniorCitizenIdDoc: '',
+      seniorCitizenStatus: 'none',
+      totalPrice,
+      coupon: null,
+      couponModel: 'Coupon',
+    }],
+    { session }
+  );
+
+  for (const item of prescription.quoteItems) {
+    const stockOk = await deductStockAtomic(item.product, Number(item.quantity || 1), Product, session);
+    if (!stockOk) {
+      return { error: { status: 400, body: { success: false, message: 'Stock changed during checkout. Please try again.' } } };
+    }
+  }
+
+  prescription.quoteStatus = 'accepted';
+  prescription.orderedAt = new Date();
+  await prescription.save({ session });
+
+  return { order };
+};
+
+const handleBuyNowOrder = async (req, session) => {
+  const { shippingAddress, paymentMethod, couponCode, isSeniorCitizen, seniorCitizenIdDoc, buyNowItem } = req.body;
+  const quantity = Math.max(1, Number(buyNowItem.quantity || 1));
+  const product = await Product.findById(buyNowItem.productId).session(session);
+
+  if (!product || product.status !== 'active') {
+    return { error: { status: 404, body: { success: false, message: 'Product not found or unavailable' } } };
+  }
+  if (product.stock < quantity) {
+    return { error: { status: 400, body: { success: false, message: `Only ${product.stock} available.` } } };
+  }
+
+  if (product.isPrescriptionRequired) {
+    const hasPrescription = await hasAcceptedPrescriptionForProduct(req.user._id, product._id, session);
+    if (!hasPrescription) {
+      return { error: { status: 400, body: {
+        success: false,
+        message: 'This product requires a prescription upload before checkout.',
+        prescriptionItems: [product.name],
+      } } };
+    }
+  }
+
+  const price = resolveProductPrice(product, quantity);
+  const itemsPrice = price * quantity;
+  const seniorDiscount = calculateSeniorDiscount(itemsPrice, isSeniorCitizen, seniorCitizenIdDoc);
+
+  const orderItems = [{
+    product: product._id,
+    name: product.name,
+    image: getProductImage(product.images),
+    productSlug: product.slug,
+    price: Number(price),
+    originalPrice: Number(price),
+    quantity,
+  }];
+
+  const couponResult = await resolveOrderCoupon({
+    couponCode,
+    userId: req.user._id,
+    itemsPrice,
+    session,
+  });
+  if (couponResult.error) {
+    return { error: { status: couponResult.error.status, body: { success: false, message: couponResult.error.message } } };
+  }
+
+  const taxPrice = Number(calculateItemTax(itemsPrice, product.taxRate).toFixed(2));
+  const shippingPrice = calculateShipping(itemsPrice);
+  const checkoutOfferDiscount = await resolveCheckoutOffer(itemsPrice, session);
+  const totalPrice = calculateTotalPrice(itemsPrice, shippingPrice, couponResult.couponDiscount, seniorDiscount, checkoutOfferDiscount);
+
+  const [order] = await Order.create(
+    [{
+      user: req.user._id,
+      orderItems,
+      shippingAddress,
+      paymentMethod,
+      itemsPrice,
+      taxPrice,
+      shippingPrice,
+      couponDiscount: couponResult.couponDiscount,
+      seniorDiscount,
+      checkoutOfferDiscount,
+      isSeniorCitizen: !!isSeniorCitizen,
+      seniorCitizenIdDoc: seniorCitizenIdDoc || '',
+      seniorCitizenStatus: (isSeniorCitizen && seniorCitizenIdDoc) ? 'pending' : 'none',
+      totalPrice,
+      coupon: couponResult.appliedCouponId,
+      couponModel: 'Coupon',
+    }],
+    { session }
+  );
+
+  const stockOk = await deductStockAtomic(product._id, quantity, Product, session);
+  if (!stockOk) {
+    return { error: { status: 400, body: { success: false, message: 'Stock changed during checkout. Please try again.' } } };
+  }
+
+  return { order };
+};
+
+const handleCartOrder = async (req, session) => {
+  const { shippingAddress, paymentMethod, couponCode, isSeniorCitizen, seniorCitizenIdDoc } = req.body;
+
+  const cart = await Cart.findOne({ user: req.user._id }).populate('items.product').session(session);
+  if (!cart || cart.items.length === 0) {
+    return { error: { status: 400, body: { success: false, message: 'Cart is empty' } } };
+  }
+
+  // Check for prescription-required items
+  const prescriptionItems = cart.items.filter((item) => item.product.isPrescriptionRequired);
+  if (prescriptionItems.length > 0) {
+    const missingPrescriptionItems = [];
+    for (const item of prescriptionItems) {
+      const hasPrescription = await hasAcceptedPrescriptionForProduct(req.user._id, item.product._id, session);
+      if (!hasPrescription) {
+        missingPrescriptionItems.push(item.product.name);
+      }
+    }
+
+    if (missingPrescriptionItems.length > 0) {
+      return { error: { status: 400, body: {
+        success: false,
+        message: 'Some items in your cart require a prescription upload before checkout.',
+        prescriptionItems: missingPrescriptionItems,
+      } } };
+    }
+  }
+
+  // Validate stock and recalculate bulk pricing within transaction
+  for (const item of cart.items) {
+    const product = await Product.findById(item.product._id).session(session);
+    if (!product || product.stock < item.quantity) {
+      return { error: { status: 400, body: {
+        success: false,
+        message: `Insufficient stock for ${product?.name || 'a product'}. Only ${product?.stock || 0} left.`,
+      } } };
+    }
+
+    // Calculate bulk pricing / group offer price
+    item.price = resolveProductPrice(product, item.quantity);
+  }
+
+  const itemsPrice = cart.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const seniorDiscount = calculateSeniorDiscount(itemsPrice, isSeniorCitizen, seniorCitizenIdDoc);
+  const orderItems = cart.items.map((item) => {
+    const originalPrice = Number(item.price || 0);
+    return {
+      product: item.product._id,
+      name: item.product.name,
+      image: getProductImage(item.product.images),
+      productSlug: item.product.slug,
+      price: originalPrice,
+      originalPrice,
+      quantity: item.quantity,
+    };
+  });
+
+  const couponResult = await resolveOrderCoupon({
+    couponCode,
+    userId: req.user._id,
+    itemsPrice,
+    cartCouponId: cart.coupon,
+    session,
+  });
+  if (couponResult.error) {
+    return { error: { status: couponResult.error.status, body: { success: false, message: couponResult.error.message } } };
+  }
+
+  let calculatedTax = 0;
+  for (const item of cart.items) {
+    calculatedTax += calculateItemTax(item.price * item.quantity, item.product.taxRate);
+  }
+  const taxPrice = Number(calculatedTax.toFixed(2));
+  const shippingPrice = calculateShipping(itemsPrice);
+  const checkoutOfferDiscount = await resolveCheckoutOffer(itemsPrice, session);
+  const totalPrice = calculateTotalPrice(itemsPrice, shippingPrice, couponResult.couponDiscount, seniorDiscount, checkoutOfferDiscount);
+
+  const [order] = await Order.create(
+    [{
+      user: req.user._id,
+      orderItems,
+      shippingAddress,
+      paymentMethod,
+      itemsPrice,
+      taxPrice,
+      shippingPrice,
+      couponDiscount: couponResult.couponDiscount,
+      seniorDiscount,
+      checkoutOfferDiscount,
+      isSeniorCitizen: !!isSeniorCitizen,
+      seniorCitizenIdDoc: seniorCitizenIdDoc || '',
+      seniorCitizenStatus: (isSeniorCitizen && seniorCitizenIdDoc) ? 'pending' : 'none',
+      totalPrice,
+      coupon: couponResult.appliedCouponId,
+      couponModel: 'Coupon',
+    }],
+    { session }
+  );
+
+  // Atomic stock deduction within transaction
+  for (const item of cart.items) {
+    const stockOk = await deductStockAtomic(item.product._id, item.quantity, Product, session);
+    if (!stockOk) {
+      return { error: { status: 400, body: {
+        success: false,
+        message: 'Stock changed during checkout. Please review your cart and try again.',
+      } } };
+    }
+  }
+
+  // Clear cart within transaction
+  await Cart.findOneAndUpdate(
+    { user: req.user._id },
+    { items: [], coupon: null, couponDiscount: 0 },
+    { session }
+  );
+
+  return { order };
+};
+
+// ─── Exported Controller Functions ───
+
 export const createOrder = async (req, res, next) => {
   const session = await mongoose.startSession();
   session.startTransaction();
   try {
-    const { shippingAddress, paymentMethod, couponCode, isB2B, b2bItem, isSeniorCitizen, seniorCitizenIdDoc, isBuyNow, buyNowItem, isPrescriptionQuote, prescriptionQuote } = req.body;
+    const { isB2B, b2bItem, isPrescriptionQuote, prescriptionQuote, isBuyNow, buyNowItem } = req.body;
 
+    let result;
     if (isB2B && b2bItem?.productId) {
-      const quantity = Math.max(1, Number(b2bItem.quantity || 1));
-      const requestedPrice = Number(b2bItem.price || 0);
-      const product = await B2BProduct.findById(b2bItem.productId).session(session);
-
-      if (!product || product.status !== 'active') {
-        await session.abortTransaction();
-        return res.status(404).json({ success: false, message: 'B2B product not found or unavailable' });
-      }
-      if (product.stock < quantity) {
-        await session.abortTransaction();
-        return res.status(400).json({ success: false, message: `Only ${product.stock} available.` });
-      }
-
-      const selectedTier = product.bulkPricing?.find((tier) =>
-        Number(tier.unitPrice) === requestedPrice &&
-        (!b2bItem.tierLabel || tier.label === b2bItem.tierLabel)
-      );
-      const price = Number(selectedTier?.unitPrice || requestedPrice);
-      if (!price || price <= 0) {
-        await session.abortTransaction();
-        return res.status(400).json({ success: false, message: 'Invalid B2B pricing option' });
-      }
-
-      const image = product.images?.[0]?.url || (typeof product.images?.[0] === 'string' ? product.images[0] : '') || b2bItem.image || '';
-      const orderItems = [{
-        product: product._id,
-        name: product.name,
-        image,
-        productSlug: product.slug,
-        price,
-        quantity,
-        isB2B: true,
-        tierLabel: selectedTier?.label || b2bItem.tierLabel || 'Bulk Tier',
-      }];
-      const itemsPrice = price * quantity;
-      const itemTaxRate = product.taxRate !== undefined ? product.taxRate : 12;
-      const taxPrice = Number((itemsPrice * (itemTaxRate / (100 + itemTaxRate))).toFixed(2));
-      const shippingPrice = itemsPrice >= SHIPPING_THRESHOLD ? 0 : SHIPPING_COST;
-      const { couponDiscount, coupon: appliedB2BCoupon } = await resolveB2BCouponForOrder({
-        code: b2bItem.couponCode || req.body.b2bCouponCode,
-        userId: req.user._id,
-        orderAmount: itemsPrice,
-        session,
-      });
-      const totalPrice = Math.max(0, itemsPrice + shippingPrice - couponDiscount);
-
-      const [order] = await Order.create(
-        [{
-          user: req.user._id,
-          orderItems,
-          isB2B: true,
-          shippingAddress,
-          paymentMethod,
-          itemsPrice,
-          taxPrice,
-          shippingPrice,
-          couponDiscount,
-          seniorDiscount: 0,
-          checkoutOfferDiscount: 0,
-          isSeniorCitizen: false,
-          seniorCitizenIdDoc: '',
-          seniorCitizenStatus: 'none',
-          totalPrice,
-          coupon: appliedB2BCoupon?._id || null,
-          couponModel: appliedB2BCoupon ? 'B2BCoupon' : 'Coupon',
-        }],
-        { session }
-      );
-
-      const updated = await B2BProduct.findOneAndUpdate(
-        { _id: product._id, stock: { $gte: quantity } },
-        { $inc: { stock: -quantity } },
-        { session }
-      );
-      if (!updated) {
-        await session.abortTransaction();
-        return res.status(400).json({
-          success: false,
-          message: 'Stock changed during checkout. Please try again.',
-        });
-      }
-
-      await session.commitTransaction();
-
-      try {
-        await sendEmail({
-          to: req.user.email,
-          subject: `Order Confirmed - ${order._id}`,
-          html: getOrderConfirmationTemplate(order),
-        });
-      } catch (emailError) {
-        console.error('[Order] Confirmation email failed:', emailError.message);
-      }
-
-      return res.status(201).json({ success: true, message: 'Order placed successfully', order });
+      result = await handleB2BOrder(req, session);
+    } else if (isPrescriptionQuote && prescriptionQuote?.prescriptionId) {
+      result = await handlePrescriptionQuoteOrder(req, session);
+    } else if (isBuyNow && buyNowItem?.productId) {
+      result = await handleBuyNowOrder(req, session);
+    } else {
+      result = await handleCartOrder(req, session);
     }
 
-    if (isPrescriptionQuote && prescriptionQuote?.prescriptionId) {
-      const prescription = await Prescription.findOne({
-        _id: prescriptionQuote.prescriptionId,
-        user: req.user._id,
-      }).session(session);
-
-      if (!prescription) {
-        await session.abortTransaction();
-        return res.status(404).json({ success: false, message: 'Prescription quote not found' });
-      }
-      if (prescription.quoteStatus !== 'sent' || !prescription.quoteItems?.length) {
-        await session.abortTransaction();
-        return res.status(400).json({ success: false, message: 'No active quote available for this prescription' });
-      }
-
-      const orderItems = [];
-      let itemsPrice = 0;
-      let calculatedTax = 0;
-
-      for (const item of prescription.quoteItems) {
-        const quantity = Math.max(1, Number(item.quantity || 1));
-        const product = await Product.findById(item.product).session(session);
-        if (!product || product.status !== 'active') {
-          await session.abortTransaction();
-          return res.status(400).json({ success: false, message: `${item.name || 'A quoted product'} is no longer available` });
-        }
-        if (product.stock < quantity) {
-          await session.abortTransaction();
-          return res.status(400).json({ success: false, message: `Only ${product.stock} available for ${product.name}` });
-        }
-
-        const price = Number(item.price || 0);
-        const lineTotal = price * quantity;
-        const rate = product.taxRate !== undefined ? product.taxRate : 12;
-        calculatedTax += lineTotal * (rate / (100 + rate));
-        itemsPrice += lineTotal;
-
-        orderItems.push({
-          product: product._id,
-          name: product.name,
-          image: item.image || product.images?.[0]?.url || (typeof product.images?.[0] === 'string' ? product.images[0] : '') || '',
-          productSlug: product.slug,
-          price,
-          originalPrice: price,
-          quantity,
-        });
-      }
-
-      const shippingPrice = itemsPrice >= SHIPPING_THRESHOLD ? 0 : SHIPPING_COST;
-      const totalPrice = itemsPrice + shippingPrice;
-      const [order] = await Order.create(
-        [{
-          user: req.user._id,
-          orderItems,
-          isPrescriptionOrder: true,
-          prescription: prescription._id,
-          shippingAddress,
-          paymentMethod,
-          itemsPrice,
-          taxPrice: Number(calculatedTax.toFixed(2)),
-          shippingPrice,
-          couponDiscount: 0,
-          seniorDiscount: 0,
-          checkoutOfferDiscount: 0,
-          isSeniorCitizen: false,
-          seniorCitizenIdDoc: '',
-          seniorCitizenStatus: 'none',
-          totalPrice,
-          coupon: null,
-          couponModel: 'Coupon',
-        }],
-        { session }
-      );
-
-      for (const item of prescription.quoteItems) {
-        const updated = await Product.findOneAndUpdate(
-          { _id: item.product, stock: { $gte: Number(item.quantity || 1) } },
-          { $inc: { stock: -Number(item.quantity || 1) } },
-          { session }
-        );
-        if (!updated) {
-          await session.abortTransaction();
-          return res.status(400).json({
-            success: false,
-            message: 'Stock changed during checkout. Please try again.',
-          });
-        }
-      }
-
-      prescription.quoteStatus = 'accepted';
-      prescription.orderedAt = new Date();
-      await prescription.save({ session });
-
-      await session.commitTransaction();
-
-      try {
-        await sendEmail({
-          to: req.user.email,
-          subject: `Order Confirmed - ${order._id}`,
-          html: getOrderConfirmationTemplate(order),
-        });
-      } catch (emailError) {
-        console.error('[Order] Confirmation email failed:', emailError.message);
-      }
-
-      return res.status(201).json({ success: true, message: 'Order placed successfully', order });
-    }
-
-    if (isBuyNow && buyNowItem?.productId) {
-      const quantity = Math.max(1, Number(buyNowItem.quantity || 1));
-      const product = await Product.findById(buyNowItem.productId).session(session);
-
-      if (!product || product.status !== 'active') {
-        await session.abortTransaction();
-        return res.status(404).json({ success: false, message: 'Product not found or unavailable' });
-      }
-      if (product.stock < quantity) {
-        await session.abortTransaction();
-        return res.status(400).json({ success: false, message: `Only ${product.stock} available.` });
-      }
-
-      if (product.isPrescriptionRequired) {
-        const hasPrescription = await hasAcceptedPrescriptionForProduct(req.user._id, product._id, session);
-        if (!hasPrescription) {
-          await session.abortTransaction();
-          return res.status(400).json({
-            success: false,
-            message: 'This product requires a prescription upload before checkout.',
-            prescriptionItems: [product.name],
-          });
-        }
-      }
-
-      let price = product.discountPrice > 0 ? product.discountPrice : product.price;
-      if (product.bulkPricing && product.bulkPricing.length > 0) {
-        const sortedTiers = [...product.bulkPricing].sort((a, b) => b.minQty - a.minQty);
-        const matchingTier = sortedTiers.find(tier => quantity >= tier.minQty && (!tier.maxQty || quantity <= tier.maxQty));
-        if (matchingTier) {
-          price = matchingTier.unitPrice;
-        }
-      }
-
-      const itemsPrice = price * quantity;
-      const seniorDiscount = (isSeniorCitizen && seniorCitizenIdDoc)
-        ? Number((itemsPrice * 0.20).toFixed(2))
-        : 0;
-
-      const orderItems = [{
-        product: product._id,
-        name: product.name,
-        image: product.images[0]?.url || (typeof product.images[0] === 'string' ? product.images[0] : '') || '',
-        productSlug: product.slug,
-        price: Number(price),
-        originalPrice: Number(price),
-        quantity,
-      }];
-
-      let couponDiscount = 0;
-      let appliedCoupon = null;
-
-      if (couponCode) {
-        const coupon = await Coupon.findOne({ code: couponCode.toUpperCase(), isActive: true }).session(session);
-        const perUserLimit = coupon ? getCouponPerUserLimit(coupon) : null;
-        if (coupon && perUserLimit && getUserCouponUsage(coupon, req.user._id) >= perUserLimit) {
-          await session.abortTransaction();
-          return res.status(400).json({ success: false, message: `You have reached the per-user limit for this coupon (${perUserLimit})` });
-        }
-        if (coupon && coupon.startDate <= new Date() && coupon.endDate > new Date() && (!perUserLimit || getUserCouponUsage(coupon, req.user._id) < perUserLimit)) {
-          if (itemsPrice >= coupon.minOrderAmount) {
-            if (coupon.discountType === 'percentage') {
-              couponDiscount = (itemsPrice * coupon.discountValue) / 100;
-              if (coupon.maxDiscountAmount) couponDiscount = Math.min(couponDiscount, coupon.maxDiscountAmount);
-            } else {
-              couponDiscount = coupon.discountValue;
-            }
-            await incrementUserCouponUsage({ coupon, userId: req.user._id, session });
-            appliedCoupon = coupon._id;
-          }
-        }
-      }
-
-      const rate = product.taxRate !== undefined ? product.taxRate : 12;
-      const taxPrice = Number((itemsPrice * (rate / (100 + rate))).toFixed(2));
-      const shippingPrice = itemsPrice >= SHIPPING_THRESHOLD ? 0 : SHIPPING_COST;
-
-      let checkoutOfferDiscount = 0;
-      const settings = await Setting.findOne({ key: 'promo_banner' }).session(session);
-      if (settings && settings.value?.checkoutDiscount?.enabled) {
-        const config = settings.value.checkoutDiscount;
-        if (itemsPrice >= config.minOrderAmount) {
-          checkoutOfferDiscount = Number((itemsPrice * (config.discountPercentage / 100)).toFixed(2));
-        }
-      }
-
-      let totalPrice = itemsPrice + shippingPrice - couponDiscount - seniorDiscount - checkoutOfferDiscount;
-      if (totalPrice < 0) totalPrice = 0;
-
-      const [order] = await Order.create(
-        [{
-          user: req.user._id,
-          orderItems,
-          shippingAddress,
-          paymentMethod,
-          itemsPrice,
-          taxPrice,
-          shippingPrice,
-          couponDiscount,
-          seniorDiscount,
-          checkoutOfferDiscount,
-          isSeniorCitizen: !!isSeniorCitizen,
-          seniorCitizenIdDoc: seniorCitizenIdDoc || '',
-          seniorCitizenStatus: (isSeniorCitizen && seniorCitizenIdDoc) ? 'pending' : 'none',
-          totalPrice,
-          coupon: appliedCoupon,
-          couponModel: 'Coupon',
-        }],
-        { session }
-      );
-
-      const updated = await Product.findOneAndUpdate(
-        { _id: product._id, stock: { $gte: quantity } },
-        { $inc: { stock: -quantity } },
-        { session }
-      );
-      if (!updated) {
-        await session.abortTransaction();
-        return res.status(400).json({
-          success: false,
-          message: 'Stock changed during checkout. Please try again.',
-        });
-      }
-
-      await session.commitTransaction();
-
-      try {
-        await sendEmail({
-          to: req.user.email,
-          subject: `Order Confirmed - ${order._id}`,
-          html: getOrderConfirmationTemplate(order),
-        });
-      } catch (emailError) {
-        console.error('[Order] Confirmation email failed:', emailError.message);
-      }
-
-      return res.status(201).json({ success: true, message: 'Order placed successfully', order });
-    }
-
-    const cart = await Cart.findOne({ user: req.user._id }).populate('items.product').session(session);
-    if (!cart || cart.items.length === 0) {
+    if (result.error) {
       await session.abortTransaction();
-      return res.status(400).json({ success: false, message: 'Cart is empty' });
+      return res.status(result.error.status).json(result.error.body);
     }
-
-    // Check for prescription-required items
-    const prescriptionItems = cart.items.filter((item) => item.product.isPrescriptionRequired);
-    if (prescriptionItems.length > 0) {
-      const missingPrescriptionItems = [];
-      for (const item of prescriptionItems) {
-        const hasPrescription = await hasAcceptedPrescriptionForProduct(req.user._id, item.product._id, session);
-        if (!hasPrescription) {
-          missingPrescriptionItems.push(item.product.name);
-        }
-      }
-
-      if (missingPrescriptionItems.length > 0) {
-        await session.abortTransaction();
-        return res.status(400).json({
-          success: false,
-          message: 'Some items in your cart require a prescription upload before checkout.',
-          prescriptionItems: missingPrescriptionItems,
-        });
-      }
-    }
-
-    // Validate stock and validate/recalculate group/bulk price within transaction
-    for (const item of cart.items) {
-      const product = await Product.findById(item.product._id).session(session);
-      if (!product || product.stock < item.quantity) {
-        await session.abortTransaction();
-        return res.status(400).json({
-          success: false,
-          message: `Insufficient stock for ${product?.name || 'a product'}. Only ${product?.stock || 0} left.`,
-        });
-      }
-
-      // Calculate bulk pricing / group offer price
-      let price = product.discountPrice > 0 ? product.discountPrice : product.price;
-      if (product.bulkPricing && product.bulkPricing.length > 0) {
-        const sortedTiers = [...product.bulkPricing].sort((a, b) => b.minQty - a.minQty);
-        const matchingTier = sortedTiers.find(tier => item.quantity >= tier.minQty && (!tier.maxQty || item.quantity <= tier.maxQty));
-        if (matchingTier) {
-          price = matchingTier.unitPrice;
-        }
-      }
-      item.price = price;
-    }
-
-    const itemsPrice = cart.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
-    const seniorDiscount = (isSeniorCitizen && seniorCitizenIdDoc)
-      ? Number((itemsPrice * 0.20).toFixed(2))
-      : 0;
-    const orderItems = cart.items.map((item) => {
-      const originalPrice = Number(item.price || 0);
-      return {
-        product: item.product._id,
-        name: item.product.name,
-        image: item.product.images[0]?.url || (typeof item.product.images[0] === 'string' ? item.product.images[0] : '') || '',
-        productSlug: item.product.slug,
-        price: originalPrice,
-        originalPrice,
-        quantity: item.quantity,
-      };
-    });
-
-    let couponDiscount = 0;
-    let appliedCoupon = null;
-
-    if (couponCode) {
-      const coupon = await Coupon.findOne({ code: couponCode.toUpperCase(), isActive: true }).session(session);
-      const perUserLimit = coupon ? getCouponPerUserLimit(coupon) : null;
-      if (coupon && perUserLimit && getUserCouponUsage(coupon, req.user._id) >= perUserLimit) {
-        await session.abortTransaction();
-        return res.status(400).json({ success: false, message: `You have reached the per-user limit for this coupon (${perUserLimit})` });
-      }
-      if (coupon && coupon.startDate <= new Date() && coupon.endDate > new Date() && (!perUserLimit || getUserCouponUsage(coupon, req.user._id) < perUserLimit)) {
-        if (itemsPrice >= coupon.minOrderAmount) {
-          // Verify coupon was actually applied to the cart
-          if (!cart.coupon || !cart.coupon.equals(coupon._id)) {
-            await session.abortTransaction();
-            return res.status(400).json({ success: false, message: 'Coupon not applied to cart. Please apply it first.' });
-          }
-          if (coupon.discountType === 'percentage') {
-            couponDiscount = (itemsPrice * coupon.discountValue) / 100;
-            if (coupon.maxDiscountAmount) couponDiscount = Math.min(couponDiscount, coupon.maxDiscountAmount);
-          } else {
-            couponDiscount = coupon.discountValue;
-          }
-          await incrementUserCouponUsage({ coupon, userId: req.user._id, session });
-          appliedCoupon = coupon._id;
-        }
-      }
-    }
-
-    let calculatedTax = 0;
-    for (const item of cart.items) {
-      const rate = item.product.taxRate !== undefined ? item.product.taxRate : 12;
-      const itemTax = (item.price * item.quantity) * (rate / (100 + rate));
-      calculatedTax += itemTax;
-    }
-    const taxPrice = Number(calculatedTax.toFixed(2));
-    const shippingPrice = itemsPrice >= SHIPPING_THRESHOLD ? 0 : SHIPPING_COST;
-
-    let checkoutOfferDiscount = 0;
-    const settings = await Setting.findOne({ key: 'promo_banner' }).session(session);
-    if (settings && settings.value?.checkoutDiscount?.enabled) {
-      const config = settings.value.checkoutDiscount;
-      if (itemsPrice >= config.minOrderAmount) {
-        checkoutOfferDiscount = Number((itemsPrice * (config.discountPercentage / 100)).toFixed(2));
-      }
-    }
-
-    let totalPrice = itemsPrice + shippingPrice - couponDiscount - seniorDiscount - checkoutOfferDiscount;
-    if (totalPrice < 0) totalPrice = 0;
-
-    const [order] = await Order.create(
-      [{
-        user: req.user._id,
-        orderItems,
-        shippingAddress,
-        paymentMethod,
-        itemsPrice,
-        taxPrice,
-        shippingPrice,
-        couponDiscount,
-        seniorDiscount,
-        checkoutOfferDiscount,
-        isSeniorCitizen: !!isSeniorCitizen,
-        seniorCitizenIdDoc: seniorCitizenIdDoc || '',
-        seniorCitizenStatus: (isSeniorCitizen && seniorCitizenIdDoc) ? 'pending' : 'none',
-        totalPrice,
-        coupon: appliedCoupon,
-        couponModel: 'Coupon',
-      }],
-      { session }
-    );
-
-    // Atomic stock deduction within transaction
-    for (const item of cart.items) {
-      const updated = await Product.findOneAndUpdate(
-        { _id: item.product._id, stock: { $gte: item.quantity } },
-        { $inc: { stock: -item.quantity } },
-        { session }
-      );
-      if (!updated) {
-        await session.abortTransaction();
-        return res.status(400).json({
-          success: false,
-          message: 'Stock changed during checkout. Please review your cart and try again.',
-        });
-      }
-    }
-
-    // Clear cart within transaction
-    await Cart.findOneAndUpdate(
-      { user: req.user._id },
-      { items: [], coupon: null, couponDiscount: 0 },
-      { session }
-    );
 
     await session.commitTransaction();
 
     // Send email after transaction (non-critical)
-    try {
-      await sendEmail({
-        to: req.user.email,
-        subject: `Order Confirmed - ${order._id}`,
-        html: getOrderConfirmationTemplate(order),
-      });
-    } catch (emailError) {
-      console.error('[Order] Confirmation email failed:', emailError.message);
-    }
+    await sendOrderConfirmationEmail(result.order, req.user.email);
 
-    res.status(201).json({ success: true, message: 'Order placed successfully', order });
+    res.status(201).json({ success: true, message: 'Order placed successfully', order: result.order });
   } catch (error) {
     await session.abortTransaction();
     next(error);
@@ -822,11 +663,7 @@ export const updateOrderStatus = async (req, res, next) => {
     if (trackingNumber) order.trackingNumber = trackingNumber;
     if (notes) order.notes = notes;
     if (shouldRestoreStock) {
-      for (const item of order.orderItems) {
-        if (!item.product) continue;
-        const Model = item.isB2B ? B2BProduct : Product;
-        await Model.findByIdAndUpdate(item.product, { $inc: { stock: item.quantity } });
-      }
+      await restoreStock(order.orderItems);
     }
     if (status === 'delivered') {
       order.isDelivered = true;
@@ -865,14 +702,7 @@ export const cancelOrder = async (req, res, next) => {
     await order.save();
 
     // Restore stock only once
-    for (const item of order.orderItems) {
-      if (!item.product) continue;
-      if (item.isB2B) {
-        await B2BProduct.findByIdAndUpdate(item.product, { $inc: { stock: item.quantity } });
-      } else {
-        await Product.findByIdAndUpdate(item.product, { $inc: { stock: item.quantity } });
-      }
-    }
+    await restoreStock(order.orderItems);
     res.json({ success: true, message: 'Order cancelled', order });
   } catch (error) {
     next(error);

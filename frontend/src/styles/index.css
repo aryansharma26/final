@@ -100,11 +100,11 @@
     scrollbar-width: none;
   }
 
+  .no-scrollbar {
+    scrollbar-width: none;
+  }
+
   .no-scrollbar::-webkit-scrollbar {
     display: none;
   }
-}
-
-body.js-scroll-restoring footer {
-  display: none !important;
 }

@@ -7,6 +7,9 @@ const validateSecrets = () => {
   if (!process.env.JWT_REFRESH_SECRET) {
     throw new Error('FATAL: JWT_REFRESH_SECRET environment variable is required');
   }
+  if (!process.env.JWT_ADMIN_SECRET) {
+    throw new Error('FATAL: JWT_ADMIN_SECRET environment variable is required');
+  }
 };
 
 export const generateAccessToken = (payload) => {
@@ -16,7 +19,7 @@ export const generateAccessToken = (payload) => {
 
 export const generateAdminToken = (payload) => {
   validateSecrets();
-  return jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '30d' });
+  return jwt.sign(payload, process.env.JWT_ADMIN_SECRET, { expiresIn: '30d' });
 };
 
 export const generateRefreshToken = (payload) => {
