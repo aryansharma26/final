@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import {
   BadgeCheck,
@@ -14,8 +14,7 @@ import {
   Upload,
 } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { productAPI } from "../api/index.js";
-import useSessionOnce from "../hooks/useSessionOnce.js";
+import { productAPI, categoryAPI } from "../api/index.js";
 
 const FAQ_LINKS = [
   { label: "Rx quote process", to: "/faq#rx-quote" },
@@ -24,21 +23,9 @@ const FAQ_LINKS = [
   { label: "Delivery help", to: "/faq#delivery" },
 ];
 
-const getImageUrl = (product) => {
-  const image = product?.images?.[0];
-  return typeof image === "string" ? image : image?.url || "";
-};
-
-const formatPrice = (product) => {
-  const price =
-    product?.discountPrice > 0 ? product.discountPrice : product?.price;
-  return typeof price === "number" ? `PHP ${price.toLocaleString()}` : "";
-};
-
 const Hero = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const shouldAnimateHero = useSessionOnce("homeAnimationsSeen");
   const [searchQuery, setSearchQuery] = useState("");
   const [suggestionsOpen, setSuggestionsOpen] = useState(false);
   const [suggestionsLoading, setSuggestionsLoading] = useState(false);
@@ -56,101 +43,88 @@ const Hero = () => {
       return;
     }
 
-    const controller = new AbortController();
-    const timeout = setTimeout(async () => {
+    const timer = setTimeout(async () => {
+      setSuggestionsLoading(true);
       try {
-        setSuggestionsLoading(true);
-        const { data } = await productAPI.getSearchSuggestions(query, {
-          signal: controller.signal,
-        });
-        setSuggestions({
-          products: data?.products || [],
-          brands: data?.brands || [],
-          categories: data?.categories || [],
-        });
-        setSuggestionsOpen(true);
-      } catch (err) {
-        if (err.name !== "CanceledError" && err.code !== "ERR_CANCELED") {
-          console.error("[Hero] Failed to load search suggestions:", err);
-          setSuggestions({ products: [], brands: [], categories: [] });
-        }
-      } finally {
-        if (!controller.signal.aborted) {
-          setSuggestionsLoading(false);
-        }
-      }
-    }, 220);
+        const [prodRes, brandRes, catRes] = await Promise.allSettled([
+          productAPI.getAll({ search: query, limit: 4 }),
+          b2bAPI.getBrands({ search: query, limit: 3 }),
+          categoryAPI.getAll(),
+        ]);
 
-    return () => {
-      controller.abort();
-      clearTimeout(timeout);
-    };
+        const products =
+          prodRes.status === "fulfilled" && prodRes.value.data?.products
+            ? prodRes.value.data.products.slice(0, 4)
+            : [];
+
+        const brands =
+          brandRes.status === "fulfilled" && brandRes.value.data?.brands
+            ? brandRes.value.data.brands.slice(0, 3)
+            : [];
+
+        const allCategories =
+          catRes.status === "fulfilled" && catRes.value.data?.categories
+            ? catRes.value.data.categories
+            : [];
+
+        const matchedCategories = allCategories
+          .filter((cat) =>
+            cat.name.toLowerCase().includes(query.toLowerCase())
+          )
+          .slice(0, 3);
+
+        setSuggestions({
+          products,
+          brands,
+          categories: matchedCategories,
+        });
+      } catch (err) {
+        console.error("Failed to fetch suggestions:", err);
+      } finally {
+        setSuggestionsLoading(false);
+      }
+    }, 250);
+
+    return () => clearTimeout(timer);
   }, [searchQuery]);
 
+  const searchContainerRef = useRef(null);
+
   useEffect(() => {
-    const closeOnOutsideClick = (e) => {
-      if (!e.target.closest('[data-hero-search="true"]')) {
+    const handleClickOutside = (e) => {
+      if (
+        searchContainerRef.current &&
+        !searchContainerRef.current.contains(e.target)
+      ) {
         setSuggestionsOpen(false);
       }
     };
-
-    const closeOnEscape = (e) => {
-      if (e.key === "Escape") {
-        setSuggestionsOpen(false);
-      }
-    };
-
-    document.addEventListener("mousedown", closeOnOutsideClick);
-    document.addEventListener("keydown", closeOnEscape);
-    return () => {
-      document.removeEventListener("mousedown", closeOnOutsideClick);
-      document.removeEventListener("keydown", closeOnEscape);
-    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const resetSearch = () => {
-    setSearchQuery("");
-    setSuggestionsOpen(false);
-    setSuggestions({ products: [], brands: [], categories: [] });
-  };
-
-  const delayedNavigate = (e, to) => {
+  const delayedNavigate = (e, path) => {
     e.preventDefault();
-    window.setTimeout(() => navigate(to), 160);
-  };
-
-  const submitSearch = () => {
-    const query = searchQuery.trim();
-    if (query) {
-      navigate(`/medicines?search=${encodeURIComponent(query)}`);
-      resetSearch();
+    const currentTarget = e.currentTarget;
+    if (currentTarget && currentTarget.classList) {
+      currentTarget.classList.add("pressed");
     }
+    setTimeout(() => {
+      navigate(path);
+    }, 150);
   };
 
-  const openProduct = (product) => {
-    if (!product?.slug) return;
-    navigate(`/product/${product.slug}`, {
-      state: { from: { pathname: location.pathname, search: location.search } },
-    });
-    resetSearch();
+  const submitSearch = (overrideQuery) => {
+    const term = (overrideQuery ?? searchQuery).trim();
+    if (!term) return;
+    setSuggestionsOpen(false);
+    navigate(`/medicines?search=${encodeURIComponent(term)}`);
   };
 
-  const searchBrand = (brand) => {
-    if (!brand) return;
-    navigate(`/medicines?search=${encodeURIComponent(brand)}`);
-    resetSearch();
-  };
-
-  const openCategory = (category) => {
-    if (!category?._id) return;
-    navigate(`/medicines?category=${category._id}`);
-    resetSearch();
-  };
-
-  const hasSuggestions =
-    suggestions.products.length > 0 ||
-    suggestions.brands.length > 0 ||
-    suggestions.categories.length > 0;
+  const totalSuggestions =
+    suggestions.products.length +
+    suggestions.brands.length +
+    suggestions.categories.length;
 
   return (
     <section className="relative z-20 overflow-visible bg-[#f7f8f3] pt-4 pb-10 sm:pt-8 lg:pt-3 lg:pb-12">
@@ -158,9 +132,9 @@ const Hero = () => {
       <div className="container-custom relative">
         <div className="mx-auto max-w-4xl text-center">
           <motion.div
-            initial={shouldAnimateHero ? { opacity: 0, y: -10 } : false}
-            animate={shouldAnimateHero ? { opacity: 1, y: 0 } : undefined}
-            transition={shouldAnimateHero ? { duration: 0.4, ease: "easeOut" } : undefined}
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, ease: "easeOut" }}
             className="mb-2 inline-flex items-center gap-1.5 rounded-full border border-emerald-100 bg-white/85 px-3 py-1.5 text-xs font-semibold text-emerald-700 shadow-sm"
           >
             <BadgeCheck className="h-3.5 w-3.5" />
@@ -168,23 +142,18 @@ const Hero = () => {
           </motion.div>
 
           <motion.h1
-            initial={shouldAnimateHero ? { opacity: 0, y: 15 } : false}
-            animate={shouldAnimateHero ? { opacity: 1, y: 0 } : undefined}
-            transition={shouldAnimateHero ? { duration: 0.5, delay: 0.1, ease: "easeOut" } : undefined}
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.1, ease: "easeOut" }}
             className="mx-auto max-w-4xl text-4xl font-extrabold leading-[1.04] tracking-tight text-gray-950 sm:text-5xl lg:text-[56px]"
           >
             Your Health, Delivered to Your Doorstep
           </motion.h1>
 
-          {/* <p className="mx-auto mt-4 max-w-2xl text-base leading-7 text-gray-600 sm:text-lg">
-            Genuine medicines and healthcare products. Upload prescriptions and
-            track your wellness - all in one place.
-          </p> */}
-
           <motion.div
-            initial={shouldAnimateHero ? { opacity: 0, y: 15 } : false}
-            animate={shouldAnimateHero ? { opacity: 1, y: 0 } : undefined}
-            transition={shouldAnimateHero ? { duration: 0.5, delay: 0.2, ease: "easeOut" } : undefined}
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2, ease: "easeOut" }}
             className="mx-auto mt-5 max-w-3xl"
           >
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -242,7 +211,7 @@ const Hero = () => {
                       </span>
                     </div>
                     <p className="mt-0.5 text-[11px] leading-5 text-slate-500">
-                       Bulk medicine orders for pharmacies, retail stores, clinics, and healthcare providers at competitive wholesale prices.
+                      Bulk medicine orders for pharmacies, retail stores, clinics, and healthcare providers at competitive wholesale prices.
                     </p>
                   </div>
                 </div>
@@ -251,11 +220,12 @@ const Hero = () => {
           </motion.div>
 
           <motion.div
-            initial={shouldAnimateHero ? { opacity: 0, y: 15 } : false}
-            animate={shouldAnimateHero ? { opacity: 1, y: 0 } : undefined}
-            transition={shouldAnimateHero ? { duration: 0.5, delay: 0.3, ease: "easeOut" } : undefined}
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.3, ease: "easeOut" }}
             className="mx-auto mt-7 max-w-2xl"
             data-hero-search="true"
+            ref={searchContainerRef}
           >
             <form
               autoComplete="off"

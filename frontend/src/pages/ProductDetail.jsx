@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { motion } from 'framer-motion';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { ArrowLeft, ShoppingCart, Heart, Star, Minus, Plus, Truck, Shield, CheckCircle, CreditCard, Info, ListChecks, HelpCircle, FileText, Upload, Loader2, XCircle, Tag, Camera } from 'lucide-react';
 import { productAPI, reviewAPI, wishlistAPI, prescriptionAPI } from '../api/index.js';
@@ -313,7 +314,27 @@ const ProductDetail = () => {
   };
 
   if (loading && !product) {
-    return <div className="min-h-[75vh] bg-white" />;
+    return (
+      <div className="container-custom py-3 lg:py-5 animate-pulse">
+        <div className="h-4 w-32 bg-slate-200 rounded-lg mb-3" />
+        <div className="grid grid-cols-12 gap-4 rounded-2xl border border-gray-100 bg-white p-3 sm:rounded-3xl sm:p-4 lg:gap-5 lg:p-5 shadow-sm">
+          <div className="col-span-12 lg:col-span-5">
+            <div className="h-[280px] sm:h-[350px] lg:h-[480px] w-full bg-slate-100 rounded-2xl" />
+          </div>
+          <div className="col-span-12 lg:col-span-7 space-y-4">
+            <div className="h-5 w-28 bg-emerald-100 rounded-full" />
+            <div className="h-8 w-3/4 bg-slate-200 rounded-xl" />
+            <div className="h-4 w-1/2 bg-slate-100 rounded-lg" />
+            <div className="h-10 w-44 bg-slate-200 rounded-xl mt-4" />
+            <div className="h-28 w-full bg-slate-50 rounded-2xl border border-slate-100 mt-5" />
+            <div className="flex gap-3 pt-4">
+              <div className="h-12 flex-1 bg-slate-200 rounded-2xl" />
+              <div className="h-12 flex-1 bg-slate-800 rounded-2xl" />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   if (!product) {
@@ -378,7 +399,12 @@ const ProductDetail = () => {
   const rxUploading = Boolean(rxUploadingSource);
 
   return (
-    <div className="container-custom py-3 lg:py-5">
+    <motion.div
+      initial={{ opacity: 0, y: 14 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+      className="container-custom py-3 lg:py-5"
+    >
       <button
         onClick={handleGoBack}
         className="pressable inline-flex items-center gap-1.5 text-sm font-medium text-gray-500 transition-colors hover:text-brand"
@@ -922,7 +948,7 @@ const ProductDetail = () => {
           </div>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 };
 

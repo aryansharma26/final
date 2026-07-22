@@ -63,8 +63,6 @@ const AppRoutes = () => {
   const location = useLocation();
   const navigationType = useNavigationType();
 
-  // Opening page (PUSH): y=8 vertical slide + fade (the perfect opening animation).
-  // Back navigation (POP): y=0 pure fade at restored scroll position (eliminates y-offset jitter on scrolled pages).
   const isPop = navigationType === 'POP';
   const motionKey = `${location.pathname}${location.search}_${location.key || 'def'}_${navigationType}`;
 

@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
 import { Zap } from "lucide-react";
 import { useSettings } from "../contexts/SettingsContext.jsx";
 
 const FlashDeals = () => {
-  const { flashDeal } = useSettings();
+  const { flashDeal, loading } = useSettings();
   const navigate = useNavigate();
   const [timeLeft, setTimeLeft] = useState({
     hours: 0,
@@ -47,6 +48,25 @@ const FlashDeals = () => {
     return () => clearInterval(timer);
   }, [flashDeal]);
 
+  if (loading && !flashDeal) {
+    return (
+      <section className="bg-gray-900 py-2.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] sm:py-4">
+        <div className="container-custom">
+          <div className="flex items-center justify-between gap-4 animate-pulse">
+            <div className="flex items-center gap-3">
+              <div className="h-8 w-8 rounded-xl bg-gray-800" />
+              <div className="space-y-1">
+                <div className="h-3.5 w-36 rounded bg-gray-800" />
+                <div className="h-2.5 w-48 rounded bg-gray-800/60" />
+              </div>
+            </div>
+            <div className="h-8 w-24 rounded-full bg-gray-800" />
+          </div>
+        </div>
+      </section>
+    );
+  }
+
   if (!flashDeal || !flashDeal.show) return null;
 
   const pad = (num) => String(num).padStart(2, "0");
@@ -56,8 +76,13 @@ const FlashDeals = () => {
     <section className="bg-gray-900 py-2.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] sm:py-4">
       <div className="container-custom">
         <div className="flex min-w-0 flex-wrap items-center justify-between gap-2 sm:flex-nowrap sm:gap-4">
-          {/* Left */}
-          <div className="flex min-w-0 flex-1 items-center gap-2 sm:gap-3">
+          {/* Left: Icon + Title + Subtext */}
+          <motion.div
+            initial={{ opacity: 0.85, x: -6 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.25, ease: "easeOut" }}
+            className="flex min-w-0 flex-1 items-center gap-2 sm:gap-3"
+          >
             <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-pills-pink/30 bg-pills-pink/15 shadow-inner sm:h-10 sm:w-10 sm:rounded-2xl">
               <Zap className="h-3.5 w-3.5 text-pills-pink sm:h-4 sm:w-4" />
             </div>
@@ -73,10 +98,15 @@ const FlashDeals = () => {
                 </p>
               )}
             </div>
-          </div>
+          </motion.div>
 
-          {/* Center */}
-          <div className="flex shrink-0 items-center gap-1 rounded-full border border-gray-700 bg-gray-800 px-2 py-1.5 sm:gap-2 sm:px-3 sm:py-2">
+          {/* Center: Timer Badges */}
+          <motion.div
+            initial={{ opacity: 0.85, scale: 0.96 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.25, ease: "easeOut" }}
+            className="flex shrink-0 items-center gap-1 rounded-full border border-gray-700 bg-gray-800 px-2 py-1.5 sm:gap-2 sm:px-3 sm:py-2"
+          >
             {isExpired ? (
               <span className="text-xs font-semibold text-pills-pink sm:text-sm">
                 Deal Expired
@@ -112,19 +142,26 @@ const FlashDeals = () => {
                 </div>
               </>
             )}
-          </div>
+          </motion.div>
 
-          {/* Right */}
-          <Link
-            to={dealLink}
-            onClick={(e) => {
-              e.preventDefault();
-              window.setTimeout(() => navigate(dealLink), 160);
-            }}
-            className="pressable route-pressable shrink-0 rounded-full bg-pills-pink px-3 py-2 text-xs font-bold text-white transition-all duration-200 hover:-translate-y-0.5 hover:bg-pills-pink-dark sm:px-7 sm:py-2.5 sm:text-sm"
+          {/* Right: CTA Button */}
+          <motion.div
+            initial={{ opacity: 0.85, x: 6 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.25, ease: "easeOut" }}
+            className="shrink-0"
           >
-            {flashDeal.buttonText || "Shop Now"}
-          </Link>
+            <Link
+              to={dealLink}
+              onClick={(e) => {
+                e.preventDefault();
+                window.setTimeout(() => navigate(dealLink), 160);
+              }}
+              className="pressable route-pressable block rounded-full bg-pills-pink px-3 py-2 text-xs font-bold text-white transition-all duration-200 hover:-translate-y-0.5 hover:bg-pills-pink-dark sm:px-7 sm:py-2.5 sm:text-sm"
+            >
+              {flashDeal.buttonText || "Shop Now"}
+            </Link>
+          </motion.div>
         </div>
       </div>
     </section>

@@ -3,7 +3,6 @@ import { motion } from "framer-motion";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { Link, useNavigate, useNavigationType } from "react-router-dom";
 import { categoryAPI } from "../api/index.js";
-import useSessionOnce from "../hooks/useSessionOnce.js";
 
 const MotionLink = motion(Link);
 
@@ -104,7 +103,6 @@ const saveCategoryRestoreTarget = (categoryId, element) => {
 };
 
 const ShopByCategory = () => {
-  const shouldAnimate = useSessionOnce("homeAnimationsSeen");
   const [categories, setCategories] = useState(getCachedCategories);
   const [loading, setLoading] = useState(getCachedCategories().length === 0);
   const [error, setError] = useState(null);
@@ -276,17 +274,17 @@ const ShopByCategory = () => {
                 data-category-id={category._id}
                 to={`/medicines?category=${category._id}`}
                 onClick={(e) => handleCategoryClick(e, category._id)}
-                initial={shouldAnimate ? { opacity: 0, y: 15 } : false}
-                whileInView={shouldAnimate ? {
+                initial={{ opacity: 0, y: 15 }}
+                whileInView={{
                   opacity: 1,
                   y: 0,
                   transition: {
                     duration: 0.35,
-                    delay: index * 0.05,
+                    delay: (index % 6) * 0.05,
                     ease: "easeOut",
                   },
-                } : undefined}
-                viewport={shouldAnimate ? { once: true } : undefined}
+                }}
+                viewport={{ once: true }}
                 whileHover={{
                   y: -6,
                   scale: 1.02,

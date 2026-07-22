@@ -1,4 +1,5 @@
-import { Outlet, useLocation } from 'react-router-dom';
+import { Outlet, useLocation, useNavigationType } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import Navbar from './Navbar';
 import Footer from './Footer';
 // import FloatingContactButtons from '../components/FloatingContactButtons';
@@ -10,6 +11,7 @@ import { useSettings } from '../contexts/SettingsContext.jsx';
 
 const MainLayout = () => {
   const location = useLocation();
+  const navigationType = useNavigationType();
   const isAdmin = location.pathname.startsWith('/admin');
   const isAuth = ['/login', '/register', '/forgot-password', '/reset-password'].some((p) => location.pathname.startsWith(p));
   const { banner } = useSettings();
@@ -19,11 +21,26 @@ const MainLayout = () => {
     return <Outlet />;
   }
 
+  const isPop = navigationType === 'POP';
+  const isHome = location.pathname === '/';
+  const outletKey = `${location.pathname}${location.search}`;
+
   return (
     <div className="min-h-screen flex flex-col bg-white">
       <Navbar />
       <main className={`flex-1 ${showBanner ? 'pt-[94px] lg:pt-[156px]' : 'pt-[54px] lg:pt-[120px]'}`}>
-        <Outlet />
+        {isHome ? (
+          <Outlet />
+        ) : (
+          <motion.div
+            key={outletKey}
+            initial={isPop ? false : { opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+          >
+            <Outlet />
+          </motion.div>
+        )}
       </main>
       <Footer />
       {/* <FloatingContactButtons /> */}

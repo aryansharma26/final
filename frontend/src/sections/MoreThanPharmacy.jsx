@@ -2,7 +2,6 @@ import { motion } from 'framer-motion';
 import medicine from "../assets/medicine.svg";
 import joyfulfemaledoctor from "../assets/joyfulfemaledoctor.svg";
 import doctorcheckingpatientwithstethoscope from "../assets/doctorcheckingpatientwithstethoscope.svg";
-import useSessionOnce from "../hooks/useSessionOnce.js";
 
 /* ═════════════════════════════════════════════════════════════
    Card 1: Doctor + Patient (Online Consultation)
@@ -51,8 +50,6 @@ const services = [
 ];
 
 const MoreThanPharmacy = () => {
-  const shouldAnimate = useSessionOnce("homeAnimationsSeen");
-
   return (
     <section className="py-8 sm:py-12 lg:py-20 bg-white">
       <div className="container-custom">
@@ -71,10 +68,10 @@ const MoreThanPharmacy = () => {
             return (
               <motion.div
                 key={service.title}
-                initial={shouldAnimate ? { opacity: 0, y: 20 } : false}
-                whileInView={shouldAnimate ? { opacity: 1, y: 0 } : undefined}
-                viewport={shouldAnimate ? { once: true } : undefined}
-                transition={shouldAnimate ? { duration: 0.4, delay: index * 0.1 } : undefined}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.4, delay: index * 0.1 }}
                 className="group"
               >
                 {/* SVG Area — Bada, Borderless */}

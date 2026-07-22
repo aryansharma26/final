@@ -447,7 +447,13 @@ const Navbar = () => {
         </div>
       )}
       <div className="container-custom bg-white">
-        <div className="flex h-[54px] items-center justify-between gap-2 pb-0.5 sm:h-16 sm:pb-0 lg:h-[72px]">
+        <motion.div
+          key={location.pathname}
+          initial={{ opacity: 0.88, y: -3 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.22, ease: "easeOut" }}
+          className="flex h-[54px] items-center justify-between gap-2 pb-0.5 sm:h-16 sm:pb-0 lg:h-[72px]"
+        >
           <Link to="/" className="pressable flex h-full shrink-0 items-center overflow-hidden">
             <div className="flex h-[76px] w-32 items-center justify-center overflow-hidden rounded-lg sm:h-28 sm:w-40 lg:h-40 lg:w-44">
               <img
@@ -657,7 +663,7 @@ const Navbar = () => {
               </AnimatePresence>
             </button>
           </div>
-        </div>
+        </motion.div>
       </div>
 
       <AnimatePresence>
@@ -711,7 +717,13 @@ const Navbar = () => {
       </AnimatePresence>
 
       {/* ─── Desktop category bar with simple vertical dropdowns ─── */}
-      <div className="hidden lg:block border-t border-gray-100">
+      <motion.div
+        key={`cat-${location.pathname}`}
+        initial={{ opacity: 0.88, y: -2 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.22, ease: "easeOut" }}
+        className="hidden lg:block border-t border-gray-100"
+      >
         <div className="container-custom">
           {catLoading ? (
             <div className="flex items-center gap-1 h-11">
@@ -782,7 +794,7 @@ const Navbar = () => {
             </div>
           )}
         </div>
-      </div>
+      </motion.div>
 
       {/* ─── Mobile menu ─── */}
       <AnimatePresence>

@@ -28,20 +28,22 @@
     -webkit-tap-highlight-color: transparent;
   }
 
-  :where(button, a[href], [role="button"], summary, label[for], .pressable):not(:disabled):not([aria-disabled="true"]):active {
-    transform: translateY(1px) scale(0.94);
-    transition: transform 220ms ease, box-shadow 220ms ease, background-color 220ms ease;
+  :where(button, a[href], [role="button"], summary, label[for], .pressable):not(:disabled):not([aria-disabled="true"]):active,
+  .pressed {
+    transform: translateY(2px) scale(0.93) !important;
+    transition: transform 160ms cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 160ms ease, background-color 160ms ease !important;
   }
 
   @media (hover: none) {
-    :where(button, a[href], [role="button"], summary, label[for], .pressable):not(:disabled):not([aria-disabled="true"]):active {
-      transform: translateY(1px) scale(0.92);
+    :where(button, a[href], [role="button"], summary, label[for], .pressable):not(:disabled):not([aria-disabled="true"]):active,
+    .pressed {
+      transform: translateY(2px) scale(0.90) !important;
     }
   }
 
   @media (prefers-reduced-motion: reduce) {
     :where(button, a[href], [role="button"], summary, label[for], .pressable):active {
-      transform: none;
+      transform: none !important;
     }
   }
 }
@@ -53,36 +55,46 @@
     touch-action: manipulation;
   }
 
-  .buy-now-pressable:not(:disabled):not([aria-disabled="true"]):active {
-    transform: translateY(3px) scale(0.84);
-    transition: transform 420ms ease, box-shadow 420ms ease, background-color 420ms ease;
+  .nav-pressable:not(:disabled):not([aria-disabled="true"]):active,
+  .nav-pressable.pressed {
+    transform: translateY(2px) scale(0.86) !important;
+    transition: transform 180ms cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 180ms ease !important;
   }
 
-  .route-pressable:not(:disabled):not([aria-disabled="true"]):active {
-    transform: translateY(3px) scale(0.86);
-    transition: transform 380ms ease, box-shadow 380ms ease, background-color 380ms ease;
+  .buy-now-pressable:not(:disabled):not([aria-disabled="true"]):active {
+    transform: translateY(3px) scale(0.84) !important;
+    transition: transform 200ms cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 200ms ease, background-color 200ms ease !important;
+  }
+
+  .route-pressable:not(:disabled):not([aria-disabled="true"]):active,
+  .route-pressable.pressed {
+    transform: translateY(3px) scale(0.86) !important;
+    transition: transform 200ms cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 200ms ease, background-color 200ms ease !important;
   }
 
   @media (hover: none) {
-    .route-pressable:not(:disabled):not([aria-disabled="true"]):active {
-      transform: translateY(3px) scale(0.82);
-      transition-duration: 460ms;
+    .route-pressable:not(:disabled):not([aria-disabled="true"]):active,
+    .route-pressable.pressed {
+      transform: translateY(3px) scale(0.82) !important;
     }
 
     .buy-now-pressable:not(:disabled):not([aria-disabled="true"]):active {
-      transform: translateY(3px) scale(0.8);
-      transition-duration: 480ms;
+      transform: translateY(3px) scale(0.80) !important;
+    }
+
+    .nav-pressable:not(:disabled):not([aria-disabled="true"]):active {
+      transform: translateY(2px) scale(0.84) !important;
     }
   }
 
   .no-press-animation:not(:disabled):not([aria-disabled="true"]):active {
-    transform: none;
+    transform: none !important;
     transition: background-color 120ms ease, color 120ms ease, border-color 120ms ease;
   }
 
   .hero-search-submit:not(:disabled):not([aria-disabled="true"]):active {
-    transform: translateY(-50%) scale(0.9);
-    transition: background-color 240ms ease, box-shadow 240ms ease, transform 240ms ease;
+    transform: translateY(-50%) scale(0.9) !important;
+    transition: background-color 240ms ease, box-shadow 240ms ease, transform 240ms ease !important;
   }
 
   @media (hover: none) {

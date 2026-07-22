@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Upload, ArrowRight, FileText, Shield, X, ClipboardCheck, Truck } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import useSessionOnce from '../hooks/useSessionOnce.js';
 
 const steps = [
   {
@@ -37,7 +36,6 @@ const steps = [
 
 const PrescriptionCTA = () => {
   const navigate = useNavigate();
-  const shouldAnimate = useSessionOnce("homeAnimationsSeen");
   const [showHowItWorksModal, setShowHowItWorksModal] = useState(false);
 
   useEffect(() => {
@@ -63,10 +61,10 @@ const PrescriptionCTA = () => {
     <section className="py-8 sm:py-12 lg:py-16 bg-gradient-to-br from-brand/5 to-white">
       <div className="container-custom">
         <motion.div
-          initial={shouldAnimate ? { opacity: 0, y: 20 } : false}
-          whileInView={shouldAnimate ? { opacity: 1, y: 0 } : undefined}
-          viewport={shouldAnimate ? { once: true } : undefined}
-          transition={shouldAnimate ? { duration: 0.5 } : undefined}
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5 }}
           className="bg-white rounded-3xl p-5 sm:p-8 lg:p-12 shadow-sm"
         >
           <div className="grid gap-5 lg:grid-cols-2 lg:gap-8 items-center">

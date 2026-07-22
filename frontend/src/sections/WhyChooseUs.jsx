@@ -1,6 +1,5 @@
 import { motion } from "framer-motion";
 import Lottie from "lottie-react";
-import useSessionOnce from "../hooks/useSessionOnce.js";
 
 import firstaidkit from "../assets/lottie/firstaidkit.json";
 import locked from "../assets/lottie/locked.json";
@@ -34,8 +33,6 @@ const features = [
 ];
 
 const WhyChooseUs = () => {
-  const shouldAnimate = useSessionOnce("homeAnimationsSeen");
-
   return (
     <section className="pt-10 pb-12 lg:pt-12 lg:pb-16 bg-gray-50">
       <div className="container-custom">
@@ -58,10 +55,10 @@ const WhyChooseUs = () => {
           {features.map((feature, index) => (
             <motion.div
               key={feature.title}
-              initial={shouldAnimate ? { opacity: 0, y: 20 } : false}
-              whileInView={shouldAnimate ? { opacity: 1, y: 0 } : undefined}
-              viewport={shouldAnimate ? { once: true } : undefined}
-              transition={shouldAnimate ? { duration: 0.4, delay: index * 0.1 } : undefined}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.4, delay: index * 0.1 }}
               className="flex h-full min-h-[280px] min-w-[78vw] snap-start flex-col rounded-2xl bg-white p-5 text-center transition-all duration-300 hover:shadow-lg sm:min-h-[350px] sm:min-w-0 sm:p-6"
             >
               {/* Lottie Animation */}
