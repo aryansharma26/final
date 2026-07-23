@@ -111,6 +111,9 @@ const Hero = () => {
     }
     setTimeout(() => {
       navigate(path);
+      if (currentTarget && currentTarget.classList) {
+        currentTarget.classList.remove("pressed");
+      }
     }, 150);
   };
 

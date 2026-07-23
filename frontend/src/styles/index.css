@@ -28,16 +28,17 @@
     -webkit-tap-highlight-color: transparent;
   }
 
-  :where(button, a[href], [role="button"], summary, label[for], .pressable):not(:disabled):not([aria-disabled="true"]):active,
+  :where(button, a[href], [role="button"], summary, label[for], .pressable):not(:disabled):not([aria-disabled="true"]):not([style*="transform"]):active,
   .pressed {
     transform: translateY(2px) scale(0.93) !important;
     transition: transform 160ms cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 160ms ease, background-color 160ms ease !important;
   }
 
   @media (hover: none) {
-    :where(button, a[href], [role="button"], summary, label[for], .pressable):not(:disabled):not([aria-disabled="true"]):active,
+    :where(button, a[href], [role="button"], summary, label[for], .pressable):not(:disabled):not([aria-disabled="true"]):not([style*="transform"]):active,
     .pressed {
-      transform: translateY(2px) scale(0.90) !important;
+      transform: translateY(1px) scale(0.97) !important;
+      transition: transform 120ms ease !important;
     }
   }
 
@@ -75,15 +76,18 @@
   @media (hover: none) {
     .route-pressable:not(:disabled):not([aria-disabled="true"]):active,
     .route-pressable.pressed {
-      transform: translateY(3px) scale(0.82) !important;
+      transform: translateY(1px) scale(0.97) !important;
+      transition: transform 120ms ease !important;
     }
 
     .buy-now-pressable:not(:disabled):not([aria-disabled="true"]):active {
-      transform: translateY(3px) scale(0.80) !important;
+      transform: translateY(1px) scale(0.96) !important;
+      transition: transform 120ms ease !important;
     }
 
     .nav-pressable:not(:disabled):not([aria-disabled="true"]):active {
-      transform: translateY(2px) scale(0.84) !important;
+      transform: translateY(1px) scale(0.96) !important;
+      transition: transform 120ms ease !important;
     }
   }
 

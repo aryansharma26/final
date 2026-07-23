@@ -10,14 +10,14 @@ export default function FloatingMessenger() {
       href={messengerUrl}
       target="_blank"
       rel="noopener noreferrer"
-      className="group fixed bottom-[9.75rem] right-5 z-50 flex items-center gap-0 transition-all duration-300 hover:gap-2 lg:bottom-[5.75rem] lg:right-6"
+      className="group fixed bottom-[9.75rem] right-5 z-50 flex items-center lg:bottom-[5.75rem] lg:right-6"
       aria-label="Chat on Messenger"
     >
-      <span className="hidden group-hover:inline-block whitespace-nowrap bg-[#0084FF] text-white text-sm font-medium px-3 py-2 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-2 group-hover:translate-x-0">
+      <span className="pointer-events-none absolute right-14 whitespace-nowrap bg-[#0084FF] text-white text-sm font-medium px-3 py-2 rounded-full shadow-lg opacity-0 transition-all duration-200 translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 lg:right-16">
         Chat on Messenger
       </span>
       <div
-        className="w-12 h-12 rounded-full bg-[#0084FF] flex items-center justify-center shadow-[0_4px_30px_rgba(0,132,255,0.65)] hover:shadow-[0_6px_40px_rgba(0,132,255,0.85)] hover:scale-110 transition-all duration-300 lg:h-14 lg:w-14"
+        className="w-12 h-12 rounded-full bg-[#0084FF] flex items-center justify-center shadow-[0_4px_30px_rgba(0,132,255,0.65)] hover:shadow-[0_6px_40px_rgba(0,132,255,0.85)] hover:scale-105 transition-transform duration-200 lg:h-14 lg:w-14"
       >
         {/* Official Messenger brand icon (from Simple Icons) */}
         <svg width="24" height="24" viewBox="0 0 24 24" fill="white" className="lg:h-7 lg:w-7">

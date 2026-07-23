@@ -175,14 +175,15 @@ const B2BEnquiry = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50/50 py-6 sm:py-10">
-      <div className="container-custom">
-        <button
-          onClick={() => navigate('/')}
-          className="mb-4 inline-flex items-center gap-1.5 rounded-full bg-white px-3.5 py-2 text-sm font-medium text-gray-500 transition-colors hover:text-brand sm:mb-6"
-        >
-          <ArrowLeft className="w-4 h-4" /> Back
-        </button>
+    <div className="container-custom py-6 lg:py-8">
+      <button
+        type="button"
+        onClick={() => navigate(-1)}
+        className="mb-5 inline-flex items-center gap-1.5 text-sm font-medium text-gray-500 transition-colors hover:text-brand"
+      >
+        <ArrowLeft className="h-4 w-4" />
+        Back
+      </button>
 
         <div className="max-w-6xl mx-auto space-y-8">
           {/* Header Title block without boilerplate */}
@@ -507,8 +508,7 @@ const B2BEnquiry = () => {
           </div>
         </div>
       </div>
-    </div>
-  );
+    );
 };
 
 export default B2BEnquiry;

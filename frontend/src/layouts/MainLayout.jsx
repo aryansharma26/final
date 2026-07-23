@@ -29,18 +29,7 @@ const MainLayout = () => {
     <div className="min-h-screen flex flex-col bg-white">
       <Navbar />
       <main className={`flex-1 ${showBanner ? 'pt-[94px] lg:pt-[156px]' : 'pt-[54px] lg:pt-[120px]'}`}>
-        {isHome ? (
-          <Outlet />
-        ) : (
-          <motion.div
-            key={outletKey}
-            initial={isPop ? false : { opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
-          >
-            <Outlet />
-          </motion.div>
-        )}
+        <Outlet />
       </main>
       <Footer />
       {/* <FloatingContactButtons /> */}
