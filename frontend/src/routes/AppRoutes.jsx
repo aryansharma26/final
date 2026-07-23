@@ -1,5 +1,6 @@
 import { lazy, Suspense } from 'react';
-import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation, useNavigationType } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import MainLayout from '../layouts/MainLayout';
 import ProtectedRoute from '../components/ProtectedRoute';
 import AdminProtectedRoute from '../components/AdminProtectedRoute';
@@ -58,8 +59,20 @@ const RedirectWithQuery = () => {
 };
 
 const AppRoutes = () => {
+  const location = useLocation();
+  const navigationType = useNavigationType();
+
+  const isPop = navigationType === 'POP';
+  const motionKey = `${location.pathname}${location.search}_${location.key || 'def'}_${navigationType}`;
+
   return (
-    <Routes>
+    <motion.div
+      key={motionKey}
+      initial={{ opacity: 0, y: isPop ? 0 : 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.18, ease: 'easeOut' }}
+    >
+      <Routes location={location}>
       <Route element={<MainLayout />}>
         <Route path="/" element={<Home />} />
         <Route path="/medicines" element={<Medicines />} />
@@ -134,6 +147,7 @@ const AppRoutes = () => {
       } />
       <Route path="*" element={<NotFound />} />
     </Routes>
+    </motion.div>
   );
 };
 
