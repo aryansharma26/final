@@ -68,9 +68,7 @@ const Hero = () => {
             : [];
 
         const matchedCategories = allCategories
-          .filter((cat) =>
-            cat.name.toLowerCase().includes(query.toLowerCase())
-          )
+          .filter((cat) => cat.name.toLowerCase().includes(query.toLowerCase()))
           .slice(0, 3);
 
         setSuggestions({
@@ -153,7 +151,7 @@ const Hero = () => {
             Your Health, Delivered to Your Doorstep
           </motion.h1>
 
-          <motion.div
+          {/* <motion.div
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2, ease: "easeOut" }}
@@ -184,7 +182,8 @@ const Hero = () => {
                       </span>
                     </div>
                     <p className="mt-0.5 text-[11px] leading-5 text-slate-500">
-                      Upload your prescription and get genuine medicines delivered to your doorstep.
+                      Upload your prescription and get genuine medicines
+                      delivered to your doorstep.
                     </p>
                   </div>
                 </div>
@@ -214,13 +213,15 @@ const Hero = () => {
                       </span>
                     </div>
                     <p className="mt-0.5 text-[11px] leading-5 text-slate-500">
-                      Bulk medicine orders for pharmacies, retail stores, clinics, and healthcare providers at competitive wholesale prices.
+                      Bulk medicine orders for pharmacies, retail stores,
+                      clinics, and healthcare providers at competitive wholesale
+                      prices.
                     </p>
                   </div>
                 </div>
               </Link>
             </div>
-          </motion.div>
+          </motion.div> */}
 
           <motion.div
             initial={{ opacity: 0, y: 15 }}
@@ -390,6 +391,78 @@ const Hero = () => {
                 </div>
               </div>
             )}
+          </motion.div>
+
+            <motion.div
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2, ease: "easeOut" }}
+            className="mx-auto mt-5 max-w-3xl"
+          >
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <Link
+                to="/prescriptions"
+                onClick={(e) => delayedNavigate(e, "/prescriptions")}
+                className="pressable route-pressable group relative overflow-hidden rounded-[18px] border border-slate-200/80 bg-white/95 px-3 py-2.5 text-left shadow-[0_10px_28px_rgba(15,23,42,0.06)] transition-all duration-300 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-[0_14px_36px_rgba(15,23,42,0.1)]"
+              >
+                <div className="relative flex items-start gap-2">
+                  <span className="mt-0.5 inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-700 shadow-sm ring-1 ring-slate-200">
+                    <Upload className="h-4 w-4" />
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center justify-between gap-2">
+                      <div>
+                        <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500">
+                          For Patients
+                        </p>
+                        <p className="mt-0.5 text-sm font-semibold text-gray-900">
+                          Upload Prescription
+                        </p>
+                      </div>
+                      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-slate-50 text-slate-600 ring-1 ring-slate-100 transition-all duration-300 group-hover:bg-slate-900 group-hover:text-white">
+                        <ChevronRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+                      </span>
+                    </div>
+                    <p className="mt-0.5 text-[11px] leading-5 text-slate-500">
+                      Upload your prescription and get genuine medicines
+                      delivered to your doorstep.
+                    </p>
+                  </div>
+                </div>
+              </Link>
+
+              <Link
+                to="/b2b-enquiry"
+                onClick={(e) => delayedNavigate(e, "/b2b-enquiry")}
+                className="pressable route-pressable group relative overflow-hidden rounded-[18px] border border-slate-200/80 bg-white/95 px-3 py-2.5 text-left shadow-[0_10px_28px_rgba(15,23,42,0.06)] transition-all duration-300 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-[0_14px_36px_rgba(15,23,42,0.1)]"
+              >
+                <div className="relative flex items-start gap-2">
+                  <span className="mt-0.5 inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-700 shadow-sm ring-1 ring-slate-200">
+                    <Pill className="h-4 w-4" />
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center justify-between gap-2">
+                      <div>
+                        <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500">
+                          FOR BUSINESSES
+                        </p>
+                        <p className="mt-0.5 text-sm font-semibold text-gray-900">
+                          Bulk Purchase
+                        </p>
+                      </div>
+                      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-slate-50 text-slate-600 ring-1 ring-slate-100 transition-all duration-300 group-hover:bg-slate-900 group-hover:text-white">
+                        <ChevronRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+                      </span>
+                    </div>
+                    <p className="mt-0.5 text-[11px] leading-5 text-slate-500">
+                      Bulk medicine orders for pharmacies, retail stores,
+                      clinics, and healthcare providers at competitive wholesale
+                      prices.
+                    </p>
+                  </div>
+                </div>
+              </Link>
+            </div>
           </motion.div>
 
           <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
