@@ -1,6 +1,7 @@
+import { memo } from 'react';
 import { MessageCircle } from 'lucide-react';
 
-export default function FloatingViber() {
+const FloatingViber = memo(function FloatingViber() {
   const viberNumber = '+639778559579';
   const viberLink = `viber://chat?number=${encodeURIComponent(viberNumber)}`;
 
@@ -32,4 +33,6 @@ export default function FloatingViber() {
       </div>
     </a>
   );
-}
+});
+
+export default FloatingViber;

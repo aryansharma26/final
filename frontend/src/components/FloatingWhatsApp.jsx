@@ -1,6 +1,6 @@
-import { MessageCircle } from 'lucide-react';
+import { memo } from 'react';
 
-export default function FloatingWhatsApp() {
+const FloatingWhatsApp = memo(function FloatingWhatsApp() {
   const whatsappNumber = '917015008916';
   const whatsappLink = `https://wa.me/${whatsappNumber}`;
 
@@ -33,4 +33,6 @@ export default function FloatingWhatsApp() {
       </div>
     </a>
   );
-}
+});
+
+export default FloatingWhatsApp;
