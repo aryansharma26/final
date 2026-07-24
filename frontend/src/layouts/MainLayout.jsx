@@ -3,9 +3,6 @@ import { motion } from 'framer-motion';
 import Navbar from './Navbar';
 import Footer from './Footer';
 // import FloatingContactButtons from '../components/FloatingContactButtons';
-import FloatingWhatsApp from '../components/FloatingWhatsApp';
-import FloatingMessenger from '../components/FloatingMessenger';
-import FloatingViber from '../components/FloatingViber';
 import CoreQuickActions from '../components/CoreQuickActions';
 import { useSettings } from '../contexts/SettingsContext.jsx';
 
@@ -33,9 +30,6 @@ const MainLayout = () => {
       </main>
       <Footer />
       {/* <FloatingContactButtons /> */}
-      <FloatingWhatsApp />
-      <FloatingMessenger />
-      <FloatingViber />
       <CoreQuickActions />
     </div>
   );

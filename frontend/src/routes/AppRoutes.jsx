@@ -26,6 +26,9 @@ import Register from '../pages/Register';
 import ForgotPassword from '../pages/ForgotPassword';
 import ResetPassword from '../pages/ResetPassword';
 import NotFound from '../pages/NotFound';
+import FloatingWhatsApp from '../components/FloatingWhatsApp';
+import FloatingMessenger from '../components/FloatingMessenger';
+import FloatingViber from '../components/FloatingViber';
 
 const AdminLogin = lazy(() => import('../pages/AdminLogin'));
 const AdminDashboard = lazy(() => import('../pages/AdminDashboard'));
@@ -64,8 +67,11 @@ const AppRoutes = () => {
 
   const isPop = navigationType === 'POP';
   const motionKey = `${location.pathname}${location.search}_${location.key || 'def'}_${navigationType}`;
+  const showFloatingContacts = !location.pathname.startsWith('/admin') &&
+    !['/login', '/register', '/forgot-password', '/reset-password'].some((p) => location.pathname.startsWith(p));
 
   return (
+    <>
     <motion.div
       key={motionKey}
       initial={{ opacity: 0, y: isPop ? 0 : 8 }}
@@ -148,6 +154,14 @@ const AppRoutes = () => {
       <Route path="*" element={<NotFound />} />
     </Routes>
     </motion.div>
+    {showFloatingContacts && (
+      <>
+        <FloatingWhatsApp />
+        <FloatingMessenger />
+        <FloatingViber />
+      </>
+    )}
+    </>
   );
 };
 

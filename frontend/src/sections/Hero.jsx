@@ -23,6 +23,16 @@ const FAQ_LINKS = [
   { label: "Delivery help", to: "/faq#delivery" },
 ];
 
+const getImageUrl = (product) => {
+  const image = product?.images?.[0];
+  return typeof image === "string" ? image : image?.url || "";
+};
+
+const formatPrice = (product) => {
+  const price = product?.discountPrice > 0 ? product.discountPrice : product?.price;
+  return typeof price === "number" ? `PHP ${price.toLocaleString()}` : "";
+};
+
 const Hero = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -43,47 +53,34 @@ const Hero = () => {
       return;
     }
 
+    const controller = new AbortController();
     const timer = setTimeout(async () => {
       setSuggestionsLoading(true);
       try {
-        const [prodRes, brandRes, catRes] = await Promise.allSettled([
-          productAPI.getAll({ search: query, limit: 4 }),
-          b2bAPI.getBrands({ search: query, limit: 3 }),
-          categoryAPI.getAll(),
-        ]);
-
-        const products =
-          prodRes.status === "fulfilled" && prodRes.value.data?.products
-            ? prodRes.value.data.products.slice(0, 4)
-            : [];
-
-        const brands =
-          brandRes.status === "fulfilled" && brandRes.value.data?.brands
-            ? brandRes.value.data.brands.slice(0, 3)
-            : [];
-
-        const allCategories =
-          catRes.status === "fulfilled" && catRes.value.data?.categories
-            ? catRes.value.data.categories
-            : [];
-
-        const matchedCategories = allCategories
-          .filter((cat) => cat.name.toLowerCase().includes(query.toLowerCase()))
-          .slice(0, 3);
-
+        const { data } = await productAPI.getSearchSuggestions(query, {
+          signal: controller.signal,
+        });
         setSuggestions({
-          products,
-          brands,
-          categories: matchedCategories,
+          products: data?.products || [],
+          brands: data?.brands || [],
+          categories: data?.categories || [],
         });
       } catch (err) {
-        console.error("Failed to fetch suggestions:", err);
+        if (err.name !== "CanceledError" && err.code !== "ERR_CANCELED") {
+          console.error("Failed to fetch suggestions:", err);
+          setSuggestions({ products: [], brands: [], categories: [] });
+        }
       } finally {
-        setSuggestionsLoading(false);
+        if (!controller.signal.aborted) {
+          setSuggestionsLoading(false);
+        }
       }
     }, 250);
 
-    return () => clearTimeout(timer);
+    return () => {
+      controller.abort();
+      clearTimeout(timer);
+    };
   }, [searchQuery]);
 
   const searchContainerRef = useRef(null);
@@ -116,16 +113,33 @@ const Hero = () => {
   };
 
   const submitSearch = (overrideQuery) => {
-    const term = (overrideQuery ?? searchQuery).trim();
+    const term = (typeof overrideQuery === "string" ? overrideQuery : searchQuery).trim();
     if (!term) return;
     setSuggestionsOpen(false);
     navigate(`/medicines?search=${encodeURIComponent(term)}`);
   };
 
+  const openProduct = (product) => {
+    setSuggestionsOpen(false);
+    navigate(`/product/${product.slug || product._id}`);
+  };
+
+  const searchBrand = (brand) => {
+    setSuggestionsOpen(false);
+    navigate(`/medicines?brand=${encodeURIComponent(brand)}`);
+  };
+
+  const openCategory = (category) => {
+    setSuggestionsOpen(false);
+    navigate(`/medicines?category=${encodeURIComponent(category.slug || category._id)}`);
+  };
+
   const totalSuggestions =
-    suggestions.products.length +
-    suggestions.brands.length +
-    suggestions.categories.length;
+    (suggestions.products?.length || 0) +
+    (suggestions.brands?.length || 0) +
+    (suggestions.categories?.length || 0);
+
+  const hasSuggestions = totalSuggestions > 0;
 
   return (
     <section className="relative z-20 overflow-visible bg-[#f7f8f3] pt-4 pb-10 sm:pt-8 lg:pt-3 lg:pb-12">
