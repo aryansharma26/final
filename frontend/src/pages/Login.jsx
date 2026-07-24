@@ -10,7 +10,7 @@ import {
   Eye,
   EyeOff,
   Lock,
-  Mail,
+  Phone,
   ShieldCheck,
   Truck,
   X,
@@ -21,7 +21,7 @@ import logo from "../assets/logo.png";
 import preventiveHealthcare from "../assets/lottie/preventivehealthcare.json";
 
 export default function Login() {
-  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -85,11 +85,11 @@ export default function Login() {
     setError("");
     setLoading(true);
     try {
-      const result = await login({ email, password });
+      const result = await login({ phone, password });
       if (result.success) {
         navigate(redirect, { replace: true, state: location.state?.from?.state });
       } else {
-        setError(result.error || "Invalid email or password");
+        setError(result.error || "Invalid phone number or password");
       }
     } catch (err) {
       setError(
@@ -186,17 +186,17 @@ export default function Login() {
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
                   <label className="mb-2 block text-sm font-semibold text-slate-700">
-                    Email
+                    Phone number
                   </label>
                   <div className="relative">
-                    <Mail className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                    <Phone className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                     <input
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
+                      type="tel"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
                       required
                       className="h-12 w-full rounded-2xl border border-slate-200 bg-slate-50 pl-11 pr-4 text-sm font-medium text-slate-900 outline-none transition-all placeholder:text-slate-400 focus:border-pills-pink focus:bg-white focus:ring-4 focus:ring-pills-pink/10"
-                      placeholder="Enter your email address"
+                      placeholder="Enter your phone number"
                     />
                   </div>
                 </div>

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
-import { ArrowLeft, User, Phone, MapPin, Trash2, Edit2, LogOut, Package, FileText, Mail, ShieldCheck, CalendarDays } from 'lucide-react';
+import { ArrowLeft, User, Phone, MapPin, Trash2, Edit2, LogOut, Package, FileText, ShieldCheck, CalendarDays } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import { userAPI } from '../api/index.js';
 
@@ -89,6 +89,9 @@ const Profile = () => {
     { id: 'addresses', label: 'Addresses', icon: MapPin },
   ];
 
+  const formatAddressLocation = (addr) =>
+    [addr.barangay, addr.cityMunicipality, addr.province, addr.zipCode].filter(Boolean).join(', ');
+
   if (!user) return null;
 
   if (loading) {
@@ -134,7 +137,7 @@ const Profile = () => {
               </div>
               <div className="min-w-0">
                 <p className="truncate font-semibold text-gray-950">{user.name}</p>
-                <p className="truncate text-sm text-gray-500">{user.email}</p>
+                <p className="truncate text-sm text-gray-500">{user.phone || 'Phone number'}</p>
               </div>
             </div>
             <nav className="grid grid-cols-2 gap-2 lg:block lg:space-y-1">
@@ -206,13 +209,6 @@ const Profile = () => {
                 </div>
                 <div className="rounded-2xl border border-gray-100 bg-gray-50 p-4">
                   <div className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-gray-400">
-                    <Mail className="h-4 w-4" />
-                    Email Address
-                  </div>
-                  <p className="truncate text-base font-semibold text-gray-950">{user.email}</p>
-                </div>
-                <div className="rounded-2xl border border-gray-100 bg-gray-50 p-4">
-                  <div className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-gray-400">
                     <Phone className="h-4 w-4" />
                     Phone
                   </div>
@@ -243,31 +239,53 @@ const Profile = () => {
             <div className="space-y-6">
               <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm sm:p-6">
                 <h2 className="mb-6 text-xl font-bold text-gray-950">{editingAddressId ? 'Edit Address' : 'Add New Address'}</h2>
-                <form onSubmit={handleSubmitAddress(onAddAddress)} className="grid gap-4 sm:grid-cols-2">
-                  <input {...registerAddress('name', { required: true })} placeholder="Full Name" className="rounded-xl border border-gray-200 px-4 py-2.5 focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20" />
-                  <input {...registerAddress('phone', { required: true })} placeholder="Phone" className="rounded-xl border border-gray-200 px-4 py-2.5 focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20" />
-                  <input {...registerAddress('addressLine1', { required: true })} placeholder="Address Line 1" className="rounded-xl border border-gray-200 px-4 py-2.5 focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20 sm:col-span-2" />
-                  <input {...registerAddress('addressLine2')} placeholder="Address Line 2 (Optional)" className="rounded-xl border border-gray-200 px-4 py-2.5 focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20 sm:col-span-2" />
-                  <input {...registerAddress('barangay')} placeholder="Barangay (Optional)" className="rounded-xl border border-gray-200 px-4 py-2.5 focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20" />
-                  <input {...registerAddress('cityMunicipality', { required: true })} placeholder="City / Municipality" className="rounded-xl border border-gray-200 px-4 py-2.5 focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20" />
-                  <input {...registerAddress('province', { required: true })} placeholder="Province" className="rounded-xl border border-gray-200 px-4 py-2.5 focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20" />
-                  <div className="flex flex-col">
-                    <input {...registerAddress('zipCode', { required: 'Zip Code is required', pattern: { value: /^\d{4}$/, message: 'Zip Code must be exactly 4 digits' } })} placeholder="Zip Code" className="w-full rounded-xl border border-gray-200 px-4 py-2.5 focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20" />
+                <form onSubmit={handleSubmitAddress(onAddAddress)} className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  <div>
+                    <label className="mb-1 block text-xs font-medium text-gray-500">Full Name *</label>
+                    <input {...registerAddress('name', { required: true })} placeholder="Enter your name" className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20" />
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-xs font-medium text-gray-500">Phone *</label>
+                    <input {...registerAddress('phone', { required: true })} type="tel" placeholder="Phone number" className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20" />
+                  </div>
+                  <div className="sm:col-span-2">
+                    <label className="mb-1 block text-xs font-medium text-gray-500">Address *</label>
+                    <input {...registerAddress('addressLine1', { required: true })} placeholder="Street address, house number" className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20" />
+                  </div>
+                  <div className="sm:col-span-2">
+                    <label className="mb-1 block text-xs font-medium text-gray-500">Address Line 2 (Optional)</label>
+                    <input {...registerAddress('addressLine2')} placeholder="Apartment, floor, landmark" className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20" />
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-xs font-medium text-gray-500">Barangay (Optional)</label>
+                    <input {...registerAddress('barangay')} placeholder="Barangay" className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20" />
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-xs font-medium text-gray-500">City / Municipality (Optional)</label>
+                    <input {...registerAddress('cityMunicipality')} placeholder="City" className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20" />
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-xs font-medium text-gray-500">Province (Optional)</label>
+                    <input {...registerAddress('province')} placeholder="Province" className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20" />
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-xs font-medium text-gray-500">Zip Code (Optional)</label>
+                    <input {...registerAddress('zipCode', { pattern: { value: /^$|^\d{4}$/, message: 'Zip Code must be exactly 4 digits' } })} placeholder="Zip code" className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20" />
                     {addressErrors.zipCode && <span className="text-xs text-red-500 mt-1">{addressErrors.zipCode.message}</span>}
                   </div>
                   <label className="flex items-center gap-2 sm:col-span-2">
-                    <input {...registerAddress('isDefault')} type="checkbox" className="rounded" />
+                    <input {...registerAddress('isDefault')} type="checkbox" className="h-4 w-4 rounded border-gray-300 text-brand focus:ring-brand" />
                     <span className="text-sm text-gray-600">Set as default address</span>
                   </label>
-                  <div className="flex flex-col gap-3 sm:col-span-2 sm:flex-row">
-                    <button type="submit" className="pressable rounded-xl bg-brand px-6 py-3 font-semibold text-white transition-colors hover:bg-brand-dark">
-                      {editingAddressId ? 'Update Address' : 'Add Address'}
-                    </button>
+                  <div className="flex flex-col-reverse gap-2 sm:col-span-2 sm:flex-row sm:justify-end">
                     {editingAddressId && (
-                      <button type="button" onClick={() => { setEditingAddressId(null); resetAddress(); }} className="pressable rounded-xl border border-gray-200 px-6 py-3 text-gray-700 transition-colors hover:bg-gray-50">
+                      <button type="button" onClick={() => { setEditingAddressId(null); resetAddress(); }} className="pressable rounded-lg px-4 py-2 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-100">
                         Cancel
                       </button>
                     )}
+                    <button type="submit" className="pressable rounded-lg bg-brand px-5 py-2 text-sm font-medium text-white transition-colors hover:bg-brand-dark">
+                      {editingAddressId ? 'Update Address' : 'Add Address'}
+                    </button>
                   </div>
                 </form>
               </div>
@@ -295,7 +313,7 @@ const Profile = () => {
                           </div>
                         </div>
                         <p className="mt-2 text-sm text-gray-600">{addr.addressLine1}{addr.addressLine2 ? `, ${addr.addressLine2}` : ''}{addr.barangay ? `, ${addr.barangay}` : ''}</p>
-                        <p className="text-sm text-gray-600">{addr.cityMunicipality}, {addr.province} - {addr.zipCode}</p>
+                        {formatAddressLocation(addr) && <p className="text-sm text-gray-600">{formatAddressLocation(addr)}</p>}
                         {addr.isDefault && (
                           <span className="mt-2 inline-block rounded bg-brand/10 px-2 py-0.5 text-xs font-semibold text-brand">Default</span>
                         )}

@@ -321,10 +321,10 @@ const ShopByCategory = () => {
                   isPressed ? "shadow-lg" : ""
                 }`}
               >
-                <div className="absolute inset-x-0 top-0 h-1 bg-pills-pink/60 opacity-0 transition-opacity sm:group-hover:opacity-100" />
+                <div className={`absolute inset-x-0 top-0 h-1 bg-pills-pink/60 transition-opacity sm:opacity-0 sm:group-hover:opacity-100 ${isPressed ? "opacity-100" : "opacity-0"}`} />
                 <div className="mb-3 flex items-start justify-between gap-3 sm:mb-4">
                   <CategoryIllustration categoryName={category.name} active={isPressed} />
-                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gray-50 text-gray-400 transition-colors sm:group-hover:bg-brand sm:group-hover:text-white">
+                  <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition-colors sm:bg-gray-50 sm:text-gray-400 sm:group-hover:bg-brand sm:group-hover:text-white ${isPressed ? "bg-brand text-white" : "bg-gray-50 text-gray-400"}`}>
                     <ArrowRight className="h-4 w-4" />
                   </span>
                 </div>

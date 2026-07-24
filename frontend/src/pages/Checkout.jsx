@@ -21,13 +21,18 @@ const isCompleteAddress = (address) =>
   Boolean(
     address?.name?.trim() &&
     address?.phone?.trim() &&
-    address?.addressLine1?.trim() &&
-    address?.barangay?.trim() &&
-    address?.cityMunicipality?.trim() &&
-    address?.province?.trim() &&
-    address?.zipCode?.trim() &&
-    /^\d{4}$/.test(address?.zipCode?.trim())
+    address?.addressLine1?.trim()
   );
+
+const formatAddressLocation = (address) =>
+  [
+    address?.barangay,
+    address?.cityMunicipality,
+    address?.province,
+    address?.zipCode,
+  ]
+    .filter(Boolean)
+    .join(', ');
 
 const Checkout = () => {
   const { cart, subtotal, clearCart } = useCart();
@@ -179,11 +184,11 @@ const Checkout = () => {
     setFormError('');
     
     // Validate
-    if (!addressForm.name?.trim() || !addressForm.phone?.trim() || !addressForm.addressLine1?.trim() || !addressForm.barangay?.trim() || !addressForm.cityMunicipality?.trim() || !addressForm.province?.trim() || !addressForm.zipCode?.trim()) {
+    if (!addressForm.name?.trim() || !addressForm.phone?.trim() || !addressForm.addressLine1?.trim()) {
       setFormError('Please fill in all required fields');
       return;
     }
-    if (!/^\d{4}$/.test(addressForm.zipCode.trim())) {
+    if (addressForm.zipCode.trim() && !/^\d{4}$/.test(addressForm.zipCode.trim())) {
       setFormError('Philippines zip code must be exactly 4 digits (e.g. 1000)');
       return;
     }
@@ -330,7 +335,7 @@ const Checkout = () => {
         return;
       }
       if (!isCompleteAddress(address)) {
-        setError('Please edit your selected address and ensure Zip Code is exactly 4 digits (e.g. 1000) before placing the order.');
+        setError('Please edit your selected address and fill in name, phone, and street address before placing the order.');
         setLoading(false);
         return;
       }
@@ -561,7 +566,7 @@ const Checkout = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-gray-500 mb-1">Barangay *</label>
+                    <label className="block text-xs font-medium text-gray-500 mb-1">Barangay (Optional)</label>
                     <input
                       type="text" name="barangay" value={addressForm.barangay} onChange={handleFormChange}
                       className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
@@ -569,7 +574,7 @@ const Checkout = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-gray-500 mb-1">City / Municipality *</label>
+                    <label className="block text-xs font-medium text-gray-500 mb-1">City / Municipality (Optional)</label>
                     <input
                       type="text" name="cityMunicipality" value={addressForm.cityMunicipality} onChange={handleFormChange}
                       className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
@@ -577,7 +582,7 @@ const Checkout = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-gray-500 mb-1">Province *</label>
+                    <label className="block text-xs font-medium text-gray-500 mb-1">Province (Optional)</label>
                     <input
                       type="text" name="province" value={addressForm.province} onChange={handleFormChange}
                       className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
@@ -585,7 +590,7 @@ const Checkout = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-gray-500 mb-1">Zip Code *</label>
+                    <label className="block text-xs font-medium text-gray-500 mb-1">Zip Code (Optional)</label>
                     <input
                       type="text" name="zipCode" value={addressForm.zipCode} onChange={handleFormChange}
                       className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
@@ -650,9 +655,12 @@ const Checkout = () => {
                           <p className="text-sm text-gray-500">{addr.phone}</p>
                           <p className="text-sm text-gray-600 mt-1 leading-relaxed">
                             {addr.addressLine1}
-                            {addr.barangay && `, ${addr.barangay}`}
-                            <br />
-                            {addr.cityMunicipality}, {addr.province} - {addr.zipCode}
+                            {formatAddressLocation(addr) && (
+                              <>
+                                <br />
+                                {formatAddressLocation(addr)}
+                              </>
+                            )}
                           </p>
                           {addr.isDefault && (
                             <span className="inline-block mt-2 text-xs font-medium text-brand bg-brand/10 px-2 py-0.5 rounded">Default</span>

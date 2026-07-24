@@ -19,7 +19,9 @@ export const errorHandler = (err, req, res, next) => {
     if (duplicateField === 'sku') {
       message = 'SKU already exists. Please use a unique SKU.';
     } else if (duplicateField === 'email') {
-      message = 'Email already exists. Please use a different email.';
+      message = 'Phone number already exists. Please use a different phone number.';
+    } else if (duplicateField === 'phone') {
+      message = 'Phone number already exists. Please use a different phone number.';
     } else if (duplicateField === 'slug') {
       message = 'Slug already exists. Please use a unique name or slug.';
     } else {

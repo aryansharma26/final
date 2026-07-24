@@ -13,10 +13,22 @@ const cookieOptions = {
   sameSite: 'strict',
 };
 
+const normalizePhone = (phone = '') => String(phone).replace(/[^\d+]/g, '').trim();
+
+const getPhoneEmail = (phone) => {
+  const digits = String(phone).replace(/\D/g, '');
+  return `${digits}@phone.capsandpills.local`;
+};
+
 export const register = async (req, res, next) => {
   try {
-    const { name, email, password, phone } = req.body;
-    const userExists = await User.findOne({ email });
+    const { name, password } = req.body;
+    const phone = normalizePhone(req.body.phone);
+    if (!phone) {
+      return res.status(400).json({ success: false, message: 'Phone number is required' });
+    }
+    const email = req.body.email || getPhoneEmail(phone);
+    const userExists = await User.findOne({ $or: [{ phone }, { email }] });
     if (userExists) {
       return res.status(400).json({ success: false, message: 'User already exists' });
     }
@@ -27,21 +39,23 @@ export const register = async (req, res, next) => {
     const refreshToken = generateRefreshToken({ id: user._id, tokenVersion: user.tokenVersion });
     user.refreshToken = refreshToken;
     await user.save();
-    try {
-      await sendEmail({
-        to: user.email,
-        subject: 'Welcome to Capsandpills!',
-        html: getWelcomeEmailTemplate(user.name),
-      });
-    } catch (emailError) {
-      console.error('[Register] Welcome email failed:', emailError.message);
+    if (req.body.email) {
+      try {
+        await sendEmail({
+          to: user.email,
+          subject: 'Welcome to Capsandpills!',
+          html: getWelcomeEmailTemplate(user.name),
+        });
+      } catch (emailError) {
+        console.error('[Register] Welcome email failed:', emailError.message);
+      }
     }
     res.cookie('accessToken', accessToken, { ...cookieOptions, maxAge: ACCESS_TOKEN_MAX_AGE });
     res.cookie('refreshToken', refreshToken, { ...cookieOptions, maxAge: REFRESH_TOKEN_MAX_AGE });
     res.status(201).json({
       success: true,
       message: 'User registered successfully.',
-      user: { id: user._id, name: user.name, email: user.email, role: user.role, isVerified: user.isVerified },
+      user: { id: user._id, name: user.name, phone: user.phone, role: user.role, isVerified: user.isVerified },
     });
   } catch (error) {
     next(error);
@@ -50,14 +64,15 @@ export const register = async (req, res, next) => {
 
 export const login = async (req, res, next) => {
   try {
-    const { email, password } = req.body;
-    const user = await User.findOne({ email }).select('+password');
+    const { password } = req.body;
+    const phone = normalizePhone(req.body.phone);
+    const user = await User.findOne(phone ? { phone } : { email: req.body.email }).select('+password');
     if (!user) {
-      return res.status(401).json({ success: false, message: 'Invalid email or password' });
+      return res.status(401).json({ success: false, message: 'Invalid phone number or password' });
     }
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return res.status(401).json({ success: false, message: 'Invalid email or password' });
+      return res.status(401).json({ success: false, message: 'Invalid phone number or password' });
     }
     // Check if account is disabled
     if (!user.isActive) {
@@ -73,7 +88,7 @@ export const login = async (req, res, next) => {
     res.json({
       success: true,
       message: 'Login successful',
-      user: { id: user._id, name: user.name, email: user.email, role: user.role, avatar: user.avatar },
+      user: { id: user._id, name: user.name, phone: user.phone, role: user.role, avatar: user.avatar },
     });
   } catch (error) {
     next(error);
@@ -118,31 +133,33 @@ export const refresh = async (req, res, next) => {
 
 export const forgotPassword = async (req, res, next) => {
   try {
-    const { email } = req.body;
-    const user = await User.findOne({ email });
-    // Always return the same message to prevent email enumeration
+    const phone = normalizePhone(req.body.phone);
+    const user = await User.findOne({ phone });
+    // Always return the same message to prevent account enumeration
     if (!user) {
-      return res.json({ success: true, message: 'If an account exists with this email, a password reset link has been sent.' });
+      return res.json({ success: true, message: 'If an account exists with this phone number, password reset instructions will be sent.' });
     }
     const resetToken = crypto.randomBytes(32).toString('hex');
     user.passwordResetToken = crypto.createHash('sha256').update(resetToken).digest('hex');
     user.passwordResetExpires = Date.now() + 30 * 60 * 1000;
     await user.save();
     const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/reset-password?token=${resetToken}`;
-    try {
-      await sendEmail({
-        to: user.email,
-        subject: 'Password Reset Request',
-        html: getPasswordResetTemplate(resetUrl),
-      });
-    } catch (emailError) {
-      console.error('[ForgotPassword] Email failed to send to:', user.email);
-      // Clear token so unused tokens don't accumulate in DB
-      user.passwordResetToken = undefined;
-      user.passwordResetExpires = undefined;
-      await user.save();
+    if (!String(user.email || '').endsWith('@phone.capsandpills.local')) {
+      try {
+        await sendEmail({
+          to: user.email,
+          subject: 'Password Reset Request',
+          html: getPasswordResetTemplate(resetUrl),
+        });
+      } catch (emailError) {
+        console.error('[ForgotPassword] Email failed to send to:', user.email);
+        // Clear token so unused tokens don't accumulate in DB
+        user.passwordResetToken = undefined;
+        user.passwordResetExpires = undefined;
+        await user.save();
+      }
     }
-    res.json({ success: true, message: 'If an account exists with this email, a password reset link has been sent.' });
+    res.json({ success: true, message: 'If an account exists with this phone number, password reset instructions will be sent.' });
   } catch (error) {
     next(error);
   }

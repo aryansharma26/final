@@ -12,10 +12,10 @@ router.post('/', protect, [
   body('shippingAddress.name').trim().notEmpty().withMessage('Address name is required'),
   body('shippingAddress.phone').trim().notEmpty().withMessage('Address phone is required'),
   body('shippingAddress.addressLine1').trim().notEmpty().withMessage('Address line 1 is required'),
-  body('shippingAddress.province').trim().notEmpty().withMessage('Province is required'),
-  body('shippingAddress.cityMunicipality').trim().notEmpty().withMessage('City/Municipality is required'),
-  body('shippingAddress.barangay').trim().notEmpty().withMessage('Barangay is required'),
-  body('shippingAddress.zipCode').trim().notEmpty().withMessage('Zip code is required').matches(/^\d{4}$/).withMessage('Zip code must be exactly 4 digits'),
+  body('shippingAddress.province').optional({ checkFalsy: true }).trim(),
+  body('shippingAddress.cityMunicipality').optional({ checkFalsy: true }).trim(),
+  body('shippingAddress.barangay').optional({ checkFalsy: true }).trim(),
+  body('shippingAddress.zipCode').optional({ checkFalsy: true }).trim().matches(/^\d{4}$/).withMessage('Zip code must be exactly 4 digits'),
   body('paymentMethod').isIn(['cod']).withMessage('Payment method must be cod'),
 ], validate, createOrder);
 router.get('/my-orders', protect, getMyOrders);

@@ -423,8 +423,10 @@ export const createOrder = async (req, res, next) => {
 
     await session.commitTransaction();
 
-    // Send email after transaction (non-critical)
-    await sendOrderConfirmationEmail(result.order, req.user.email);
+    // Send email after transaction (non-critical) only when a real email exists.
+    if (req.user.email && !String(req.user.email).endsWith('@phone.capsandpills.local')) {
+      await sendOrderConfirmationEmail(result.order, req.user.email);
+    }
 
     res.status(201).json({ success: true, message: 'Order placed successfully', order: result.order });
   } catch (error) {

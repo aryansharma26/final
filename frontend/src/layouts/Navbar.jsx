@@ -853,7 +853,7 @@ const Navbar = () => {
                 {isAuthenticated && (
                   <motion.div {...mobileItemMotion} transition={{ duration: 0.18, delay: 0.03 }} className="mb-2 rounded-2xl border border-gray-100 bg-white px-4 py-3 shadow-sm">
                     <p className="font-semibold text-gray-900">{user?.name}</p>
-                    <p className="text-sm text-gray-500">{user?.email}</p>
+                    <p className="text-sm text-gray-500">{user?.phone || 'Phone number'}</p>
                   </motion.div>
                 )}
 
@@ -1001,13 +1001,13 @@ const Navbar = () => {
         @media (hover: none) {
           .nav-pressable:active {
             background-color: rgb(249 250 251);
-            box-shadow: 0 10px 26px rgba(15, 23, 42, 0.15);
-            transform: translateY(2px) scale(0.84);
-            transition-duration: 340ms;
+            box-shadow: 0 8px 22px rgba(15, 23, 42, 0.1);
+            transform: translateY(1px) scale(0.88);
+            transition-duration: 280ms;
           }
           .nav-pressable:active::after {
             opacity: 1;
-            transform: scale(1.24);
+            transform: scale(1.18);
           }
         }
       `}</style>

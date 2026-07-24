@@ -10,7 +10,6 @@ import {
   Eye,
   EyeOff,
   Lock,
-  Mail,
   Phone,
   ShieldCheck,
   Truck,
@@ -25,7 +24,6 @@ import preventiveHealthcare from "../assets/lottie/preventivehealthcare.json";
 export default function Register() {
   const [formData, setFormData] = useState({
     fullName: "",
-    email: "",
     phone: "",
     password: "",
     confirmPassword: "",
@@ -100,8 +98,8 @@ export default function Register() {
       setError("Passwords do not match");
       return;
     }
-    if (formData.password.length < 6) {
-      setError("Password must be at least 6 characters");
+    if (formData.password.length < 8) {
+      setError("Password must be at least 8 characters");
       return;
     }
 
@@ -109,7 +107,6 @@ export default function Register() {
     try {
       const result = await register({
         name: formData.fullName,
-        email: formData.email,
         phone: formData.phone,
         password: formData.password,
       });
@@ -246,24 +243,6 @@ export default function Register() {
                         placeholder="Phone number"
                       />
                     </div>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="mb-2 block text-sm font-semibold text-slate-700">
-                    Email
-                  </label>
-                  <div className="relative">
-                    <Mail className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-                    <input
-                      type="email"
-                      name="email"
-                      value={formData.email}
-                      onChange={handleChange}
-                      required
-                      className="h-12 w-full rounded-2xl border border-slate-200 bg-slate-50 pl-11 pr-4 text-sm font-medium text-slate-900 outline-none transition-all placeholder:text-slate-400 focus:border-pills-pink focus:bg-white focus:ring-4 focus:ring-pills-pink/10"
-                      placeholder="Enter your email address"
-                    />
                   </div>
                 </div>
 

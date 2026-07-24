@@ -6,7 +6,7 @@ import {
   ArrowRight,
   CheckCircle,
   Clock3,
-  Mail,
+  Phone,
   RefreshCw,
   ShieldCheck,
 } from "lucide-react";
@@ -23,7 +23,7 @@ const ForgotPassword = () => {
   const [sent, setSent] = useState(false);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
-  const [submittedEmail, setSubmittedEmail] = useState("");
+  const [submittedPhone, setSubmittedPhone] = useState("");
   const [resending, setResending] = useState(false);
   const [resendCooldown, setResendCooldown] = useState(0);
   const {
@@ -46,31 +46,31 @@ const ForgotPassword = () => {
       setError("");
       setMessage("");
       await authAPI.forgotPassword(data);
-      setSubmittedEmail(data.email);
+      setSubmittedPhone(data.phone);
       setSent(true);
       setResendCooldown(30);
     } catch (err) {
-      setError(err.response?.data?.message || "Failed to send reset email");
+      setError(err.response?.data?.message || "Failed to send reset instructions");
     }
   };
 
   const handleResend = async () => {
-    if (!submittedEmail || resendCooldown > 0) return;
+    if (!submittedPhone || resendCooldown > 0) return;
     try {
       setError("");
       setMessage("");
       setResending(true);
-      await authAPI.forgotPassword({ email: submittedEmail });
-      setMessage("A new reset link has been sent. Please check your inbox.");
+      await authAPI.forgotPassword({ phone: submittedPhone });
+      setMessage("New reset instructions have been requested.");
       setResendCooldown(30);
     } catch (err) {
-      setError(err.response?.data?.message || "Failed to resend reset email");
+      setError(err.response?.data?.message || "Failed to resend reset instructions");
     } finally {
       setResending(false);
     }
   };
 
-  const changeEmail = () => {
+  const changePhone = () => {
     setSent(false);
     setMessage("");
     setError("");
@@ -96,8 +96,8 @@ const ForgotPassword = () => {
                 Secure password recovery
               </h1>
               <p className="mt-4 text-sm leading-6 text-slate-500">
-                We will send a private reset link to your registered email. The
-                link is time-limited for your account safety.
+                Enter your registered phone number to start secure account
+                recovery.
               </p>
             </div>
             <div className="grid grid-cols-2 gap-4">
@@ -111,12 +111,12 @@ const ForgotPassword = () => {
                 </p>
               </div>
               <div className="rounded-2xl border border-slate-100 bg-white p-4 shadow-[0_16px_40px_rgba(15,23,42,0.06)]">
-                <Mail className="h-5 w-5 text-pills-pink" />
+                <Phone className="h-5 w-5 text-pills-pink" />
                 <p className="mt-3 text-sm font-bold text-slate-900">
-                  Email delivery
+                  Phone number
                 </p>
                 <p className="mt-1 text-xs leading-5 text-slate-500">
-                  Use the email on your account.
+                  Use the number on your account.
                 </p>
               </div>
             </div>
@@ -145,12 +145,12 @@ const ForgotPassword = () => {
                   Account recovery
                 </p>
                 <h1 className="mt-2 text-3xl font-bold tracking-tight text-slate-950">
-                  {sent ? "Check your email" : "Forgot password?"}
+                  {sent ? "Request received" : "Forgot password?"}
                 </h1>
                 <p className="mt-2 text-sm leading-6 text-slate-500">
                   {sent
-                    ? "If this email exists in our system, a reset link has been sent."
-                    : "Enter your account email and we'll send you a reset link."}
+                    ? "If this phone number exists in our system, password reset instructions will be sent."
+                    : "Enter your account phone number to request password reset instructions."}
                 </p>
               </div>
 
@@ -172,11 +172,11 @@ const ForgotPassword = () => {
                       <CheckCircle className="h-8 w-8" />
                     </div>
                     <p className="text-sm leading-6 text-slate-600">
-                      We sent reset instructions to{" "}
+                      Password reset instructions were requested for{" "}
                       <span className="font-bold text-slate-900">
-                        {submittedEmail}
+                        {submittedPhone}
                       </span>
-                      . Check your inbox and spam folder.
+                      .
                     </p>
                     <div className="mt-6 space-y-3">
                       <button
@@ -196,10 +196,10 @@ const ForgotPassword = () => {
                       </button>
                       <button
                         type="button"
-                        onClick={changeEmail}
+                        onClick={changePhone}
                         className="pressable text-sm font-semibold text-pills-pink hover:text-pills-pink-dark"
                       >
-                        Use a different email
+                        Use a different phone number
                       </button>
                       <Link
                         to={loginTarget}
@@ -219,27 +219,23 @@ const ForgotPassword = () => {
                   >
                     <div>
                       <label className="mb-2 block text-sm font-semibold text-slate-700">
-                        Email
+                        Phone number
                       </label>
                       <div className="relative">
-                        <Mail className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                        <Phone className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                         <input
-                          {...register("email", {
-                            required: "Email is required",
-                            pattern: {
-                              value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                              message: "Enter a valid email address",
-                            },
+                          {...register("phone", {
+                            required: "Phone number is required",
                           })}
-                          type="email"
-                          autoComplete="email"
+                          type="tel"
+                          autoComplete="tel"
                           className="h-12 w-full rounded-2xl border border-slate-200 bg-slate-50 pl-11 pr-4 text-sm font-medium text-slate-900 outline-none transition-all placeholder:text-slate-400 focus:border-pills-pink focus:bg-white focus:ring-4 focus:ring-pills-pink/10"
-                          placeholder="Enter your email address"
+                          placeholder="Enter your phone number"
                         />
                       </div>
-                      {errors.email && (
+                      {errors.phone && (
                         <p className="mt-1.5 text-xs font-medium text-red-500">
-                          {errors.email.message}
+                          {errors.phone.message}
                         </p>
                       )}
                     </div>
