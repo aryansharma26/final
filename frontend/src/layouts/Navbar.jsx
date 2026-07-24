@@ -669,11 +669,15 @@ const Navbar = () => {
       <AnimatePresence>
         {isMobileSearchOpen && (
       <motion.div
-        initial={{ opacity: 0, height: 0, y: -8 }}
-        animate={{ opacity: 1, height: "auto", y: 0 }}
-        exit={{ opacity: 0, height: 0, y: -8 }}
-        transition={{ duration: 0.2, ease: "easeOut" }}
-        className="overflow-visible border-t border-gray-100 bg-white px-3 py-3 shadow-sm lg:hidden"
+        initial={{ opacity: 0, y: -18, scale: 0.98 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        exit={{ opacity: 0, y: -12, scale: 0.985 }}
+        transition={{
+          y: { type: "spring", stiffness: 360, damping: 30, mass: 0.7 },
+          scale: { type: "spring", stiffness: 360, damping: 30, mass: 0.7 },
+          opacity: { duration: 0.18, ease: "easeOut" },
+        }}
+        className="absolute inset-x-0 top-full origin-top border-t border-gray-100 bg-white px-3 py-2 shadow-sm lg:hidden"
       >
         <form onSubmit={handleSearch} className="relative" data-search-root="true">
           <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
@@ -699,18 +703,16 @@ const Navbar = () => {
             placeholder="Search for medicines, brands..."
             className="w-full rounded-full border border-gray-200 bg-gray-50 py-2.5 pl-10 pr-4 text-[16px] transition-all focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20"
           />
-          <div className="relative">
-            <SearchSuggestions
-              query={searchQuery}
-              suggestions={searchSuggestions}
-              loading={suggestionsLoading}
-              open={suggestionsOpen}
-              onSearch={submitSearch}
-              onProduct={handleProductSuggestion}
-              onBrand={handleBrandSuggestion}
-              onCategory={handleCategorySuggestion}
-            />
-          </div>
+          <SearchSuggestions
+            query={searchQuery}
+            suggestions={searchSuggestions}
+            loading={suggestionsLoading}
+            open={suggestionsOpen}
+            onSearch={submitSearch}
+            onProduct={handleProductSuggestion}
+            onBrand={handleBrandSuggestion}
+            onCategory={handleCategorySuggestion}
+          />
         </form>
       </motion.div>
         )}
@@ -797,21 +799,27 @@ const Navbar = () => {
       </motion.div>
 
       {/* ─── Mobile menu ─── */}
-      <AnimatePresence>
+      <AnimatePresence initial={false}>
         {isOpen && (
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.16 }}
-            className="lg:hidden"
+            initial={{ opacity: 0, clipPath: "inset(0 0 0% 0)" }}
+            animate={{ opacity: 1, clipPath: "inset(0 0 0% 0)" }}
+            exit={{ opacity: 1, clipPath: "inset(0 0 100% 0)" }}
+            transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
+            className="fixed inset-x-0 top-[54px] h-[calc(100vh-54px)] overflow-hidden bg-gray-100 lg:hidden sm:top-16 sm:h-[calc(100vh-64px)]"
           >
-            <div className="fixed inset-x-0 top-[54px] h-[calc(100vh-54px)] bg-gray-100 sm:top-16 sm:h-[calc(100vh-64px)]" />
             <motion.div
-              initial={{ opacity: 0, y: -14, scale: 0.98 }}
+              initial={{ opacity: 0, scaleY: 0.92, clipPath: "inset(0 0 8% 0)" }}
+              animate={{ opacity: 1, scaleY: 1, clipPath: "inset(0 0 0% 0)" }}
+              exit={{ opacity: 0, scaleY: 0.92, clipPath: "inset(0 0 100% 0)" }}
+              transition={{ duration: 0.26, ease: [0.22, 1, 0.36, 1] }}
+              className="absolute inset-0 origin-top bg-gray-100"
+            />
+            <motion.div
+              initial={{ opacity: 0, y: -18, scale: 0.98 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -10, scale: 0.98 }}
-              transition={{ duration: 0.22, ease: "easeOut" }}
+              exit={{ opacity: 0, y: -18, scale: 0.98 }}
+              transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
               className="relative max-h-[calc(100vh-54px)] overflow-y-auto overscroll-contain border-t border-gray-100 bg-gray-50 shadow-xl sm:max-h-[calc(100vh-64px)]"
             >
               <div className="container-custom space-y-2 py-3 pb-24">

@@ -73,6 +73,31 @@
     transition: transform 200ms cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 200ms ease, background-color 200ms ease !important;
   }
 
+  @media (max-width: 1023px) {
+    .route-pressable.hero-action-pressable:not(:disabled):not([aria-disabled="true"]):active {
+      transform: none !important;
+      transition: none !important;
+    }
+
+    .route-pressable.hero-action-pressable.hero-action-running {
+      animation: hero-action-tap 275ms cubic-bezier(0.4, 0, 0.2, 1) both;
+      transform-origin: center;
+      will-change: transform;
+    }
+  }
+
+  @keyframes hero-action-tap {
+    0% {
+      transform: translate3d(0, 0, 0) scale(1);
+    }
+    50% {
+      transform: translate3d(0, 1.5px, 0) scale(0.95);
+    }
+    100% {
+      transform: translate3d(0, 0, 0) scale(1);
+    }
+  }
+
   @media (hover: none) {
     .route-pressable:not(:disabled):not([aria-disabled="true"]):active,
     .route-pressable.pressed {

@@ -1,14 +1,11 @@
-import { Outlet, useLocation, useNavigationType } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { Outlet, useLocation } from 'react-router-dom';
 import Navbar from './Navbar';
 import Footer from './Footer';
 // import FloatingContactButtons from '../components/FloatingContactButtons';
-import CoreQuickActions from '../components/CoreQuickActions';
 import { useSettings } from '../contexts/SettingsContext.jsx';
 
 const MainLayout = () => {
   const location = useLocation();
-  const navigationType = useNavigationType();
   const isAdmin = location.pathname.startsWith('/admin');
   const isAuth = ['/login', '/register', '/forgot-password', '/reset-password'].some((p) => location.pathname.startsWith(p));
   const { banner } = useSettings();
@@ -18,10 +15,6 @@ const MainLayout = () => {
     return <Outlet />;
   }
 
-  const isPop = navigationType === 'POP';
-  const isHome = location.pathname === '/';
-  const outletKey = `${location.pathname}${location.search}`;
-
   return (
     <div className="min-h-screen flex flex-col bg-white">
       <Navbar />
@@ -30,7 +23,6 @@ const MainLayout = () => {
       </main>
       <Footer />
       {/* <FloatingContactButtons /> */}
-      <CoreQuickActions />
     </div>
   );
 };

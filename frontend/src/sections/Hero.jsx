@@ -101,6 +101,15 @@ const Hero = () => {
   const delayedNavigate = (e, path) => {
     e.preventDefault();
     const currentTarget = e.currentTarget;
+    const isMobileHeroAction =
+      window.matchMedia("(max-width: 1023px)").matches &&
+      currentTarget?.classList?.contains("hero-action-pressable");
+    if (isMobileHeroAction) {
+      if (currentTarget.classList.contains("hero-action-running")) return;
+      currentTarget.classList.add("hero-action-running");
+      setTimeout(() => navigate(path), 285);
+      return;
+    }
     if (currentTarget && currentTarget.classList) {
       currentTarget.classList.add("pressed");
     }
@@ -175,7 +184,7 @@ const Hero = () => {
               <Link
                 to="/prescriptions"
                 onClick={(e) => delayedNavigate(e, "/prescriptions")}
-                className="pressable route-pressable group relative overflow-hidden rounded-[18px] border border-slate-200/80 bg-white/95 px-3 py-2.5 text-left shadow-[0_10px_28px_rgba(15,23,42,0.06)] transition-all duration-300 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-[0_14px_36px_rgba(15,23,42,0.1)]"
+                className="pressable route-pressable hero-action-pressable group relative overflow-hidden rounded-[18px] border border-slate-200/80 bg-white/95 px-3 py-2.5 text-left shadow-[0_10px_28px_rgba(15,23,42,0.06)] transition-all duration-300 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-[0_14px_36px_rgba(15,23,42,0.1)]"
               >
                 <div className="relative flex items-start gap-2">
                   <span className="mt-0.5 inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-700 shadow-sm ring-1 ring-slate-200">
@@ -206,7 +215,7 @@ const Hero = () => {
               <Link
                 to="/b2b-enquiry"
                 onClick={(e) => delayedNavigate(e, "/b2b-enquiry")}
-                className="pressable route-pressable group relative overflow-hidden rounded-[18px] border border-slate-200/80 bg-white/95 px-3 py-2.5 text-left shadow-[0_10px_28px_rgba(15,23,42,0.06)] transition-all duration-300 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-[0_14px_36px_rgba(15,23,42,0.1)]"
+                className="pressable route-pressable hero-action-pressable group relative overflow-hidden rounded-[18px] border border-slate-200/80 bg-white/95 px-3 py-2.5 text-left shadow-[0_10px_28px_rgba(15,23,42,0.06)] transition-all duration-300 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-[0_14px_36px_rgba(15,23,42,0.1)]"
               >
                 <div className="relative flex items-start gap-2">
                   <span className="mt-0.5 inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-700 shadow-sm ring-1 ring-slate-200">
@@ -417,7 +426,7 @@ const Hero = () => {
               <Link
                 to="/prescriptions"
                 onClick={(e) => delayedNavigate(e, "/prescriptions")}
-                className="pressable route-pressable group relative overflow-hidden rounded-[18px] border border-slate-200/80 bg-white/95 px-3 py-2.5 text-left shadow-[0_10px_28px_rgba(15,23,42,0.06)] transition-all duration-300 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-[0_14px_36px_rgba(15,23,42,0.1)]"
+                className="pressable route-pressable hero-action-pressable group relative overflow-hidden rounded-[18px] border border-slate-200/80 bg-white/95 px-3 py-2.5 text-left shadow-[0_10px_28px_rgba(15,23,42,0.06)] transition-all duration-300 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-[0_14px_36px_rgba(15,23,42,0.1)]"
               >
                 <div className="relative flex items-start gap-2">
                   <span className="mt-0.5 inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-700 shadow-sm ring-1 ring-slate-200">
@@ -448,7 +457,7 @@ const Hero = () => {
               <Link
                 to="/b2b-enquiry"
                 onClick={(e) => delayedNavigate(e, "/b2b-enquiry")}
-                className="pressable route-pressable group relative overflow-hidden rounded-[18px] border border-slate-200/80 bg-white/95 px-3 py-2.5 text-left shadow-[0_10px_28px_rgba(15,23,42,0.06)] transition-all duration-300 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-[0_14px_36px_rgba(15,23,42,0.1)]"
+                className="pressable route-pressable hero-action-pressable group relative overflow-hidden rounded-[18px] border border-slate-200/80 bg-white/95 px-3 py-2.5 text-left shadow-[0_10px_28px_rgba(15,23,42,0.06)] transition-all duration-300 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-[0_14px_36px_rgba(15,23,42,0.1)]"
               >
                 <div className="relative flex items-start gap-2">
                   <span className="mt-0.5 inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-700 shadow-sm ring-1 ring-slate-200">

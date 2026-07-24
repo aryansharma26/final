@@ -29,6 +29,7 @@ import NotFound from '../pages/NotFound';
 import FloatingWhatsApp from '../components/FloatingWhatsApp';
 import FloatingMessenger from '../components/FloatingMessenger';
 import FloatingViber from '../components/FloatingViber';
+import CoreQuickActions from '../components/CoreQuickActions';
 
 const AdminLogin = lazy(() => import('../pages/AdminLogin'));
 const AdminDashboard = lazy(() => import('../pages/AdminDashboard'));
@@ -159,6 +160,7 @@ const AppRoutes = () => {
         <FloatingWhatsApp />
         <FloatingMessenger />
         <FloatingViber />
+        <CoreQuickActions />
       </>
     )}
     </>
